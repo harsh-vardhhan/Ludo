@@ -1,4 +1,4 @@
-package com.example.rummy
+package com.example.Ludo
 
 import io.flutter.embedding.android.FlutterActivity
 

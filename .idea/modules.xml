@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/rummy.iml" filepath="$PROJECT_DIR$/rummy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Ludo.iml" filepath="$PROJECT_DIR$/Ludo.iml" />
     </modules>
   </component>
 </project>
