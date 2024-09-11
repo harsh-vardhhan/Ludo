@@ -1,12 +1,3 @@
-// Copyright 2024 the Dart project authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license
-// that can be found in the LICENSE file.
-
-/// A simplified brick-breaker game,
-/// built using the Flame game engine for Flutter.
-///
-/// To learn how to build a more complete version of this game yourself,
-/// check out the codelab at https://flutter.dev/to/brick-breaker.
 library;
 
 import 'dart:async';
@@ -98,10 +89,6 @@ class BrickBreaker extends FlameGame
   }
 
   void startGame() {
-    // world.removeAll(world.children.query<Ball>());
-    // world.removeAll(world.children.query<Paddle>());
-    // world.removeAll(world.children.query<Brick>());
-
     world.add(Home(
       size: 287.0,
       position: Vector2(0.0, 0.0), // Custom position
@@ -110,38 +97,22 @@ class BrickBreaker extends FlameGame
     ));
 
     world.add(Home(
-      size: 287.0,
-      position: Vector2(532.0, 0.0), // Custom position
-      paint: Paint()..color = Colors.green, // Custom color
-      homeSpotColor: Paint()..color = Colors.green
-    ));
+        size: 287.0,
+        position: Vector2(532.0, 0.0), // Custom position
+        paint: Paint()..color = Colors.green, // Custom color
+        homeSpotColor: Paint()..color = Colors.green));
 
-    // world.add(Ball(
-    //   difficultyModifier: difficultyModifier,
-    //   radius: ballRadius,
-    //   position: size / 2,
-    //   velocity:
-    //       Vector2((rand.nextDouble() - 0.5) * width, height * 0.3).normalized()
-    //         ..scale(height / 4),
-    // ));
+    world.add(Home(
+        size: 287.0,
+        position: Vector2(0.0, 530.0), // Custom position
+        paint: Paint()..color = Colors.blue, // Custom color
+        homeSpotColor: Paint()..color = Colors.blue));
 
-    // world.add(Paddle(
-    //   size: Vector2(paddleWidth, paddleHeight),
-    //   cornerRadius: const Radius.circular(ballRadius / 2),
-    //   position: Vector2(width / 2, height * 0.95),
-    // ));
-
-    // world.addAll([
-    //   for (var i = 0; i < brickColors.length; i++)
-    //     for (var j = 1; j <= 5; j++)
-    //       Brick(
-    //         Vector2(
-    //           (i + 0.5) * brickWidth + (i + 1) * brickGutter,
-    //           (j + 2.0) * brickHeight + j * brickGutter,
-    //         ),
-    //         brickColors[i],
-    //       ),
-    // ]);
+    world.add(Home(
+        size: 286.0,
+        position: Vector2(532.0, 530.0), // Custom position
+        paint: Paint()..color = brickColors[4], // Custom color
+        homeSpotColor: Paint()..color = brickColors[4]));
   }
 
   @override
@@ -330,11 +301,9 @@ class Home extends RectangleComponent {
             paint: paint ?? Paint(),
             children: [
               HomePlate(
-                size: 190.0,
-                position: Vector2(45.0, 45.0), // Custom position
-                paint: paint,
-                homeSpotColor: homeSpotColor
-              )
+                  size: 190.0,
+                  position: Vector2(45.0, 45.0), // Custom position
+                  homeSpotColor: homeSpotColor)
             ] // Initialize paint if not provided
             );
 }
@@ -344,21 +313,47 @@ class HomePlate extends RectangleComponent {
   HomePlate({
     required double size,
     required Vector2 position,
-    required Paint? paint,
-    required Paint? homeSpotColor
+    required Paint? homeSpotColor,
   }) : super(
           size: Vector2.all(size),
           position: position,
-          paint:  Paint()..color = Colors.white,
+          // First paint object for the fill (white color)
+          paint: Paint()..color = Colors.white,
           children: [
-             HomeSpot(
-                radius: 25.0,
-                position: Vector2(40.0, 40.0), // Custom position
-                paint: homeSpotColor
-              )
-          ]
+            // Define border as a separate child component for the stroke
+            RectangleComponent(
+              size: Vector2.all(size),
+              paint: Paint()
+                ..color = Colors.transparent // Keep interior transparent
+                ..style = PaintingStyle.stroke // Set style to stroke
+                ..strokeWidth = 1.0 // Set border width
+                ..color = Colors.black, // Set border color to black
+            ),
+            // Other children: HomeSpot components
+            HomeSpot(
+              radius: 25.0,
+              position: Vector2(30.0, 20.0), // Custom position
+              paint: homeSpotColor,
+            ),
+            HomeSpot(
+              radius: 25.0,
+              position: Vector2(110.0, 20.0), // Custom position
+              paint: homeSpotColor,
+            ),
+            HomeSpot(
+              radius: 25.0,
+              position: Vector2(30.0, 110.0), // Custom position
+              paint: homeSpotColor,
+            ),
+            HomeSpot(
+              radius: 25.0,
+              position: Vector2(110.0, 110.0), // Custom position
+              paint: homeSpotColor,
+            ),
+          ],
         );
 }
+
 
 class HomeSpot extends CircleComponent {
   // Constructor to initialize the square with size, position, and optional paint
@@ -373,13 +368,12 @@ class HomeSpot extends CircleComponent {
         );
 }
 
-
 const brickColors = [
   Color(0xfff94144),
   Color(0xfff3722c),
   Color(0xfff8961e),
   Color(0xfff9844a),
-  Color(0xfff9c74f),
+  Color(0xffFDDA0D),
   Color(0xff90be6d),
   Color(0xff43aa8b),
   Color(0xff4d908e),
@@ -388,7 +382,7 @@ const brickColors = [
 ];
 
 const gameWidth = 820.0;
-const gameHeight = 1200.0;
+const gameHeight = 815.0;
 const ballRadius = gameWidth * 0.02;
 const paddleWidth = gameWidth * 0.8;
 const paddleHeight = ballRadius * 2;
