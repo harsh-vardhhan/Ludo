@@ -88,32 +88,40 @@ class BrickBreaker extends FlameGame
     startGame();
   }
 
-  void startGame() {
-    world.add(Home(
-      size: 287.0,
-      position: Vector2(0.0, 0.0), // Custom position
-      paint: Paint()..color = Colors.red, // Custom color
-      homeSpotColor: Paint()..color = Colors.red, // Custom color
-    ));
+void startGame() {
+  const gameWidth = 820.0;
+  const gameHeight = 815.0;
+  const homeSize = 300.0;
+  final screenSize = Vector2(gameWidth, gameHeight); // Replace with your actual screen size
 
-    world.add(Home(
-        size: 287.0,
-        position: Vector2(532.0, 0.0), // Custom position
-        paint: Paint()..color = Colors.green, // Custom color
-        homeSpotColor: Paint()..color = Colors.green));
+  world.add(Home(
+    size: homeSize,
+    position: Vector2(0, 0), // Top-left corner
+    paint: Paint()..color = Colors.red,
+    homeSpotColor: Paint()..color = Colors.red,
+  ));
 
-    world.add(Home(
-        size: 287.0,
-        position: Vector2(0.0, 530.0), // Custom position
-        paint: Paint()..color = Colors.blue, // Custom color
-        homeSpotColor: Paint()..color = Colors.blue));
+  world.add(Home(
+    size: homeSize,
+    position: Vector2(screenSize.x - homeSize, 0), // Top-right corner
+    paint: Paint()..color = Colors.green,
+    homeSpotColor: Paint()..color = Colors.green,
+  ));
 
-    world.add(Home(
-        size: 286.0,
-        position: Vector2(532.0, 530.0), // Custom position
-        paint: Paint()..color = brickColors[4], // Custom color
-        homeSpotColor: Paint()..color = brickColors[4]));
-  }
+  world.add(Home(
+    size: homeSize,
+    position: Vector2(0, screenSize.y - homeSize), // Bottom-left corner
+    paint: Paint()..color = Colors.blue,
+    homeSpotColor: Paint()..color = Colors.blue,
+  ));
+
+  world.add(Home(
+    size: homeSize,
+    position: Vector2(screenSize.x - homeSize, screenSize.y - homeSize), // Bottom-right corner
+    paint: Paint()..color = brickColors[4],
+    homeSpotColor: Paint()..color = brickColors[4],
+  ));
+}
 
   @override
   void onTap() {
@@ -288,7 +296,6 @@ class PlayArea extends RectangleComponent with HasGameReference<BrickBreaker> {
 }
 
 class Home extends RectangleComponent {
-  // Constructor to initialize the square with size, position, and optional paint
   Home(
       {required double size,
       required Vector2 position,
@@ -300,12 +307,23 @@ class Home extends RectangleComponent {
             position: position,
             paint: paint ?? Paint(),
             children: [
+              // Define border as a separate child component for the stroke
+              RectangleComponent(
+                size: Vector2.all(size),
+                paint: Paint()
+                  ..color = Colors.transparent
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 1.0
+                  ..color = Colors.black,
+              ),
               HomePlate(
-                  size: 190.0,
-                  position: Vector2(45.0, 45.0), // Custom position
+                  size: size / 1.5,
+                  position: Vector2(
+                    size / 2 - (size / 1.5) / 2, // Calculate center x
+                    size / 2 - (size / 1.5) / 2, // Calculate center y
+                  ),
                   homeSpotColor: homeSpotColor)
-            ] // Initialize paint if not provided
-            );
+            ]);
 }
 
 class HomePlate extends RectangleComponent {
@@ -353,7 +371,6 @@ class HomePlate extends RectangleComponent {
           ],
         );
 }
-
 
 class HomeSpot extends CircleComponent {
   // Constructor to initialize the square with size, position, and optional paint
