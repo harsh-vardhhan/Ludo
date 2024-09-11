@@ -88,40 +88,42 @@ class BrickBreaker extends FlameGame
     startGame();
   }
 
-void startGame() {
-  const gameWidth = 820.0;
-  const gameHeight = 815.0;
-  const homeSize = 300.0;
-  final screenSize = Vector2(gameWidth, gameHeight); // Replace with your actual screen size
+  void startGame() {
+    const gameWidth = 820.0;
+    const gameHeight = 815.0;
+    const homeSize = 310.0;
+    final screenSize =
+        Vector2(gameWidth, gameHeight); // Replace with your actual screen size
 
-  world.add(Home(
-    size: homeSize,
-    position: Vector2(0, 0), // Top-left corner
-    paint: Paint()..color = Colors.red,
-    homeSpotColor: Paint()..color = Colors.red,
-  ));
+    world.add(Home(
+      size: homeSize,
+      position: Vector2(0, 0), // Top-left corner
+      paint: Paint()..color = Colors.red,
+      homeSpotColor: Paint()..color = Colors.red,
+    ));
 
-  world.add(Home(
-    size: homeSize,
-    position: Vector2(screenSize.x - homeSize, 0), // Top-right corner
-    paint: Paint()..color = Colors.green,
-    homeSpotColor: Paint()..color = Colors.green,
-  ));
+    world.add(Home(
+      size: homeSize,
+      position: Vector2(screenSize.x - homeSize, 0), // Top-right corner
+      paint: Paint()..color = Colors.green,
+      homeSpotColor: Paint()..color = Colors.green,
+    ));
 
-  world.add(Home(
-    size: homeSize,
-    position: Vector2(0, screenSize.y - homeSize), // Bottom-left corner
-    paint: Paint()..color = Colors.blue,
-    homeSpotColor: Paint()..color = Colors.blue,
-  ));
+    world.add(Home(
+      size: homeSize,
+      position: Vector2(0, screenSize.y - homeSize), // Bottom-left corner
+      paint: Paint()..color = Colors.blue,
+      homeSpotColor: Paint()..color = Colors.blue,
+    ));
 
-  world.add(Home(
-    size: homeSize,
-    position: Vector2(screenSize.x - homeSize, screenSize.y - homeSize), // Bottom-right corner
-    paint: Paint()..color = brickColors[4],
-    homeSpotColor: Paint()..color = brickColors[4],
-  ));
-}
+    world.add(Home(
+      size: homeSize,
+      position: Vector2(screenSize.x - homeSize,
+          screenSize.y - homeSize), // Bottom-right corner
+      paint: Paint()..color = brickColors[4],
+      homeSpotColor: Paint()..color = brickColors[4],
+    ));
+  }
 
   @override
   void onTap() {
@@ -347,25 +349,46 @@ class HomePlate extends RectangleComponent {
                 ..strokeWidth = 1.0 // Set border width
                 ..color = Colors.black, // Set border color to black
             ),
-            // Other children: HomeSpot components
+            HomeSpotContainer(
+              size: size * 0.6667,
+              position: position * 0.6667,
+              homeSpotColor: homeSpotColor,
+              radius: size * 0.125,
+            ),
+          ],
+        );
+}
+
+class HomeSpotContainer extends RectangleComponent {
+  HomeSpotContainer({
+    required double size,
+    required Vector2 position,
+    required Paint? homeSpotColor,
+    required double radius,
+  }) : super(
+          size: Vector2.all(size),
+          position: position,
+          paint: Paint()..color = Colors.transparent,
+          children: [
             HomeSpot(
-              radius: 25.0,
-              position: Vector2(30.0, 20.0), // Custom position
+              radius: radius,
+              position: Vector2(0, 0), // Top-left corner
               paint: homeSpotColor,
             ),
             HomeSpot(
-              radius: 25.0,
-              position: Vector2(110.0, 20.0), // Custom position
+              radius: radius,
+              position: Vector2(size - radius * 2, 0.0), // Top-right corner
               paint: homeSpotColor,
             ),
             HomeSpot(
-              radius: 25.0,
-              position: Vector2(30.0, 110.0), // Custom position
+              radius: radius,
+              position: Vector2(0, size - radius * 2), // Bottom-left corner
               paint: homeSpotColor,
             ),
             HomeSpot(
-              radius: 25.0,
-              position: Vector2(110.0, 110.0), // Custom position
+              radius: radius,
+              position: Vector2(
+                  size - radius * 2, size - radius * 2), // Bottom-right corner
               paint: homeSpotColor,
             ),
           ],
