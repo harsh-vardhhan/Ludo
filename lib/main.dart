@@ -32,6 +32,7 @@ class _GameAppState extends State<GameApp> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -52,8 +53,8 @@ class _GameAppState extends State<GameApp> {
               child: Center(
                 child: FittedBox(
                   child: SizedBox(
-                    width: gameWidth,
-                    height: gameHeight,
+                    width: screenWidth,
+                    height: screenWidth,
                     child: GameWidget(
                       game: game,
                     ),
@@ -80,10 +81,7 @@ class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
 
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
-  Ludo()
-      : super(
-            camera: CameraComponent.withFixedResolution(
-                width: gameWidth, height: gameHeight));
+  Ludo();
 
   final rand = math.Random();
   double get width => size.x;
@@ -91,18 +89,22 @@ class Ludo extends FlameGame
 
   @override
   FutureOr<void> onLoad() async {
-    super.onLoad();
+    await super.onLoad();
+    // Now you can set up the camera with the screen size
+    camera = CameraComponent.withFixedResolution(
+      width: width,
+      height: height,
+    );
     camera.viewfinder.anchor = Anchor.topLeft;
     world.add(PlayArea());
     startGame();
   }
 
   void startGame() {
-    const gameWidth = 820.0;
-    const gameHeight = 815.0;
-    const homeSize = 310.0;
-    final screenSize =
-        Vector2(gameWidth, gameHeight); // Replace with your actual screen size
+    final screenWidth = size.x;
+    final screenHeight = size.y;
+    final screenSize = Vector2(screenWidth, screenHeight);
+    final homeSize = screenWidth / 2.7;
 
     world.add(Home(
       size: homeSize,
@@ -130,7 +132,7 @@ class Ludo extends FlameGame
       position: Vector2(screenSize.x - homeSize,
           screenSize.y - homeSize), // Bottom-right corner
       paint: Paint()..color = Colors.primaries[12],
-      homeSpotColor: Paint()..color =  Colors.primaries[12],
+      homeSpotColor: Paint()..color = Colors.primaries[12],
     ));
   }
 
@@ -156,6 +158,31 @@ class Ludo extends FlameGame
 
   @override
   Color backgroundColor() => const Color(0xfff2e8cf);
+}
+
+class SquareContainer extends RectangleComponent {
+  // Constructor to initialize the square with size, position, and optional paint
+  SquareContainer({
+    required double size,
+    required Vector2 position,
+    required Paint? homeSpotColor,
+  }) : super(
+          size: Vector2.all(size),
+          position: position,
+          // First paint object for the fill (white color)
+          paint: Paint()..color = Colors.white,
+          children: [
+            // Define border as a separate child component for the stroke
+            RectangleComponent(
+              size: Vector2.all(size),
+              paint: Paint()
+                ..color = Colors.transparent // Keep interior transparent
+                ..style = PaintingStyle.stroke // Set style to stroke
+                ..strokeWidth = 1.0 // Set border width
+                ..color = Colors.black, // Set border color to black
+            ),
+          ],
+        );
 }
 
 class Home extends RectangleComponent {
@@ -279,6 +306,3 @@ class HomeSpot extends CircleComponent {
           ],
         );
 }
-
-const gameWidth = 820.0;
-const gameHeight = 815.0;
