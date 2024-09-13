@@ -101,39 +101,124 @@ class Ludo extends FlameGame
   }
 
   void startGame() {
-    final screenWidth = size.x;
-    final screenHeight = size.y;
-    final screenSize = Vector2(screenWidth, screenHeight);
+    // Get the screen width and height
+    final screenSize = size;
+    final double screenWidth = screenSize.x;
     final homeSize = screenWidth / 2.7;
 
-    world.add(Home(
-      size: homeSize,
-      position: Vector2(0, 0), // Top-left corner
-      paint: Paint()..color = Colors.red,
-      homeSpotColor: Paint()..color = Colors.red,
-    ));
+    // Define the percentage widths for the components in each row
+    final double firstComponentWidth = screenWidth * 0.37;
+    final double secondComponentWidth = screenWidth * 0.26;
+    final double thirdComponentWidth = screenWidth * 0.37;
 
-    world.add(Home(
-      size: homeSize,
-      position: Vector2(screenSize.x - homeSize, 0), // Top-right corner
-      paint: Paint()..color = Colors.green,
-      homeSpotColor: Paint()..color = Colors.green,
-    ));
+    final double firstRowHeight = screenWidth * 0.37;
+    final double secondRowHeight = screenWidth * 0.26;
 
-    world.add(Home(
-      size: homeSize,
-      position: Vector2(0, screenSize.y - homeSize), // Bottom-left corner
-      paint: Paint()..color = Colors.blue,
-      homeSpotColor: Paint()..color = Colors.blue,
-    ));
+    // Spacing between components
+    const double horizontalSpacing = 0.0;
 
-    world.add(Home(
-      size: homeSize,
-      position: Vector2(screenSize.x - homeSize,
-          screenSize.y - homeSize), // Bottom-right corner
-      paint: Paint()..color = Colors.primaries[12],
-      homeSpotColor: Paint()..color = Colors.primaries[12],
-    ));
+    const rowOne = 0;
+
+
+    final firstComponent = RectangleComponent(
+        size: Vector2(firstComponentWidth, firstRowHeight),// Assign color based on row
+        position: Vector2(0, rowOne * firstRowHeight),
+        children: [
+          Home(
+            size: homeSize, // Top-left corner
+            paint: Paint()..color = Colors.red,
+            homeSpotColor: Paint()..color = Colors.red,
+          )
+        ]);
+
+
+    final secondComponent = RectangleComponent(
+      size: Vector2(secondComponentWidth, firstRowHeight),
+      position: Vector2(
+          firstComponentWidth + horizontalSpacing, rowOne * firstRowHeight),
+    );
+
+
+    final thirdComponent = RectangleComponent(
+        size: Vector2(thirdComponentWidth, firstRowHeight),
+        position: Vector2(
+            firstComponentWidth + secondComponentWidth + 2 * horizontalSpacing,
+            rowOne * firstRowHeight),
+        children: [
+          Home(
+            size: homeSize,
+            paint: Paint()..color = Colors.green,
+            homeSpotColor: Paint()..color = Colors.green,
+          )
+        ]);
+
+    const rowTwo = 1;
+
+
+    final fourthComponent = RectangleComponent(
+      size: Vector2(firstComponentWidth, secondRowHeight), // Assign color based on row
+      position: Vector2(0, rowTwo * firstRowHeight),
+    );
+
+
+    final fifthComponent = RectangleComponent(
+      size: Vector2(secondComponentWidth, secondRowHeight),
+      position: Vector2(
+          firstComponentWidth + horizontalSpacing, rowTwo * firstRowHeight),
+    );
+
+
+    final sixthComponent = RectangleComponent(
+      size: Vector2(thirdComponentWidth, secondRowHeight),
+      position: Vector2(
+          firstComponentWidth + secondComponentWidth + 2 * horizontalSpacing,
+          rowTwo * firstRowHeight),
+    );
+
+
+    final seventhComponent = RectangleComponent(
+        size: Vector2(firstComponentWidth, firstRowHeight),
+        position: Vector2(0, firstRowHeight + secondRowHeight),
+        children: [
+          Home(
+            size: homeSize,
+            paint: Paint()..color = Colors.blue,
+            homeSpotColor: Paint()..color = Colors.blue,
+          )
+        ]);
+
+
+    final eigthComponent = RectangleComponent(
+      size: Vector2(secondComponentWidth, firstRowHeight),
+      position: Vector2(firstComponentWidth + horizontalSpacing,
+          firstRowHeight + secondRowHeight),
+    );
+
+
+    final ninthComponent = RectangleComponent(
+        size: Vector2(thirdComponentWidth, firstRowHeight),
+        position: Vector2(
+            firstComponentWidth + secondComponentWidth + 2 * horizontalSpacing,
+            firstRowHeight + secondRowHeight),
+        children: [
+          Home(
+            size: homeSize,
+            paint: Paint()..color = Colors.primaries[12],
+            homeSpotColor: Paint()..color = Colors.primaries[12],
+          )
+        ]);
+
+    world.add(firstComponent);
+    world.add(secondComponent);
+    world.add(thirdComponent);
+
+    world.add(fourthComponent);
+    world.add(fifthComponent);
+    world.add(sixthComponent);
+
+    world.add(seventhComponent);
+    world.add(eigthComponent);
+    world.add(ninthComponent);
   }
 
   @override
@@ -160,60 +245,31 @@ class Ludo extends FlameGame
   Color backgroundColor() => const Color(0xfff2e8cf);
 }
 
-class SquareContainer extends RectangleComponent {
-  // Constructor to initialize the square with size, position, and optional paint
-  SquareContainer({
-    required double size,
-    required Vector2 position,
-    required Paint? homeSpotColor,
-  }) : super(
-          size: Vector2.all(size),
-          position: position,
-          // First paint object for the fill (white color)
-          paint: Paint()..color = Colors.white,
-          children: [
-            // Define border as a separate child component for the stroke
-            RectangleComponent(
-              size: Vector2.all(size),
-              paint: Paint()
-                ..color = Colors.transparent // Keep interior transparent
-                ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = 1.0 // Set border width
-                ..color = Colors.black, // Set border color to black
-            ),
-          ],
-        );
-}
 
 class Home extends RectangleComponent {
   Home(
       {required double size,
-      required Vector2 position,
       required Paint? paint,
       required Paint? homeSpotColor,
       children})
-      : super(
+      : super(size: Vector2.all(size), paint: paint ?? Paint(), children: [
+          // Define border as a separate child component for the stroke
+          RectangleComponent(
             size: Vector2.all(size),
-            position: position,
-            paint: paint ?? Paint(),
-            children: [
-              // Define border as a separate child component for the stroke
-              RectangleComponent(
-                size: Vector2.all(size),
-                paint: Paint()
-                  ..color = Colors.transparent
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 1.0
-                  ..color = Colors.black,
+            paint: Paint()
+              ..color = Colors.transparent
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.0
+              ..color = Colors.black,
+          ),
+          HomePlate(
+              size: size / 1.5,
+              position: Vector2(
+                size / 2 - (size / 1.5) / 2, // Calculate center x
+                size / 2 - (size / 1.5) / 2, // Calculate center y
               ),
-              HomePlate(
-                  size: size / 1.5,
-                  position: Vector2(
-                    size / 2 - (size / 1.5) / 2, // Calculate center x
-                    size / 2 - (size / 1.5) / 2, // Calculate center y
-                  ),
-                  homeSpotColor: homeSpotColor)
-            ]);
+              homeSpotColor: homeSpotColor)
+        ]);
 }
 
 class HomePlate extends RectangleComponent {
