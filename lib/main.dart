@@ -134,7 +134,7 @@ class Ludo extends FlameGame
         size: Vector2(secondComponentWidth, firstRowHeight),
         position: Vector2(
             firstComponentWidth + horizontalSpacing, rowOne * firstRowHeight),
-        children: [GreenGridComponent(size: secondComponentWidth * 0.333)]);
+        children: [GreenGridComponent(size: secondComponentWidth * 0.3333)]);
 
     final thirdComponent = RectangleComponent(
         size: Vector2(thirdComponentWidth, firstRowHeight),
@@ -155,6 +155,9 @@ class Ludo extends FlameGame
       size: Vector2(
           firstComponentWidth, secondRowHeight), // Assign color based on row
       position: Vector2(0, rowTwo * firstRowHeight),
+      children: [
+        RedGridComponent(size: firstComponentWidth * 0.1666)
+      ]
     );
 
     final fifthComponent = RectangleComponent(
@@ -168,6 +171,9 @@ class Ludo extends FlameGame
       position: Vector2(
           firstComponentWidth + secondComponentWidth + 2 * horizontalSpacing,
           rowTwo * firstRowHeight),
+      children: [
+        YellowGridComponent(size: firstComponentWidth * 0.1666)
+      ]
     );
 
     final seventhComponent = RectangleComponent(
@@ -185,6 +191,7 @@ class Ludo extends FlameGame
       size: Vector2(secondComponentWidth, firstRowHeight),
       position: Vector2(firstComponentWidth + horizontalSpacing,
           firstRowHeight + secondRowHeight),
+      children: [BlueGridComponent(size: secondComponentWidth * 0.3333)]
     );
 
     final ninthComponent = RectangleComponent(
@@ -323,6 +330,145 @@ class GreenGridComponent extends PositionComponent {
     }
   }
 }
+
+class BlueGridComponent extends PositionComponent {
+  BlueGridComponent({
+    required double size,
+  }) : super(
+          size: Vector2.all(size),
+        ) {
+    _createGrid();
+  }
+
+  // Function to create the grid of rectangles
+  void _createGrid() {
+    //Vector2 rectangleSize = Vector2(20, 20); // Size of each square
+    double spacing = 0; // Vertical spacing between rectangles
+    double columnSpacing = 0; // Horizontal spacing between columns
+
+    int numberOfRows = 6;
+    int numberOfColumns = 3;
+
+    // Loop to create 3 columns of 6 squares each
+    for (int col = 0; col < numberOfColumns; col++) {
+      for (int row = 0; row < numberOfRows; row++) {
+        var color = Colors.transparent;
+        if (col == 0 && row == 4 ||  col == 1 && row < 5) {
+          color = Colors.blue;
+        }
+        var rectangle = RectangleComponent(
+            position: Vector2(
+                col * (size.x + columnSpacing), row * (size.y + spacing)),
+            size: size,
+            paint: Paint()..color = color,
+            children: [
+              RectangleComponent(
+                size: size,
+                paint: Paint()
+                  ..color = Colors.transparent // Keep interior transparent
+                  ..style = PaintingStyle.stroke // Set style to stroke
+                  ..strokeWidth = 0.6 // Set border width
+                  ..color = Colors.black, // Set border color to black
+              )
+            ]);
+        add(rectangle);
+      }
+    }
+  }
+}
+
+class RedGridComponent extends PositionComponent {
+  RedGridComponent({
+    required double size,
+  }) : super(
+          size: Vector2.all(size),
+        ) {
+    _createGrid();
+  }
+
+  // Function to create the grid of rectangles
+  void _createGrid() {
+    //Vector2 rectangleSize = Vector2(20, 20); // Size of each square
+    double spacing = 0; // Vertical spacing between rectangles
+    double columnSpacing = 0; // Horizontal spacing between columns
+
+    int numberOfRows = 3;
+    int numberOfColumns = 6;
+
+    // Loop to create 3 rows of 6 squares each
+    for (int col = 0; col < numberOfColumns; col++) {
+      for (int row = 0; row < numberOfRows; row++) {
+        var color = Colors.transparent;
+        if (row == 0 && col == 1 || row == 1 && col > 0) {
+          color = Colors.red;
+        }
+        var rectangle = RectangleComponent(
+            position: Vector2(
+                col * (size.x + columnSpacing), row * (size.y + spacing)),
+            size: size,
+            paint: Paint()..color = color,
+            children: [
+              RectangleComponent(
+                size: size,
+                paint: Paint()
+                  ..color = Colors.transparent // Keep interior transparent
+                  ..style = PaintingStyle.stroke // Set style to stroke
+                  ..strokeWidth = 0.6 // Set border width
+                  ..color = Colors.black, // Set border color to black
+              )
+            ]);
+        add(rectangle);
+      }
+    }
+  }
+}
+
+class YellowGridComponent extends PositionComponent {
+  YellowGridComponent({
+    required double size,
+  }) : super(
+          size: Vector2.all(size),
+        ) {
+    _createGrid();
+  }
+
+  // Function to create the grid of rectangles
+  void _createGrid() {
+    //Vector2 rectangleSize = Vector2(20, 20); // Size of each square
+    double spacing = 0; // Vertical spacing between rectangles
+    double columnSpacing = 0; // Horizontal spacing between columns
+
+    int numberOfRows = 3;
+    int numberOfColumns = 6;
+
+    // Loop to create 3 rows of 6 squares each
+    for (int col = 0; col < numberOfColumns; col++) {
+      for (int row = 0; row < numberOfRows; row++) {
+        var color = Colors.transparent;
+        if (row == 1 && col < 5 || row == 2 && col == 4) {
+          color = Colors.yellow;
+        }
+        var rectangle = RectangleComponent(
+            position: Vector2(
+                col * (size.x + columnSpacing), row * (size.y + spacing)),
+            size: size,
+            paint: Paint()..color = color,
+            children: [
+              RectangleComponent(
+                size: size,
+                paint: Paint()
+                  ..color = Colors.transparent // Keep interior transparent
+                  ..style = PaintingStyle.stroke // Set style to stroke
+                  ..strokeWidth = 0.6 // Set border width
+                  ..color = Colors.black, // Set border color to black
+              )
+            ]);
+        add(rectangle);
+      }
+    }
+  }
+}
+
 
 class HomePlate extends RectangleComponent {
   // Constructor to initialize the square with size, position, and optional paint
