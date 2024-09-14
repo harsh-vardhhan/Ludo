@@ -104,7 +104,6 @@ class Ludo extends FlameGame
     // Get the screen width and height
     final screenSize = size;
     final double screenWidth = screenSize.x;
-    final homeSize = screenWidth / 2.7;
 
     // Define the percentage widths for the components in each row
     final double firstComponentWidth = screenWidth * 0.40;
@@ -135,7 +134,7 @@ class Ludo extends FlameGame
         size: Vector2(secondComponentWidth, firstRowHeight),
         position: Vector2(
             firstComponentWidth + horizontalSpacing, rowOne * firstRowHeight),
-        children: [GridComponent(size: secondComponentWidth * 0.333)]);
+        children: [GreenGridComponent(size: secondComponentWidth * 0.333)]);
 
     final thirdComponent = RectangleComponent(
         size: Vector2(thirdComponentWidth, firstRowHeight),
@@ -144,7 +143,7 @@ class Ludo extends FlameGame
             rowOne * firstRowHeight),
         children: [
           Home(
-            size: homeSize,
+            size: firstComponentWidth,
             paint: Paint()..color = Colors.green,
             homeSpotColor: Paint()..color = Colors.green,
           )
@@ -176,7 +175,7 @@ class Ludo extends FlameGame
         position: Vector2(0, firstRowHeight + secondRowHeight),
         children: [
           Home(
-            size: homeSize,
+            size: firstComponentWidth,
             paint: Paint()..color = Colors.blue,
             homeSpotColor: Paint()..color = Colors.blue,
           )
@@ -195,7 +194,7 @@ class Ludo extends FlameGame
             firstRowHeight + secondRowHeight),
         children: [
           Home(
-            size: homeSize,
+            size: firstComponentWidth,
             paint: Paint()..color = Colors.primaries[12],
             homeSpotColor: Paint()..color = Colors.primaries[12],
           )
@@ -279,8 +278,8 @@ class SquareBlocks extends RectangleComponent {
         ]);
 }
 
-class GridComponent extends PositionComponent {
-  GridComponent({
+class GreenGridComponent extends PositionComponent {
+  GreenGridComponent({
     required double size,
   }) : super(
           size: Vector2.all(size),
@@ -292,7 +291,7 @@ class GridComponent extends PositionComponent {
   void _createGrid() {
     //Vector2 rectangleSize = Vector2(20, 20); // Size of each square
     double spacing = 0; // Vertical spacing between rectangles
-    double columnSpacing = 1; // Horizontal spacing between columns
+    double columnSpacing = 0; // Horizontal spacing between columns
 
     int numberOfRows = 6;
     int numberOfColumns = 3;
@@ -300,22 +299,26 @@ class GridComponent extends PositionComponent {
     // Loop to create 3 columns of 6 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
+        var color = Colors.transparent;
+        if (row > 0 && col == 1 || row == 1 && col == 2) {
+          color = Colors.green;
+        }
         var rectangle = RectangleComponent(
             position: Vector2(
                 col * (size.x + columnSpacing), row * (size.y + spacing)),
             size: size,
-            paint: Paint()..color = Colors.transparent,
+            paint: Paint()..color = color,
             children: [
               RectangleComponent(
                 size: size,
                 paint: Paint()
                   ..color = Colors.transparent // Keep interior transparent
                   ..style = PaintingStyle.stroke // Set style to stroke
-                  ..strokeWidth = 1.0 // Set border width
+                  ..strokeWidth = 0.6 // Set border width
                   ..color = Colors.black, // Set border color to black
               )
             ]);
-        add(rectangle); // Add the rectangle as a child of the GridComponent
+        add(rectangle);
       }
     }
   }
