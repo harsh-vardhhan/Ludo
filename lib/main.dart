@@ -1,7 +1,8 @@
 library;
 
 import 'dart:async';
-import 'dart:math' as math;
+
+import 'dart:math';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -83,7 +84,7 @@ class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
   Ludo();
 
-  final rand = math.Random();
+  final rand = Random();
   double get width => size.x;
   double get height => size.y;
 
@@ -152,32 +153,25 @@ class Ludo extends FlameGame
     const rowTwo = 1;
 
     final fourthComponent = RectangleComponent(
-      size: Vector2(
-          firstComponentWidth, secondRowHeight), // Assign color based on row
-      position: Vector2(0, rowTwo * firstRowHeight),
-      children: [
-        RedGridComponent(size: firstComponentWidth * 0.1666)
-      ]
-    );
+        size: Vector2(
+            firstComponentWidth, secondRowHeight), // Assign color based on row
+        position: Vector2(0, rowTwo * firstRowHeight),
+        children: [RedGridComponent(size: firstComponentWidth * 0.1666)]);
 
     final fifthComponent = RectangleComponent(
-      size: Vector2(secondComponentWidth, secondRowHeight),
-      position: Vector2(
-          firstComponentWidth + horizontalSpacing, rowTwo * firstRowHeight),
-      children: [
-        DiagonalRectangleComponent(size: Vector2.all(secondComponentWidth))
-      ]
-    );
+        size: Vector2(secondComponentWidth, secondRowHeight),
+        position: Vector2(
+            firstComponentWidth + horizontalSpacing, rowTwo * firstRowHeight),
+        children: [
+          DiagonalRectangleComponent(size: Vector2.all(secondComponentWidth))
+        ]);
 
     final sixthComponent = RectangleComponent(
-      size: Vector2(thirdComponentWidth, secondRowHeight),
-      position: Vector2(
-          firstComponentWidth + secondComponentWidth + 2 * horizontalSpacing,
-          rowTwo * firstRowHeight),
-      children: [
-        YellowGridComponent(size: firstComponentWidth * 0.1666)
-      ]
-    );
+        size: Vector2(thirdComponentWidth, secondRowHeight),
+        position: Vector2(
+            firstComponentWidth + secondComponentWidth + 2 * horizontalSpacing,
+            rowTwo * firstRowHeight),
+        children: [YellowGridComponent(size: firstComponentWidth * 0.1666)]);
 
     final seventhComponent = RectangleComponent(
         size: Vector2(firstComponentWidth, firstRowHeight),
@@ -191,11 +185,10 @@ class Ludo extends FlameGame
         ]);
 
     final eigthComponent = RectangleComponent(
-      size: Vector2(secondComponentWidth, firstRowHeight),
-      position: Vector2(firstComponentWidth + horizontalSpacing,
-          firstRowHeight + secondRowHeight),
-      children: [BlueGridComponent(size: secondComponentWidth * 0.3333)]
-    );
+        size: Vector2(secondComponentWidth, firstRowHeight),
+        position: Vector2(firstComponentWidth + horizontalSpacing,
+            firstRowHeight + secondRowHeight),
+        children: [BlueGridComponent(size: secondComponentWidth * 0.3333)]);
 
     final ninthComponent = RectangleComponent(
         size: Vector2(thirdComponentWidth, firstRowHeight),
@@ -247,7 +240,6 @@ class Ludo extends FlameGame
   Color backgroundColor() => const Color(0xfff2e8cf);
 }
 
-
 class DiagonalRectangleComponent extends PositionComponent {
   DiagonalRectangleComponent({required Vector2 size}) {
     this.size = size;
@@ -260,28 +252,28 @@ class DiagonalRectangleComponent extends PositionComponent {
     // Add child components to each triangle area.
     // add(TextComponent(
     //   text: "Yellow Triangle", // Positioned in the yellow triangle
-    //   position: Vector2(size.x * 0.25, size.y * 0.25), 
+    //   position: Vector2(size.x * 0.25, size.y * 0.25),
     //   anchor: Anchor.center,
     //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
     // ));
 
     // add(TextComponent(
     //   text: "Red Triangle", // Positioned in the red triangle
-    //   position: Vector2(size.x * 0.75, size.y * 0.75), 
+    //   position: Vector2(size.x * 0.75, size.y * 0.75),
     //   anchor: Anchor.center,
     //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
     // ));
 
     // add(TextComponent(
     //   text: "Blue Triangle", // Positioned in the blue triangle
-    //   position: Vector2(size.x * 0.25, size.y * 0.75), 
+    //   position: Vector2(size.x * 0.25, size.y * 0.75),
     //   anchor: Anchor.center,
     //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
     // ));
 
     // add(TextComponent(
     //   text: "Green Triangle", // Positioned in the green triangle
-    //   position: Vector2(size.x * 0.75, size.y * 0.25), 
+    //   position: Vector2(size.x * 0.75, size.y * 0.25),
     //   anchor: Anchor.center,
     //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
     // ));
@@ -297,7 +289,8 @@ class DiagonalRectangleComponent extends PositionComponent {
     final topRight = rect.topRight;
     final bottomLeft = rect.bottomLeft;
     final bottomRight = rect.bottomRight;
-    final center = Offset((topLeft.dx + bottomRight.dx) / 2, (topLeft.dy + bottomRight.dy) / 2);
+    final center = Offset(
+        (topLeft.dx + bottomRight.dx) / 2, (topLeft.dy + bottomRight.dy) / 2);
 
     // Define paints for filling the triangles with colors
     Paint yellowPaint = Paint()..color = Colors.yellow;
@@ -354,7 +347,6 @@ class DiagonalRectangleComponent extends PositionComponent {
   }
 }
 
-
 class Home extends RectangleComponent {
   Home(
       {required double size,
@@ -396,6 +388,73 @@ class SquareBlocks extends RectangleComponent {
         ]);
 }
 
+class StarComponent extends PositionComponent {
+  final double innerRadius; // Instance variable for inner radius
+  final double outerRadius; // Instance variable for outer radius
+  final Paint borderPaint;
+
+  // Constructor that initializes the size, innerRadius, and outerRadius
+  StarComponent({
+    required Vector2 size,
+    required this.innerRadius, // Inner radius passed during component creation
+    required this.outerRadius, // Outer radius passed during component creation
+    Color borderColor = Colors.black,
+  }) : borderPaint = Paint()
+          ..color = borderColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0 {
+    this.size = size; // Set the size
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+
+    // Create the star shape using the provided inner and outer radius
+    Path starPath = createStarPath(innerRadius, outerRadius);
+
+    // Center the star in the component's bounding box
+    canvas.save();
+    canvas.translate(size.x / 2, size.y / 2);
+
+    // Draw the star with transparent fill and black border
+    Paint fillPaint = Paint()..color = Colors.transparent;
+    canvas.drawPath(starPath, fillPaint);
+    canvas.drawPath(starPath, borderPaint); // Black border
+
+    // Restore the canvas to its original state
+    canvas.restore();
+  }
+
+  /// Creates a star shape with the specified inner and outer radius.
+  /// Rotate the star so that one tip is at the top (90 degrees).
+  Path createStarPath(double innerRadius, double outerRadius) {
+    Path path = Path();
+    double angleStep = pi / 5; // 5-pointed star
+    double angleOffset = -pi / 2; // Offset to point one tip upwards
+
+    for (int i = 0; i < 10; i++) {
+      double radius = i.isEven ? outerRadius : innerRadius;
+      double angle = angleStep * i + angleOffset;
+      double x = radius * cos(angle);
+      double y = radius * sin(angle);
+
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+    return path;
+  }
+
+  @override
+  void update(double dt) {
+    // No update logic required for this static component
+  }
+}
+
 class GreenGridComponent extends PositionComponent {
   GreenGridComponent({
     required double size,
@@ -428,13 +487,19 @@ class GreenGridComponent extends PositionComponent {
             paint: Paint()..color = color,
             children: [
               RectangleComponent(
-                size: size,
-                paint: Paint()
-                  ..color = Colors.transparent // Keep interior transparent
-                  ..style = PaintingStyle.stroke // Set style to stroke
-                  ..strokeWidth = 0.6 // Set border width
-                  ..color = Colors.black, // Set border color to black
-              )
+                  size: size,
+                  paint: Paint()
+                    ..color = Colors.transparent // Keep interior transparent
+                    ..style = PaintingStyle.stroke // Set style to stroke
+                    ..strokeWidth = 0.6 // Set border width
+                    ..color = Colors.black, // Set border color to black
+                  children: [
+                    if (col == 0 && row == 2)
+                      StarComponent(
+                          size: size,
+                          innerRadius: size.x * 0.24,
+                          outerRadius: size.x * 0.48)
+                  ])
             ]);
         add(rectangle);
       }
@@ -464,7 +529,7 @@ class BlueGridComponent extends PositionComponent {
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
         var color = Colors.transparent;
-        if (col == 0 && row == 4 ||  col == 1 && row < 5) {
+        if (col == 0 && row == 4 || col == 1 && row < 5) {
           color = Colors.blue;
         }
         var rectangle = RectangleComponent(
@@ -474,13 +539,19 @@ class BlueGridComponent extends PositionComponent {
             paint: Paint()..color = color,
             children: [
               RectangleComponent(
-                size: size,
-                paint: Paint()
-                  ..color = Colors.transparent // Keep interior transparent
-                  ..style = PaintingStyle.stroke // Set style to stroke
-                  ..strokeWidth = 0.6 // Set border width
-                  ..color = Colors.black, // Set border color to black
-              )
+                  size: size,
+                  paint: Paint()
+                    ..color = Colors.transparent // Keep interior transparent
+                    ..style = PaintingStyle.stroke // Set style to stroke
+                    ..strokeWidth = 0.6 // Set border width
+                    ..color = Colors.black, // Set border color to black
+                  children: [
+                    if (col == 2 && row == 3)
+                      StarComponent(
+                          size: size,
+                          innerRadius: size.x * 0.24,
+                          outerRadius: size.x * 0.48)
+                  ])
             ]);
         add(rectangle);
       }
@@ -520,13 +591,19 @@ class RedGridComponent extends PositionComponent {
             paint: Paint()..color = color,
             children: [
               RectangleComponent(
-                size: size,
-                paint: Paint()
-                  ..color = Colors.transparent // Keep interior transparent
-                  ..style = PaintingStyle.stroke // Set style to stroke
-                  ..strokeWidth = 0.6 // Set border width
-                  ..color = Colors.black, // Set border color to black
-              )
+                  size: size,
+                  paint: Paint()
+                    ..color = Colors.transparent // Keep interior transparent
+                    ..style = PaintingStyle.stroke // Set style to stroke
+                    ..strokeWidth = 0.6 // Set border width
+                    ..color = Colors.black, // Set border color to black
+                  children: [
+                    if (col == 2 && row == 2)
+                      StarComponent(
+                          size: size,
+                          innerRadius: size.x * 0.24,
+                          outerRadius: size.x * 0.48)
+                  ])
             ]);
         add(rectangle);
       }
@@ -566,20 +643,25 @@ class YellowGridComponent extends PositionComponent {
             paint: Paint()..color = color,
             children: [
               RectangleComponent(
-                size: size,
-                paint: Paint()
-                  ..color = Colors.transparent // Keep interior transparent
-                  ..style = PaintingStyle.stroke // Set style to stroke
-                  ..strokeWidth = 0.6 // Set border width
-                  ..color = Colors.black, // Set border color to black
-              )
+                  size: size,
+                  paint: Paint()
+                    ..color = Colors.transparent // Keep interior transparent
+                    ..style = PaintingStyle.stroke // Set style to stroke
+                    ..strokeWidth = 0.6 // Set border width
+                    ..color = Colors.black, // Set border color to black
+                  children: [
+                    if (row == 0 && col == 3)
+                      StarComponent(
+                          size: size,
+                          innerRadius: size.x * 0.24,
+                          outerRadius: size.x * 0.48)
+                  ])
             ]);
         add(rectangle);
       }
     }
   }
 }
-
 
 class HomePlate extends RectangleComponent {
   // Constructor to initialize the square with size, position, and optional paint
