@@ -1,15 +1,14 @@
 library;
 
 import 'dart:async';
-
 import 'dart:math';
-
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() {
   runApp(const GameApp());
@@ -498,7 +497,15 @@ class GreenGridComponent extends PositionComponent {
                       StarComponent(
                           size: size,
                           innerRadius: size.x * 0.24,
-                          outerRadius: size.x * 0.48)
+                          outerRadius: size.x * 0.48),
+                    if (col == 1 && row == 0)
+                      ArrowIconComponent(
+                        icon: Icons.south,
+                        size: size.x * 0.90,
+                        position: Vector2(size.x * 0.05,
+                            size.x * 0.05), // Font size of the arrow
+                        borderColor: Colors.green, // Color of the arrow
+                      )
                   ])
             ]);
         add(rectangle);
@@ -550,12 +557,76 @@ class BlueGridComponent extends PositionComponent {
                       StarComponent(
                           size: size,
                           innerRadius: size.x * 0.24,
-                          outerRadius: size.x * 0.48)
+                          outerRadius: size.x * 0.48),
+                    if (col == 1 && row == 5)
+                      ArrowIconComponent(
+                        icon: Icons.north,
+                        size: size.x * 0.90,
+                        position: Vector2(size.x * 0.05,
+                            size.x * 0.05), // Font size of the arrow
+                        borderColor: Colors.blue, // Color of the arrow
+                      )
                   ])
             ]);
         add(rectangle);
       }
     }
+  }
+}
+
+class ArrowIconComponent extends PositionComponent {
+  final IconData arrowIcon;
+  final Paint borderPaint;
+
+  ArrowIconComponent({
+    required IconData icon,
+    required double size,
+    required Vector2 position, // Make position a required parameter
+    Color borderColor = Colors.black,
+  })  : arrowIcon = icon,
+        borderPaint = Paint()
+          ..color = borderColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0 {
+    this.size = Vector2.all(size); // Set the size of the component
+    this.position = position; // Set the position
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+
+    // Create a TextPainter to render the icon
+    TextPainter textPainter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(arrowIcon.codePoint),
+        style: TextStyle(
+          fontSize: size.x, // Font size for the arrow
+          color: borderPaint.color,
+          fontFamily: arrowIcon.fontFamily, // Use the FontAwesome font
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    // Calculate the offset to center the text within the component
+    double xOffset = (size.x - textPainter.width) / 2;
+    double yOffset = (size.y - textPainter.height) / 2;
+
+    // Center the arrow in the component
+    canvas.save();
+    canvas.translate(xOffset, yOffset);
+
+    // Draw the arrow icon
+    textPainter.paint(canvas, Offset.zero);
+
+    // Restore the canvas
+    canvas.restore();
+  }
+
+  @override
+  void update(double dt) {
+    // No update logic required for this static component
   }
 }
 
@@ -602,7 +673,15 @@ class RedGridComponent extends PositionComponent {
                       StarComponent(
                           size: size,
                           innerRadius: size.x * 0.24,
-                          outerRadius: size.x * 0.48)
+                          outerRadius: size.x * 0.48),
+                    if (col == 0 && row == 1)
+                      ArrowIconComponent(
+                        icon: Icons.east,
+                        size: size.x * 0.90,
+                        position: Vector2(size.x * 0.05,
+                            size.x * 0.05), // Font size of the arrow
+                        borderColor: Colors.red, // Color of the arrow
+                      )
                   ])
             ]);
         add(rectangle);
@@ -654,7 +733,15 @@ class YellowGridComponent extends PositionComponent {
                       StarComponent(
                           size: size,
                           innerRadius: size.x * 0.24,
-                          outerRadius: size.x * 0.48)
+                          outerRadius: size.x * 0.48),
+                    if (col == 5 && row == 1)
+                      ArrowIconComponent(
+                        icon: Icons.west,
+                        size: size.x * 0.90,
+                        position: Vector2(size.x * 0.05,
+                            size.x * 0.05), // Font size of the arrow
+                        borderColor: Colors.yellow, // Color of the arrow
+                      )
                   ])
             ]);
         add(rectangle);
