@@ -164,6 +164,9 @@ class Ludo extends FlameGame
       size: Vector2(secondComponentWidth, secondRowHeight),
       position: Vector2(
           firstComponentWidth + horizontalSpacing, rowTwo * firstRowHeight),
+      children: [
+        DiagonalRectangleComponent(size: Vector2.all(secondComponentWidth))
+      ]
     );
 
     final sixthComponent = RectangleComponent(
@@ -243,6 +246,114 @@ class Ludo extends FlameGame
   @override
   Color backgroundColor() => const Color(0xfff2e8cf);
 }
+
+
+class DiagonalRectangleComponent extends PositionComponent {
+  DiagonalRectangleComponent({required Vector2 size}) {
+    this.size = size;
+  }
+
+  @override
+  Future<void> onLoad() async {
+    super.onLoad();
+
+    // Add child components to each triangle area.
+    // add(TextComponent(
+    //   text: "Yellow Triangle", // Positioned in the yellow triangle
+    //   position: Vector2(size.x * 0.25, size.y * 0.25), 
+    //   anchor: Anchor.center,
+    //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
+    // ));
+
+    // add(TextComponent(
+    //   text: "Red Triangle", // Positioned in the red triangle
+    //   position: Vector2(size.x * 0.75, size.y * 0.75), 
+    //   anchor: Anchor.center,
+    //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
+    // ));
+
+    // add(TextComponent(
+    //   text: "Blue Triangle", // Positioned in the blue triangle
+    //   position: Vector2(size.x * 0.25, size.y * 0.75), 
+    //   anchor: Anchor.center,
+    //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
+    // ));
+
+    // add(TextComponent(
+    //   text: "Green Triangle", // Positioned in the green triangle
+    //   position: Vector2(size.x * 0.75, size.y * 0.25), 
+    //   anchor: Anchor.center,
+    //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
+    // ));
+  }
+
+  @override
+  void render(Canvas canvas) {
+    // Define the rectangle area with its top-left corner at (0, 0)
+    final rect = Rect.fromLTWH(0, 0, size.x, size.y);
+
+    // Define the vertices of the rectangle
+    final topLeft = rect.topLeft;
+    final topRight = rect.topRight;
+    final bottomLeft = rect.bottomLeft;
+    final bottomRight = rect.bottomRight;
+    final center = Offset((topLeft.dx + bottomRight.dx) / 2, (topLeft.dy + bottomRight.dy) / 2);
+
+    // Define paints for filling the triangles with colors
+    Paint yellowPaint = Paint()..color = Colors.yellow;
+    Paint redPaint = Paint()..color = Colors.red;
+    Paint bluePaint = Paint()..color = Colors.blue;
+    Paint greenPaint = Paint()..color = Colors.green;
+
+    // Define a black paint for the triangle borders
+    Paint borderPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    // Yellow Triangle (top-left)
+    Path redTriangle = Path()
+      ..moveTo(topLeft.dx, topLeft.dy)
+      ..lineTo(center.dx, center.dy)
+      ..lineTo(bottomLeft.dx, bottomLeft.dy)
+      ..close();
+    canvas.drawPath(redTriangle, redPaint);
+    canvas.drawPath(redTriangle, borderPaint); // Border
+
+    // Red Triangle (bottom-right)
+    Path yellowTriangle = Path()
+      ..moveTo(bottomRight.dx, bottomRight.dy)
+      ..lineTo(center.dx, center.dy)
+      ..lineTo(topRight.dx, topRight.dy)
+      ..close();
+    canvas.drawPath(yellowTriangle, yellowPaint);
+    canvas.drawPath(yellowTriangle, borderPaint); // Border
+
+    // Blue Triangle (bottom-left)
+    Path blueTriangle = Path()
+      ..moveTo(bottomLeft.dx, bottomLeft.dy)
+      ..lineTo(center.dx, center.dy)
+      ..lineTo(bottomRight.dx, bottomRight.dy)
+      ..close();
+    canvas.drawPath(blueTriangle, bluePaint);
+    canvas.drawPath(blueTriangle, borderPaint); // Border
+
+    // Green Triangle (top-right)
+    Path greenTriangle = Path()
+      ..moveTo(topRight.dx, topRight.dy)
+      ..lineTo(center.dx, center.dy)
+      ..lineTo(topLeft.dx, topLeft.dy)
+      ..close();
+    canvas.drawPath(greenTriangle, greenPaint);
+    canvas.drawPath(greenTriangle, borderPaint); // Border
+  }
+
+  @override
+  void update(double dt) {
+    // No update logic required for this static component
+  }
+}
+
 
 class Home extends RectangleComponent {
   Home(
