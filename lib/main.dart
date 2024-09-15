@@ -54,7 +54,7 @@ class _GameAppState extends State<GameApp> {
                 child: FittedBox(
                   child: SizedBox(
                     width: screenWidth,
-                    height: screenWidth + screenWidth * 0.33,
+                    height: screenWidth + screenWidth * 0.70,
                     child: GameWidget(
                       game: game,
                     ),
@@ -96,6 +96,50 @@ class BlueToken extends SpriteComponent {
   }
 }
 
+class UpperController extends RectangleComponent {
+  UpperController({
+    required double width,
+    required double height,
+    Vector2? position, // Add position parameter
+  }) : super(
+          size: Vector2(width, height),
+          paint: Paint()..color = Colors.grey, // Adjust color as needed
+        ) {
+    final double innerWidth = width * 0.45; // Width of the inner rectangles
+    final double innerHeight = height; // Same height as the outer rectangle
+
+    final leftToken = RectangleComponent(
+      size: Vector2(innerWidth * 0.4, innerHeight),
+      position: Vector2(0, 0), // Sticks to the left
+      paint: Paint()..color = Colors.blue, // Adjust color as needed
+    );
+
+    final leftDice = RectangleComponent(
+      size: Vector2(innerWidth * 0.4, innerHeight),
+      position: Vector2(innerWidth * 0.4, 0), // Sticks to the left
+      paint: Paint()..color = Colors.pink, // Adjust color as needed
+    );
+
+    final rightDice = RectangleComponent(
+      size: Vector2(innerWidth  * 0.4, innerHeight),
+      position: Vector2(width - innerWidth  * 0.8 , 0), // Sticks to the right
+      paint: Paint()..color = Colors.green, // Adjust color as needed
+    );
+    final rightToken = RectangleComponent(
+      size: Vector2(innerWidth * 0.4, innerHeight),
+      position: Vector2(width - innerWidth  * 0.4 , 0), // Sticks to the right
+      paint: Paint()..color = Colors.red, // Adjust color as needed
+    );
+
+    add(leftToken);
+    add(leftDice);
+    add(rightDice);
+    add(rightToken);
+
+    // Set the position of the UpperController
+    this.position = position ?? Vector2.zero(); // Default to (0, 0) if no position is provided
+  }
+}
 
 
 class Ludo extends FlameGame
@@ -117,6 +161,7 @@ class Ludo extends FlameGame
     camera.viewfinder.anchor = Anchor.topLeft;
     world.add(LudoBoard(
         width: width, height: width, position: Vector2(0, height * 0.125)));
+    world.add(UpperController(position: Vector2(0, width + (width * 0.25)), width: width, height: width * 0.20));
   }
 
   void startGame() {}
@@ -142,7 +187,7 @@ class Ludo extends FlameGame
   }
 
   @override
-  Color backgroundColor() => const Color(0xffffffff);
+  Color backgroundColor() => const Color.fromARGB(255, 255, 255, 255);
 }
 
 class LudoBoard extends PositionComponent {
