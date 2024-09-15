@@ -42,8 +42,8 @@ class _GameAppState extends State<GameApp> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xffa9d6e5),
-                Color(0xfff2e8cf),
+                Color(0xffffffff),
+                Color(0xffffffff),
               ],
             ),
           ),
@@ -54,7 +54,7 @@ class _GameAppState extends State<GameApp> {
                 child: FittedBox(
                   child: SizedBox(
                     width: screenWidth,
-                    height: screenWidth,
+                    height: screenWidth + screenWidth * 0.33,
                     child: GameWidget(
                       game: game,
                     ),
@@ -79,6 +79,25 @@ class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
   }
 }
 
+
+class BlueToken extends SpriteComponent {
+  BlueToken({
+    required Vector2 position,
+    required Vector2 size,
+  }) : super(
+          position: position,
+          size: size,
+        );
+
+  @override
+  Future<void> onLoad() async {
+    // Load your custom location pin sprite
+    sprite = await Sprite.load('../images/blue_token_symbol.png');
+  }
+}
+
+
+
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
   Ludo();
@@ -96,22 +115,49 @@ class Ludo extends FlameGame
       height: height,
     );
     camera.viewfinder.anchor = Anchor.topLeft;
-    world.add(PlayArea());
+    world.add(LudoBoard(
+        width: width, height: width, position: Vector2(0, height * 0.125)));
+  }
+
+  void startGame() {}
+
+  @override
+  void onTap() {
+    super.onTap();
     startGame();
   }
 
-  void startGame() {
-    // Get the screen width and height
-    final screenSize = size;
-    final double screenWidth = screenSize.x;
+  @override
+  KeyEventResult onKeyEvent(
+    KeyEvent event,
+    Set<LogicalKeyboardKey> keysPressed,
+  ) {
+    super.onKeyEvent(event, keysPressed);
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.space:
+      case LogicalKeyboardKey.enter:
+        startGame();
+    }
+    return KeyEventResult.handled;
+  }
 
+  @override
+  Color backgroundColor() => const Color(0xffffffff);
+}
+
+class LudoBoard extends PositionComponent {
+  LudoBoard({
+    required double width,
+    required double height,
+    Vector2? position, // Add position parameter
+  }) {
     // Define the percentage widths for the components in each row
-    final double firstComponentWidth = screenWidth * 0.40;
-    final double secondComponentWidth = screenWidth * 0.20;
-    final double thirdComponentWidth = screenWidth * 0.40;
+    final double firstComponentWidth = width * 0.40;
+    final double secondComponentWidth = width * 0.20;
+    final double thirdComponentWidth = width * 0.40;
 
-    final double firstRowHeight = screenWidth * 0.40;
-    final double secondRowHeight = screenWidth * 0.20;
+    final double firstRowHeight = width * 0.40;
+    final double secondRowHeight = width * 0.20;
 
     // Spacing between components
     const double horizontalSpacing = 0.0;
@@ -119,12 +165,11 @@ class Ludo extends FlameGame
     const rowOne = 0;
 
     final firstComponent = RectangleComponent(
-        size: Vector2(
-            firstComponentWidth, firstRowHeight), // Assign color based on row
+        size: Vector2(firstComponentWidth, firstRowHeight),
         position: Vector2(0, rowOne * firstRowHeight),
         children: [
           Home(
-            size: firstComponentWidth, // Top-left corner
+            size: firstComponentWidth,
             paint: Paint()..color = Colors.red,
             homeSpotColor: Paint()..color = Colors.red,
           )
@@ -152,8 +197,7 @@ class Ludo extends FlameGame
     const rowTwo = 1;
 
     final fourthComponent = RectangleComponent(
-        size: Vector2(
-            firstComponentWidth, secondRowHeight), // Assign color based on row
+        size: Vector2(firstComponentWidth, secondRowHeight),
         position: Vector2(0, rowTwo * firstRowHeight),
         children: [RedGridComponent(size: firstComponentWidth * 0.1666)]);
 
@@ -202,41 +246,21 @@ class Ludo extends FlameGame
           )
         ]);
 
-    world.add(firstComponent);
-    world.add(secondComponent);
-    world.add(thirdComponent);
+    // Add all components to the LudoBoard
+    add(firstComponent);
+    add(secondComponent);
+    add(thirdComponent);
+    add(fourthComponent);
+    add(fifthComponent);
+    add(sixthComponent);
+    add(seventhComponent);
+    add(eigthComponent);
+    add(ninthComponent);
 
-    world.add(fourthComponent);
-    world.add(fifthComponent);
-    world.add(sixthComponent);
-
-    world.add(seventhComponent);
-    world.add(eigthComponent);
-    world.add(ninthComponent);
+    // Set the position of the LudoBoard
+    this.position = position ??
+        Vector2.zero(); // Default to (0, 0) if no position is provided
   }
-
-  @override
-  void onTap() {
-    super.onTap();
-    startGame();
-  }
-
-  @override
-  KeyEventResult onKeyEvent(
-    KeyEvent event,
-    Set<LogicalKeyboardKey> keysPressed,
-  ) {
-    super.onKeyEvent(event, keysPressed);
-    switch (event.logicalKey) {
-      case LogicalKeyboardKey.space:
-      case LogicalKeyboardKey.enter:
-        startGame();
-    }
-    return KeyEventResult.handled;
-  }
-
-  @override
-  Color backgroundColor() => const Color(0xfff2e8cf);
 }
 
 class DiagonalRectangleComponent extends PositionComponent {
@@ -247,35 +271,6 @@ class DiagonalRectangleComponent extends PositionComponent {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-
-    // Add child components to each triangle area.
-    // add(TextComponent(
-    //   text: "Yellow Triangle", // Positioned in the yellow triangle
-    //   position: Vector2(size.x * 0.25, size.y * 0.25),
-    //   anchor: Anchor.center,
-    //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
-    // ));
-
-    // add(TextComponent(
-    //   text: "Red Triangle", // Positioned in the red triangle
-    //   position: Vector2(size.x * 0.75, size.y * 0.75),
-    //   anchor: Anchor.center,
-    //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
-    // ));
-
-    // add(TextComponent(
-    //   text: "Blue Triangle", // Positioned in the blue triangle
-    //   position: Vector2(size.x * 0.25, size.y * 0.75),
-    //   anchor: Anchor.center,
-    //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
-    // ));
-
-    // add(TextComponent(
-    //   text: "Green Triangle", // Positioned in the green triangle
-    //   position: Vector2(size.x * 0.75, size.y * 0.25),
-    //   anchor: Anchor.center,
-    //   textRenderer: TextPaint(style: TextStyle(color: Colors.black, fontSize: 12)),
-    // ));
   }
 
   @override
@@ -454,6 +449,22 @@ class StarComponent extends PositionComponent {
   }
 }
 
+class LocationPinSpriteComponent extends SpriteComponent {
+  LocationPinSpriteComponent({
+    required Vector2 position,
+    required Vector2 size,
+  }) : super(
+          position: position,
+          size: size,
+        );
+
+  @override
+  Future<void> onLoad() async {
+    // Load your custom location pin sprite
+    sprite = await Sprite.load('../images/blue_token.png');
+  }
+}
+
 class GreenGridComponent extends PositionComponent {
   GreenGridComponent({
     required double size,
@@ -505,7 +516,12 @@ class GreenGridComponent extends PositionComponent {
                         position: Vector2(size.x * 0.05,
                             size.x * 0.05), // Font size of the arrow
                         borderColor: Colors.green, // Color of the arrow
-                      )
+                      ),
+                    if (col == 0 && row == 0)
+                      LocationPinSpriteComponent(
+                        position: Vector2(-size.x * 0.25, -size.x * 0.65),
+                        size: size * 1.5,
+                      ),
                   ])
             ]);
         add(rectangle);
