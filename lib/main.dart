@@ -79,7 +79,6 @@ class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
   }
 }
 
-
 class BlueToken extends SpriteComponent {
   BlueToken({
     required Vector2 position,
@@ -103,31 +102,56 @@ class UpperController extends RectangleComponent {
     Vector2? position, // Add position parameter
   }) : super(
           size: Vector2(width, height),
-          paint: Paint()..color = Colors.grey, // Adjust color as needed
+          paint: Paint()..color = Colors.transparent, // Adjust color as needed
         ) {
     final double innerWidth = width * 0.45; // Width of the inner rectangles
     final double innerHeight = height; // Same height as the outer rectangle
 
     final leftToken = RectangleComponent(
-      size: Vector2(innerWidth * 0.4, innerHeight),
-      position: Vector2(0, 0), // Sticks to the left
-      paint: Paint()..color = Colors.blue, // Adjust color as needed
-    );
+        size: Vector2(innerWidth * 0.4, innerHeight),
+        position: Vector2(0, 0), // Sticks to the left
+        paint: Paint()..color = Colors.transparent,
+        children: [
+          RectangleComponent(
+              size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
+              position: Vector2(0, innerWidth * 0.05),
+              paint: Paint()
+                ..color = Colors.transparent
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 1.0
+                ..color = Colors.black,
+              children: [
+                BlueToken(
+                    position: Vector2(innerWidth * 0.080, innerWidth * 0.04),
+                    size: Vector2(innerWidth * 0.25, innerWidth * 0.25)),
+              ]),
+        ] // Adjust color as needed
+        );
 
     final leftDice = RectangleComponent(
       size: Vector2(innerWidth * 0.4, innerHeight),
       position: Vector2(innerWidth * 0.4, 0), // Sticks to the left
-      paint: Paint()..color = Colors.pink, // Adjust color as needed
+      paint: Paint()..color = Colors.transparent,
+      children: [
+        RectangleComponent(
+            size: Vector2(innerWidth * 0.4, innerHeight),
+            paint: Paint()
+              ..color = Colors.transparent
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.0
+              ..color = Colors.black,
+          )
+      ] // Adjust color as needed
     );
 
     final rightDice = RectangleComponent(
-      size: Vector2(innerWidth  * 0.4, innerHeight),
-      position: Vector2(width - innerWidth  * 0.8 , 0), // Sticks to the right
+      size: Vector2(innerWidth * 0.4, innerHeight),
+      position: Vector2(width - innerWidth * 0.8, 0), // Sticks to the right
       paint: Paint()..color = Colors.green, // Adjust color as needed
     );
     final rightToken = RectangleComponent(
       size: Vector2(innerWidth * 0.4, innerHeight),
-      position: Vector2(width - innerWidth  * 0.4 , 0), // Sticks to the right
+      position: Vector2(width - innerWidth * 0.4, 0), // Sticks to the right
       paint: Paint()..color = Colors.red, // Adjust color as needed
     );
 
@@ -137,10 +161,10 @@ class UpperController extends RectangleComponent {
     add(rightToken);
 
     // Set the position of the UpperController
-    this.position = position ?? Vector2.zero(); // Default to (0, 0) if no position is provided
+    this.position = position ??
+        Vector2.zero(); // Default to (0, 0) if no position is provided
   }
 }
-
 
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
@@ -161,7 +185,10 @@ class Ludo extends FlameGame
     camera.viewfinder.anchor = Anchor.topLeft;
     world.add(LudoBoard(
         width: width, height: width, position: Vector2(0, height * 0.125)));
-    world.add(UpperController(position: Vector2(0, width + (width * 0.25)), width: width, height: width * 0.20));
+    world.add(UpperController(
+        position: Vector2(0, width + (width * 0.25)),
+        width: width,
+        height: width * 0.20));
   }
 
   void startGame() {}
