@@ -166,7 +166,7 @@ class LowerController extends RectangleComponent {
     final leftToken = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
         position: Vector2(2.2, innerWidth * 0.05), // Sticks to the left
-        paint: Paint()..color = Color(0xFF6EACDA),
+        paint: Paint()..color = Color(0xFFA0DEFF),
         children: [
           CustomRectangleComponent(
               transparentRight: true,
@@ -188,7 +188,7 @@ class LowerController extends RectangleComponent {
     final leftDice = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight),
         position: Vector2(innerWidth * 0.4, 0), // Sticks to the left
-        paint: Paint()..color = Color(0xFF6EACDA),
+        paint: Paint()..color = Color(0xFFA0DEFF),
         children: [
           RectangleComponent(
               size: Vector2(innerWidth * 0.4, innerHeight),
