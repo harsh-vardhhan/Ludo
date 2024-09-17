@@ -122,8 +122,7 @@ class CustomRectangleComponent extends PositionComponent {
     required Paint paint, // Fill paint of the rectangle
     this.strokeWidth = 4.0, // Width of the stroke
     this.transparentRight = false,
-    this.transparentLeft =
-        false, // Whether the top stroke should be transparent
+    this.transparentLeft = false,
     List<Component>? children, // Optional child components
   })  : strokePaint = Paint()
           ..color = paint.color.withOpacity(1.0)
@@ -149,12 +148,17 @@ class CustomRectangleComponent extends PositionComponent {
       ..strokeWidth = 0.0;
 
     // Draw stroke on sides, skipping the top if transparentTop is true
-    if (!transparentLeft) {
+    if (transparentLeft) {
+      canvas.drawLine(
+          const Offset(0, 0), Offset(0, size.y), transparentStrokePaint);
+    } else {
       canvas.drawLine(const Offset(0, 0), Offset(0, size.y), strokePaint);
     }
-    if (!transparentRight) {
+    if (transparentRight) {
       canvas.drawLine(
           Offset(size.x, 0), Offset(size.x, size.y), transparentStrokePaint);
+    } else {
+      canvas.drawLine(Offset(size.x, 0), Offset(size.x, size.y), strokePaint);
     }
     canvas.drawLine(const Offset(0, 0), Offset(size.x, 0), strokePaint); // Top
     canvas.drawLine(
@@ -186,6 +190,7 @@ class LowerController extends RectangleComponent {
         children: [
           CustomRectangleComponent(
               transparentRight: true,
+              transparentLeft: false,
               size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
               position: Vector2(0, 0),
               paint: Paint()
@@ -195,11 +200,10 @@ class LowerController extends RectangleComponent {
                 ..color = Color(0xFF03346E),
               children: [
                 BlueToken(
-                    position: Vector2(innerWidth * 0.080, innerWidth * 0.04),
+                    position: Vector2(innerWidth * 0.08, innerWidth * 0.04),
                     size: Vector2(innerWidth * 0.20, innerWidth * 0.25)),
               ]),
-        ] // Adjust color as needed
-        );
+        ]);
 
     final leftDice = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight),
@@ -217,15 +221,39 @@ class LowerController extends RectangleComponent {
         );
 
     final rightDice = RectangleComponent(
-      size: Vector2(innerWidth * 0.4, innerHeight),
-      position: Vector2(width - innerWidth * 0.8, 0), // Sticks to the right
-      paint: Paint()..color = Colors.green, // Adjust color as needed
-    );
+        size: Vector2(innerWidth * 0.4, innerHeight),
+        position: Vector2(width - innerWidth * 0.8, 0), // Sticks to the right
+        paint: Paint()..color =  Color(0xFFFFF455),
+        children: [
+          RectangleComponent(
+              size: Vector2(innerWidth * 0.4, innerHeight),
+              paint: Paint()
+                ..color = Colors.transparent
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 4.0
+                ..color = Color(0xFF03346E))
+        ]);
+
     final rightToken = RectangleComponent(
-      size: Vector2(innerWidth * 0.4, innerHeight),
-      position: Vector2(width - innerWidth * 0.4, 0), // Sticks to the right
-      paint: Paint()..color = Colors.red, // Adjust color as needed
-    );
+        size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
+        position: Vector2(width - innerWidth * 0.4 - 2.5, innerWidth * 0.05),
+        paint: Paint()..color = Color(0xFFFFF455),
+        children: [
+          CustomRectangleComponent(
+              transparentLeft: true,
+              size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
+              position: Vector2(0, 0),
+              paint: Paint()
+                ..color = Colors.black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 1.0
+                ..color = Color(0xFF03346E),
+              children: [
+                YellowToken(
+                    position: Vector2(innerWidth * 0.080, innerWidth * 0.04),
+                    size: Vector2(innerWidth * 0.20, innerWidth * 0.25)),
+              ]),
+        ]);
 
     add(leftDice);
     add(leftToken);
