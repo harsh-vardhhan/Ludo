@@ -8,7 +8,6 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() {
   runApp(const GameApp());
@@ -42,8 +41,8 @@ class _GameAppState extends State<GameApp> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xffffffff),
-                Color(0xffffffff),
+                Color(0xff98DED9),
+                Color(0xffFFFFFF),
               ],
             ),
           ),
@@ -95,6 +94,63 @@ class BlueToken extends SpriteComponent {
   }
 }
 
+class CustomRectangleComponent extends PositionComponent {
+  final Paint strokePaint;
+  final double strokeWidth;
+  final bool transparentRight;
+  final bool transparentLeft;
+
+  CustomRectangleComponent({
+    required Vector2 size, // Size of the rectangle
+    required Vector2 position, // Position of the rectangle
+    required Paint paint, // Fill paint of the rectangle
+    this.strokeWidth = 1.0, // Width of the stroke
+    this.transparentRight = false,
+    this.transparentLeft =
+        false, // Whether the top stroke should be transparent
+    List<Component>? children, // Optional child components
+  })  : strokePaint = Paint()
+          ..color = paint.color.withOpacity(1.0)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth,
+        super(
+          size: size,
+          position: position,
+          children: children ?? [],
+        );
+
+  @override
+  void render(Canvas canvas) {
+    // Draw the filled rectangle
+    final rect = Rect.fromLTWH(0, 0, size.x, size.y);
+    canvas.drawRect(rect,
+        Paint()..color = strokePaint.color.withOpacity(0)); // Transparent fill
+
+    // Stroke paint for sides
+    final transparentStrokePaint = Paint()
+      ..color = Colors.transparent
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    // Draw stroke on sides, skipping the top if transparentTop is true
+    if (!transparentLeft) {
+      canvas.drawLine(Offset(0, 0), Offset(0, size.y), strokePaint);
+    }
+    if (!transparentRight) {
+      canvas.drawLine(
+          Offset(size.x, 0), Offset(size.x, size.y), transparentStrokePaint);
+    }
+    canvas.drawLine(Offset(0, 0), Offset(size.x, 0), strokePaint); // Top
+    canvas.drawLine(
+        Offset(0, size.y), Offset(size.x, size.y), strokePaint); // Bottom
+  }
+
+  @override
+  void update(double dt) {
+    // Update logic if needed
+  }
+}
+
 class UpperController extends RectangleComponent {
   UpperController({
     required double width,
@@ -108,15 +164,16 @@ class UpperController extends RectangleComponent {
     final double innerHeight = height; // Same height as the outer rectangle
 
     final leftToken = RectangleComponent(
-        size: Vector2(innerWidth * 0.4, innerHeight),
-        position: Vector2(0, 0), // Sticks to the left
-        paint: Paint()..color = Colors.transparent,
+        size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
+        position: Vector2(1, innerWidth * 0.05), // Sticks to the left
+        paint: Paint()..color = Colors.white,
         children: [
-          RectangleComponent(
+          CustomRectangleComponent(
+              transparentRight: true,
               size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
-              position: Vector2(0, innerWidth * 0.05),
+              position: Vector2(0, 0),
               paint: Paint()
-                ..color = Colors.transparent
+                ..color = Colors.black
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 1.0
                 ..color = Colors.black,
@@ -129,11 +186,11 @@ class UpperController extends RectangleComponent {
         );
 
     final leftDice = RectangleComponent(
-      size: Vector2(innerWidth * 0.4, innerHeight),
-      position: Vector2(innerWidth * 0.4, 0), // Sticks to the left
-      paint: Paint()..color = Colors.transparent,
-      children: [
-        RectangleComponent(
+        size: Vector2(innerWidth * 0.4, innerHeight),
+        position: Vector2(innerWidth * 0.4, 0), // Sticks to the left
+        paint: Paint()..color = Colors.white,
+        children: [
+          RectangleComponent(
             size: Vector2(innerWidth * 0.4, innerHeight),
             paint: Paint()
               ..color = Colors.transparent
@@ -141,8 +198,8 @@ class UpperController extends RectangleComponent {
               ..strokeWidth = 1.0
               ..color = Colors.black,
           )
-      ] // Adjust color as needed
-    );
+        ] // Adjust color as needed
+        );
 
     final rightDice = RectangleComponent(
       size: Vector2(innerWidth * 0.4, innerHeight),
@@ -155,8 +212,9 @@ class UpperController extends RectangleComponent {
       paint: Paint()..color = Colors.red, // Adjust color as needed
     );
 
-    add(leftToken);
     add(leftDice);
+    add(leftToken);
+
     add(rightDice);
     add(rightToken);
 
@@ -214,7 +272,7 @@ class Ludo extends FlameGame
   }
 
   @override
-  Color backgroundColor() => const Color.fromARGB(255, 255, 255, 255);
+  Color backgroundColor() => const Color.fromARGB(0, 0, 0, 0);
 }
 
 class LudoBoard extends PositionComponent {
