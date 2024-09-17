@@ -104,7 +104,7 @@ class CustomRectangleComponent extends PositionComponent {
     required Vector2 size, // Size of the rectangle
     required Vector2 position, // Position of the rectangle
     required Paint paint, // Fill paint of the rectangle
-    this.strokeWidth = 1.0, // Width of the stroke
+    this.strokeWidth = 4.0, // Width of the stroke
     this.transparentRight = false,
     this.transparentLeft =
         false, // Whether the top stroke should be transparent
@@ -130,17 +130,17 @@ class CustomRectangleComponent extends PositionComponent {
     final transparentStrokePaint = Paint()
       ..color = Colors.transparent
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
+      ..strokeWidth = 0.0;
 
     // Draw stroke on sides, skipping the top if transparentTop is true
     if (!transparentLeft) {
-      canvas.drawLine(Offset(0, 0), Offset(0, size.y), strokePaint);
+      canvas.drawLine(const Offset(0, 0), Offset(0, size.y), strokePaint);
     }
     if (!transparentRight) {
       canvas.drawLine(
           Offset(size.x, 0), Offset(size.x, size.y), transparentStrokePaint);
     }
-    canvas.drawLine(Offset(0, 0), Offset(size.x, 0), strokePaint); // Top
+    canvas.drawLine(const Offset(0, 0), Offset(size.x, 0), strokePaint); // Top
     canvas.drawLine(
         Offset(0, size.y), Offset(size.x, size.y), strokePaint); // Bottom
   }
@@ -151,8 +151,8 @@ class CustomRectangleComponent extends PositionComponent {
   }
 }
 
-class UpperController extends RectangleComponent {
-  UpperController({
+class LowerController extends RectangleComponent {
+  LowerController({
     required double width,
     required double height,
     Vector2? position, // Add position parameter
@@ -165,8 +165,8 @@ class UpperController extends RectangleComponent {
 
     final leftToken = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
-        position: Vector2(1, innerWidth * 0.05), // Sticks to the left
-        paint: Paint()..color = Colors.white,
+        position: Vector2(2.2, innerWidth * 0.05), // Sticks to the left
+        paint: Paint()..color = Color(0xFF6EACDA),
         children: [
           CustomRectangleComponent(
               transparentRight: true,
@@ -176,7 +176,7 @@ class UpperController extends RectangleComponent {
                 ..color = Colors.black
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 1.0
-                ..color = Colors.black,
+                ..color = Color(0xFF03346E),
               children: [
                 BlueToken(
                     position: Vector2(innerWidth * 0.080, innerWidth * 0.04),
@@ -188,16 +188,15 @@ class UpperController extends RectangleComponent {
     final leftDice = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight),
         position: Vector2(innerWidth * 0.4, 0), // Sticks to the left
-        paint: Paint()..color = Colors.white,
+        paint: Paint()..color = Color(0xFF6EACDA),
         children: [
           RectangleComponent(
-            size: Vector2(innerWidth * 0.4, innerHeight),
-            paint: Paint()
-              ..color = Colors.transparent
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 1.0
-              ..color = Colors.black,
-          )
+              size: Vector2(innerWidth * 0.4, innerHeight),
+              paint: Paint()
+                ..color = Colors.transparent
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 4.0
+                ..color = Color(0xFF03346E))
         ] // Adjust color as needed
         );
 
@@ -243,7 +242,7 @@ class Ludo extends FlameGame
     camera.viewfinder.anchor = Anchor.topLeft;
     world.add(LudoBoard(
         width: width, height: width, position: Vector2(0, height * 0.125)));
-    world.add(UpperController(
+    world.add(LowerController(
         position: Vector2(0, width + (width * 0.25)),
         width: width,
         height: width * 0.20));
