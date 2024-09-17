@@ -25,3 +25,5 @@ flutter:
   assets:
     - assets/images/blue_token.png
     - assets/images/blue_token_symbol.png
+    - assets/images/yellow_token.png
+    - assets/images/yellow_token_symbol.png

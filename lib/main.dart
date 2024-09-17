@@ -94,6 +94,22 @@ class BlueToken extends SpriteComponent {
   }
 }
 
+class YellowToken extends SpriteComponent {
+  YellowToken({
+    required Vector2 position,
+    required Vector2 size,
+  }) : super(
+          position: position,
+          size: size,
+        );
+
+  @override
+  Future<void> onLoad() async {
+    // Load your custom location pin sprite
+    sprite = await Sprite.load('../images/yellow_token_symbol.png');
+  }
+}
+
 class CustomRectangleComponent extends PositionComponent {
   final Paint strokePaint;
   final double strokeWidth;
@@ -180,7 +196,7 @@ class LowerController extends RectangleComponent {
               children: [
                 BlueToken(
                     position: Vector2(innerWidth * 0.080, innerWidth * 0.04),
-                    size: Vector2(innerWidth * 0.25, innerWidth * 0.25)),
+                    size: Vector2(innerWidth * 0.20, innerWidth * 0.25)),
               ]),
         ] // Adjust color as needed
         );
@@ -578,8 +594,8 @@ class StarComponent extends PositionComponent {
   }
 }
 
-class LocationPinSpriteComponent extends SpriteComponent {
-  LocationPinSpriteComponent({
+class BlueTokenPlayer extends SpriteComponent {
+  BlueTokenPlayer({
     required Vector2 position,
     required Vector2 size,
   }) : super(
@@ -591,6 +607,22 @@ class LocationPinSpriteComponent extends SpriteComponent {
   Future<void> onLoad() async {
     // Load your custom location pin sprite
     sprite = await Sprite.load('../images/blue_token.png');
+  }
+}
+
+class YellowTokenPlayer extends SpriteComponent {
+  YellowTokenPlayer({
+    required Vector2 position,
+    required Vector2 size,
+  }) : super(
+          position: position,
+          size: size,
+        );
+
+  @override
+  Future<void> onLoad() async {
+    // Load your custom location pin sprite
+    sprite = await Sprite.load('../images/yellow_token.png');
   }
 }
 
@@ -647,9 +679,14 @@ class GreenGridComponent extends PositionComponent {
                         borderColor: Colors.green, // Color of the arrow
                       ),
                     if (col == 0 && row == 0)
-                      LocationPinSpriteComponent(
-                        position: Vector2(-size.x * 0.25, -size.x * 0.65),
-                        size: size * 1.5,
+                      BlueTokenPlayer(
+                        position: Vector2(-size.x * 0.10, -size.x * 0.6),
+                        size: Vector2(size.x * 1.15, size.x * 1.5),
+                      ),
+                    if (col == 0 && row == 3)
+                      YellowTokenPlayer(
+                        position: Vector2(-size.x * 0.10, -size.x * 0.6),
+                        size: Vector2(size.x * 1.15, size.x * 1.5),
                       ),
                   ])
             ]);
