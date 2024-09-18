@@ -90,7 +90,7 @@ class BlueToken extends SpriteComponent {
   @override
   Future<void> onLoad() async {
     // Load your custom location pin sprite
-    sprite = await Sprite.load('../images/blue_token_symbol.png');
+    sprite = await Sprite.load('blue_token_symbol.png');
   }
 }
 
@@ -106,7 +106,7 @@ class YellowToken extends SpriteComponent {
   @override
   Future<void> onLoad() async {
     // Load your custom location pin sprite
-    sprite = await Sprite.load('../images/yellow_token_symbol.png');
+    sprite = await Sprite.load('yellow_token_symbol.png');
   }
 }
 
@@ -634,7 +634,7 @@ class BlueTokenPlayer extends SpriteComponent {
   @override
   Future<void> onLoad() async {
     // Load your custom location pin sprite
-    sprite = await Sprite.load('../images/blue_token.png');
+    sprite = await Sprite.load('blue_token.png');
   }
 }
 
@@ -650,7 +650,7 @@ class YellowTokenPlayer extends SpriteComponent {
   @override
   Future<void> onLoad() async {
     // Load your custom location pin sprite
-    sprite = await Sprite.load('../images/yellow_token.png');
+    sprite = await Sprite.load('yellow_token.png');
   }
 }
 
