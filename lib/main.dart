@@ -78,38 +78,6 @@ class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
   }
 }
 
-class BlueToken extends SpriteComponent {
-  BlueToken({
-    required Vector2 position,
-    required Vector2 size,
-  }) : super(
-          position: position,
-          size: size,
-        );
-
-  @override
-  Future<void> onLoad() async {
-    // Load your custom location pin sprite
-    sprite = await Sprite.load('blue_token_symbol.png');
-  }
-}
-
-class YellowToken extends SpriteComponent {
-  YellowToken({
-    required Vector2 position,
-    required Vector2 size,
-  }) : super(
-          position: position,
-          size: size,
-        );
-
-  @override
-  Future<void> onLoad() async {
-    // Load your custom location pin sprite
-    sprite = await Sprite.load('yellow_token_symbol.png');
-  }
-}
-
 class CustomRectangleComponent extends PositionComponent {
   final Paint strokePaint;
   final double strokeWidth;
@@ -198,11 +166,7 @@ class LowerController extends RectangleComponent {
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 1.0
                 ..color = Color(0xFF03346E),
-              children: [
-                BlueToken(
-                    position: Vector2(innerWidth * 0.08, innerWidth * 0.04),
-                    size: Vector2(innerWidth * 0.20, innerWidth * 0.25)),
-              ]),
+              children: []),
         ]);
 
     final leftDice = RectangleComponent(
@@ -223,7 +187,7 @@ class LowerController extends RectangleComponent {
     final rightDice = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight),
         position: Vector2(width - innerWidth * 0.8, 0), // Sticks to the right
-        paint: Paint()..color =  Color(0xFFFFF455),
+        paint: Paint()..color = Color(0xFFFFF455),
         children: [
           RectangleComponent(
               size: Vector2(innerWidth * 0.4, innerHeight),
@@ -248,11 +212,7 @@ class LowerController extends RectangleComponent {
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 1.0
                 ..color = Color(0xFF03346E),
-              children: [
-                YellowToken(
-                    position: Vector2(innerWidth * 0.080, innerWidth * 0.04),
-                    size: Vector2(innerWidth * 0.20, innerWidth * 0.25)),
-              ]),
+              children: []),
         ]);
 
     add(leftDice);
@@ -622,35 +582,85 @@ class StarComponent extends PositionComponent {
   }
 }
 
-class BlueTokenPlayer extends SpriteComponent {
-  BlueTokenPlayer({
+class InvertedDropletComponent extends PositionComponent {
+  final Paint borderPaint;
+  final Paint transparentPaint;
+  final Paint fillPaint;
+  final Paint dropletFillPaint; // Paint for filling the inside of the droplet
+
+  InvertedDropletComponent({
     required Vector2 position,
     required Vector2 size,
-  }) : super(
-          position: position,
-          size: size,
-        );
+    Color borderColor = Colors.black,
+    Color innerCircleColor = Colors.blueAccent,
+    Color dropletFillColor = Colors.white, // Default fill color for droplet
+  })  : borderPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2
+          ..color = borderColor,
+        transparentPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0
+          ..color = Colors.transparent, // Transparent line
+        fillPaint = Paint()
+          ..style = PaintingStyle.fill
+          ..color = innerCircleColor,
+        dropletFillPaint = Paint()
+          ..style = PaintingStyle.fill
+          ..color = dropletFillColor, // Paint for filling droplet
+        super(position: position, size: size);
 
   @override
-  Future<void> onLoad() async {
-    // Load your custom location pin sprite
-    sprite = await Sprite.load('blue_token.png');
-  }
-}
+  void render(Canvas canvas) {
+    super.render(canvas);
 
-class YellowTokenPlayer extends SpriteComponent {
-  YellowTokenPlayer({
-    required Vector2 position,
-    required Vector2 size,
-  }) : super(
-          position: position,
-          size: size,
-        );
+    // Save the canvas state before transformation
+    canvas.save();
 
-  @override
-  Future<void> onLoad() async {
-    // Load your custom location pin sprite
-    sprite = await Sprite.load('yellow_token.png');
+    // Move the canvas origin to the center of the component and rotate it by 180 degrees
+    canvas.translate(size.x / 2, size.y / 2);
+    canvas.rotate(3.14); // Rotate by 180 degrees (π radians)
+    canvas.translate(
+        -size.x / 2, -size.y / 2); // Move back to top-left of the component
+
+    // Draw the droplet shape
+    final path = Path();
+
+    // Define the droplet's body (bottom is a half-circle, top is a sharp point)
+    final baseRadius = size.x / 2;
+    final bottomCenter = Offset(size.x / 2, size.y - baseRadius);
+
+    // Draw the half-circle with transparent paint
+    path.arcTo(
+      Rect.fromCircle(center: bottomCenter, radius: baseRadius),
+      0, // Start angle
+      3.14, // Sweep angle (half-circle)
+      false,
+    );
+
+    // Draw lines forming the point at the top of the droplet with visible paint
+    path.lineTo(size.x / 2, 0); // Top point of the droplet
+    path.lineTo(size.x, size.y - baseRadius); // Connect to bottom-right
+
+    // Close the path
+    path.close();
+
+    // Fill the droplet shape with grey (or specified color)
+    canvas.drawPath(path, dropletFillPaint);
+
+    // Draw the droplet border with visible paint
+    canvas.drawPath(path, borderPaint);
+
+    // Now, draw a smaller circle inside the droplet at the bottom
+    final smallerCircleRadius =
+        baseRadius / 1.7; // Radius of the smaller circle
+    final smallerCircleCenter = Offset(size.x / 2, size.y - baseRadius);
+
+    // Draw the smaller circle
+    canvas.drawCircle(smallerCircleCenter, smallerCircleRadius, fillPaint);
+
+    // Restore the canvas state
+    canvas.restore();
   }
 }
 
@@ -707,14 +717,19 @@ class GreenGridComponent extends PositionComponent {
                         borderColor: Colors.green, // Color of the arrow
                       ),
                     if (col == 0 && row == 0)
-                      BlueTokenPlayer(
-                        position: Vector2(-size.x * 0.10, -size.x * 0.6),
-                        size: Vector2(size.x * 1.15, size.x * 1.5),
+                      InvertedDropletComponent(
+                        position: Vector2(size.x * 0.10, -size.x * 0.30),
+                        size: Vector2(size.x * 0.75, size.x * 1),
+                      ),
+                    if (col == 0 && row == 5)
+                      InvertedDropletComponent(
+                        position: Vector2(size.x * 0.10, -size.x * 0.30),
+                        size: Vector2(size.x * 0.75, size.x * 1),
                       ),
                     if (col == 0 && row == 3)
-                      YellowTokenPlayer(
-                        position: Vector2(-size.x * 0.10, -size.x * 0.6),
-                        size: Vector2(size.x * 1.15, size.x * 1.5),
+                      InvertedDropletComponent(
+                        position: Vector2(size.x * 0.10, -size.x * 0.30),
+                        size: Vector2(size.x * 0.75, size.x * 1),
                       ),
                   ])
             ]);
