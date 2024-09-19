@@ -6,6 +6,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -243,12 +244,19 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     // Update the dice value in the DiceFaceComponent
     diceFace.updateDiceValue(newDiceValue);
+
+    // Apply a rotate effect to the dice when tapped
+    add(
+      RotateEffect.by(
+        3.14 * 2, // Full 360-degree rotation (2π radians)
+        EffectController(
+            duration: 0.5,
+            curve: Curves.easeInOut), // Rotation duration and curve
+      ),
+    );
   }
 
-  LudoDice({
-    required this.faceSize,
-    required Vector2 position, // Position argument
-  }) {
+  LudoDice({required this.faceSize}) {
     // Calculate properties based on faceSize
     borderRadius = faceSize / 5;
     innerRectangleWidth = faceSize * 0.9;
@@ -257,8 +265,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
     // Initialize the size of the component
     size = Vector2.all(faceSize);
 
-    // Set the position of the component
-    this.position = position;
+    // Set the anchor to center for center rotation
+    anchor = Anchor.center;
 
     // Initialize the dice face component
     diceFace = DiceFaceComponent(faceSize: innerRectangleWidth, diceValue: 6);
@@ -340,10 +348,14 @@ class LowerController extends RectangleComponent {
                 ..strokeWidth = 4.0
                 ..color = Color(0xFF03346E),
               children: [
-                LudoDice(
-                    faceSize: (innerWidth * 0.4) * 0.65,
+                RectangleComponent(
                     position: Vector2(
-                        (innerWidth * 0.4) * 0.15, (innerWidth * 0.4) * 0.22))
+                        innerWidth * 0.20, innerHeight * 0.5),
+                    children: [
+                      LudoDice(
+                        faceSize: (innerWidth * 0.4) * 0.65,
+                      )
+                    ]),
               ]),
         ] // Adjust color as needed
         );
