@@ -141,7 +141,7 @@ class CustomRectangleComponent extends PositionComponent {
 
 class DiceFaceComponent extends PositionComponent {
   final double faceSize; // size of the dice face
-  final int diceValue; // dice value from 1 to 6
+  int diceValue; // dice value from 1 to 6
 
   late final double dotSize; // size of each dot
   late final double spacing; // spacing between dots
@@ -153,6 +153,11 @@ class DiceFaceComponent extends PositionComponent {
     dotSize = faceSize * 0.1; // Adjust dot size
     spacing = faceSize * 0.3; // Spacing between dots
     size = Vector2.all(faceSize);
+  }
+
+  // Method to update the dice value and re-render
+  void updateDiceValue(int newDiceValue) {
+    diceValue = newDiceValue;
   }
 
   @override
@@ -220,13 +225,25 @@ class DiceFaceComponent extends PositionComponent {
   }
 }
 
-class LudoDice extends PositionComponent {
+class LudoDice extends PositionComponent with TapCallbacks {
   final double faceSize; // size of the square
   late final double borderRadius; // radius of the curved edges
   late final double innerRectangleWidth; // width of the inner rectangle
   late final double innerRectangleHeight; // height of the inner rectangle
 
   late final RectangleComponent innerRectangle; // inner rectangle component
+  late final DiceFaceComponent diceFace; // The dice face showing dots
+
+  final Random _random = Random(); // Random number generator
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    // Generate a random number between 1 and 6
+    int newDiceValue = _random.nextInt(6) + 1;
+
+    // Update the dice value in the DiceFaceComponent
+    diceFace.updateDiceValue(newDiceValue);
+  }
 
   LudoDice({
     required this.faceSize,
@@ -243,6 +260,9 @@ class LudoDice extends PositionComponent {
     // Set the position of the component
     this.position = position;
 
+    // Initialize the dice face component
+    diceFace = DiceFaceComponent(faceSize: innerRectangleWidth, diceValue: 6);
+
     // Initialize the inner rectangle component
     innerRectangle = RectangleComponent(
       size: Vector2(innerRectangleWidth, innerRectangleHeight),
@@ -250,10 +270,8 @@ class LudoDice extends PositionComponent {
           (faceSize - innerRectangleWidth) / 2, // Center horizontally
           (faceSize - innerRectangleHeight) / 2 // Center vertically
           ),
-      paint: Paint()..color = Colors.white, 
-      children: [
-          DiceFaceComponent(faceSize: innerRectangleWidth, diceValue: 6)
-      ]
+      paint: Paint()..color = Colors.white,
+      children: [diceFace],
     );
 
     // Add the inner rectangle to this component
@@ -324,7 +342,8 @@ class LowerController extends RectangleComponent {
               children: [
                 LudoDice(
                     faceSize: (innerWidth * 0.4) * 0.65,
-                    position: Vector2((innerWidth * 0.4) * 0.15, (innerWidth * 0.4) * 0.22))
+                    position: Vector2(
+                        (innerWidth * 0.4) * 0.15, (innerWidth * 0.4) * 0.22))
               ]),
         ] // Adjust color as needed
         );
