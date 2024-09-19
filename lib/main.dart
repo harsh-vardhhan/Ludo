@@ -220,7 +220,7 @@ class DiceFaceComponent extends PositionComponent {
   }
 }
 
-class CurvedSquareComponent extends PositionComponent {
+class LudoDice extends PositionComponent {
   final double faceSize; // size of the square
   late final double borderRadius; // radius of the curved edges
   late final double innerRectangleWidth; // width of the inner rectangle
@@ -228,14 +228,14 @@ class CurvedSquareComponent extends PositionComponent {
 
   late final RectangleComponent innerRectangle; // inner rectangle component
 
-  CurvedSquareComponent({
+  LudoDice({
     required this.faceSize,
     required Vector2 position, // Position argument
   }) {
     // Calculate properties based on faceSize
     borderRadius = faceSize / 5;
-    innerRectangleWidth = faceSize * 0.7;
-    innerRectangleHeight = faceSize * 0.7;
+    innerRectangleWidth = faceSize * 0.9;
+    innerRectangleHeight = faceSize * 0.9;
 
     // Initialize the size of the component
     size = Vector2.all(faceSize);
@@ -250,7 +250,7 @@ class CurvedSquareComponent extends PositionComponent {
           (faceSize - innerRectangleWidth) / 2, // Center horizontally
           (faceSize - innerRectangleHeight) / 2 // Center vertically
           ),
-      paint: Paint()..color = Colors.grey, 
+      paint: Paint()..color = Colors.white, 
       children: [
           DiceFaceComponent(faceSize: innerRectangleWidth, diceValue: 6)
       ]
@@ -322,7 +322,7 @@ class LowerController extends RectangleComponent {
                 ..strokeWidth = 4.0
                 ..color = Color(0xFF03346E),
               children: [
-                CurvedSquareComponent(
+                LudoDice(
                     faceSize: (innerWidth * 0.4) * 0.65,
                     position: Vector2((innerWidth * 0.4) * 0.15, (innerWidth * 0.4) * 0.22))
               ]),
