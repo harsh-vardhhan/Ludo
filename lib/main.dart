@@ -759,13 +759,13 @@ class StarComponent extends PositionComponent {
   }
 }
 
-class InvertedDropletComponent extends PositionComponent {
+class Token extends PositionComponent {
   final Paint borderPaint;
   final Paint transparentPaint;
   final Paint fillPaint;
   final Paint dropletFillPaint; // Paint for filling the inside of the droplet
 
-  InvertedDropletComponent({
+  Token({
     required Vector2 position,
     required Vector2 size,
     Color borderColor = Colors.black,
@@ -894,17 +894,17 @@ class GreenGridComponent extends PositionComponent {
                         borderColor: Colors.green, // Color of the arrow
                       ),
                     if (col == 0 && row == 0)
-                      InvertedDropletComponent(
+                      Token(
                         position: Vector2(size.x * 0.10, -size.x * 0.30),
                         size: Vector2(size.x * 0.75, size.x * 1),
                       ),
                     if (col == 0 && row == 5)
-                      InvertedDropletComponent(
+                      Token(
                         position: Vector2(size.x * 0.10, -size.x * 0.30),
                         size: Vector2(size.x * 0.75, size.x * 1),
                       ),
                     if (col == 0 && row == 3)
-                      InvertedDropletComponent(
+                      Token(
                         position: Vector2(size.x * 0.10, -size.x * 0.30),
                         size: Vector2(size.x * 0.75, size.x * 1),
                       ),
