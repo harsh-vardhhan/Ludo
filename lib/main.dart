@@ -9,6 +9,7 @@ import 'package:flame/game.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flame/geometry.dart';
 
 void main() {
   runApp(const GameApp());
@@ -248,7 +249,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     // Apply a rotate effect to the dice when tapped
     add(
       RotateEffect.by(
-        3.14 * 2, // Full 360-degree rotation (2π radians)
+        tau, // Full 360-degree rotation (2π radians)
         EffectController(
             duration: 0.5,
             curve: Curves.easeInOut), // Rotation duration and curve
