@@ -139,6 +139,146 @@ class CustomRectangleComponent extends PositionComponent {
   }
 }
 
+class DiceFaceComponent extends PositionComponent {
+  final double faceSize; // size of the dice face
+  final int diceValue; // dice value from 1 to 6
+
+  late final double dotSize; // size of each dot
+  late final double spacing; // spacing between dots
+
+  DiceFaceComponent({
+    required this.faceSize,
+    required this.diceValue,
+  }) {
+    dotSize = faceSize * 0.1; // Adjust dot size
+    spacing = faceSize * 0.3; // Spacing between dots
+    size = Vector2.all(faceSize);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+
+    // Draw the dice face background
+    final paint = Paint()..color = Colors.white;
+    final rect = Rect.fromLTWH(0, 0, size.x, size.y);
+    canvas.drawRect(rect, paint);
+
+    // Draw the dots
+    final dotPaint = Paint()..color = Colors.black;
+
+    // Define dot positions for each dice face
+    final List<Offset> dotOffsets = _getDotOffsets();
+
+    for (var offset in dotOffsets) {
+      canvas.drawCircle(offset, dotSize, dotPaint);
+    }
+  }
+
+  List<Offset> _getDotOffsets() {
+    switch (diceValue) {
+      case 1:
+        return [Offset(size.x / 2, size.y / 2)]; // Center dot
+      case 2:
+        return [
+          Offset(size.x * 0.3, size.y * 0.3), // Top left
+          Offset(size.x * 0.7, size.y * 0.7), // Bottom right
+        ];
+      case 3:
+        return [
+          Offset(size.x * 0.3, size.y * 0.3), // Top left
+          Offset(size.x / 2, size.y / 2), // Center dot
+          Offset(size.x * 0.7, size.y * 0.7), // Bottom right
+        ];
+      case 4:
+        return [
+          Offset(size.x * 0.3, size.y * 0.3), // Top left
+          Offset(size.x * 0.7, size.y * 0.3), // Top right
+          Offset(size.x * 0.3, size.y * 0.7), // Bottom left
+          Offset(size.x * 0.7, size.y * 0.7), // Bottom right
+        ];
+      case 5:
+        return [
+          Offset(size.x * 0.3, size.y * 0.3), // Top left
+          Offset(size.x * 0.7, size.y * 0.3), // Top right
+          Offset(size.x / 2, size.y / 2), // Center dot
+          Offset(size.x * 0.3, size.y * 0.7), // Bottom left
+          Offset(size.x * 0.7, size.y * 0.7), // Bottom right
+        ];
+      case 6:
+        return [
+          Offset(size.x * 0.3, size.y * 0.2), // Top left
+          Offset(size.x * 0.7, size.y * 0.2), // Top right
+          Offset(size.x * 0.3, size.y * 0.5), // Middle left
+          Offset(size.x * 0.7, size.y * 0.5), // Middle right
+          Offset(size.x * 0.3, size.y * 0.8), // Bottom left
+          Offset(size.x * 0.7, size.y * 0.8), // Bottom right
+        ];
+      default:
+        return [];
+    }
+  }
+}
+
+class CurvedSquareComponent extends PositionComponent {
+  final double faceSize; // size of the square
+  late final double borderRadius; // radius of the curved edges
+  late final double innerRectangleWidth; // width of the inner rectangle
+  late final double innerRectangleHeight; // height of the inner rectangle
+
+  late final RectangleComponent innerRectangle; // inner rectangle component
+
+  CurvedSquareComponent({
+    required this.faceSize,
+    required Vector2 position, // Position argument
+  }) {
+    // Calculate properties based on faceSize
+    borderRadius = faceSize / 5;
+    innerRectangleWidth = faceSize * 0.7;
+    innerRectangleHeight = faceSize * 0.7;
+
+    // Initialize the size of the component
+    size = Vector2.all(faceSize);
+
+    // Set the position of the component
+    this.position = position;
+
+    // Initialize the inner rectangle component
+    innerRectangle = RectangleComponent(
+      size: Vector2(innerRectangleWidth, innerRectangleHeight),
+      position: Vector2(
+          (faceSize - innerRectangleWidth) / 2, // Center horizontally
+          (faceSize - innerRectangleHeight) / 2 // Center vertically
+          ),
+      paint: Paint()..color = Colors.grey, 
+      children: [
+          DiceFaceComponent(faceSize: innerRectangleWidth, diceValue: 6)
+      ]
+    );
+
+    // Add the inner rectangle to this component
+    add(innerRectangle);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+
+    // Create paint for the square
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    // Define the rounded rectangle
+    final rect = Rect.fromLTWH(0, 0, size.x, size.y);
+    final radius = Radius.circular(borderRadius);
+    final rrect = RRect.fromRectAndRadius(rect, radius);
+
+    // Draw the rounded rectangle
+    canvas.drawRRect(rrect, paint);
+  }
+}
+
 class LowerController extends RectangleComponent {
   LowerController({
     required double width,
@@ -180,7 +320,12 @@ class LowerController extends RectangleComponent {
                 ..color = Colors.transparent
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 4.0
-                ..color = Color(0xFF03346E))
+                ..color = Color(0xFF03346E),
+              children: [
+                CurvedSquareComponent(
+                    faceSize: (innerWidth * 0.4) * 0.65,
+                    position: Vector2((innerWidth * 0.4) * 0.15, (innerWidth * 0.4) * 0.22))
+              ]),
         ] // Adjust color as needed
         );
 
