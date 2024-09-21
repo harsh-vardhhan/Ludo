@@ -227,7 +227,7 @@ class DiceFaceComponent extends PositionComponent {
   }
 }
 
-class LudoDice extends PositionComponent with TapCallbacks {
+class LudoDice extends PositionComponent with TapCallbacks{
   final double faceSize; // size of the square
   late final double borderRadius; // radius of the curved edges
   late final double innerRectangleWidth; // width of the inner rectangle
@@ -242,6 +242,48 @@ class LudoDice extends PositionComponent with TapCallbacks {
   void onTapDown(TapDownEvent event) {
     // Generate a random number between 1 and 6
     int newDiceValue = _random.nextInt(6) + 1;
+
+    final world = parent?.parent?.parent?.parent?.parent;
+    if (world is World) {
+      final ludoBoard = world.children.whereType<LudoBoard>().first;
+      final childrenOfLudoBoard = ludoBoard.children.toList();
+      final childrensOfLudoBoard = childrenOfLudoBoard.length;
+
+      if (childrensOfLudoBoard >= 8) {
+        // Get token from base
+        final seventhChild = childrenOfLudoBoard[6];
+        final home = seventhChild.children.toList();
+        final homePlate = home[0].children.toList();
+        final homeSpotContainer = homePlate[1].children.toList();
+        final homeSpotList = homeSpotContainer[1].children.toList();
+
+        final homeSpotB1 = homeSpotList
+            .whereType<HomeSpot>()
+            .firstWhere((spot) => spot.uniqueId == 'B1');
+
+        final tokenB1 = homeSpotB1.children.whereType<Token>().first;
+
+        // Send token to path
+        final eigthChild = childrenOfLudoBoard[7];
+        final blueGridComponent =
+            eigthChild.children.whereType<BlueGridComponent>().first;
+        final openPosition = blueGridComponent.children
+            .whereType<UniqueRectangleComponent>()
+            .firstWhere((spot) => spot.uniqueId == 'B04');
+
+        final targetPosition = Vector2(
+            openPosition.position[0], // Use .x instead of [0]
+            openPosition.position[1]// Use .y instead of [1]
+            );
+
+        final moveToEffect = MoveToEffect(
+          targetPosition,
+          EffectController(duration: 1.0, curve: Curves.easeInOut),
+        );
+
+        tokenB1.add(moveToEffect);
+      }
+    }
 
     // Update the dice value in the DiceFaceComponent
     diceFace.updateDiceValue(newDiceValue);
@@ -306,7 +348,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 }
 
-class LowerController extends RectangleComponent {
+class LowerController extends RectangleComponent with HasGameReference<Ludo> {
   LowerController({
     required double width,
     required double height,
@@ -414,6 +456,7 @@ class Ludo extends FlameGame
   @override
   FutureOr<void> onLoad() async {
     await super.onLoad();
+    world.add(PlayArea());
     // Now you can set up the camera with the screen size
     camera = CameraComponent.withFixedResolution(
       width: width,
@@ -442,12 +485,12 @@ class Ludo extends FlameGame
           .whereType<HomeSpot>()
           .firstWhere((spot) => spot.uniqueId == 'B1');
 
-      var token = Token(
-        position: Vector2(0,0),
-        size: Vector2(homeSpotB1.size.x * 0.75,homeSpotB1.size.x * 1),
+      var tokenB1 = Token(
+        position: Vector2(homeSpotB1.size.x * 0.10, -homeSpotB1.size.x * 0.30),
+        size: Vector2(homeSpotB1.size.x * 0.80, homeSpotB1.size.x * 1.05),
       );
 
-      homeSpotB1.add(token);
+      homeSpotB1.add(tokenB1);
     } else {
       print('LudoBoard does not have children.');
     }
@@ -468,7 +511,7 @@ class Ludo extends FlameGame
     switch (event.logicalKey) {
       case LogicalKeyboardKey.space:
       case LogicalKeyboardKey.enter:
-        startGame();
+        print('test');
     }
     return KeyEventResult.handled;
   }
@@ -940,6 +983,23 @@ class GreenGridComponent extends PositionComponent {
   }
 }
 
+class UniqueRectangleComponent extends RectangleComponent {
+  final String uniqueId;
+
+  UniqueRectangleComponent({
+    required this.uniqueId,
+    required Vector2 position,
+    required Vector2 size,
+    required Paint paint,
+    List<Component>? children,
+  }) : super(
+          position: position,
+          size: size,
+          paint: paint,
+          children: children ?? [],
+        );
+}
+
 class BlueGridComponent extends PositionComponent {
   BlueGridComponent({
     required double size,
@@ -968,48 +1028,51 @@ class BlueGridComponent extends PositionComponent {
         // Create the unique ID for this block
         String uniqueId = 'B$col$row';
 
-        var rectangle = RectangleComponent(
-            position: Vector2(
-                col * (size.x + columnSpacing), row * (size.y + spacing)),
-            size: size,
-            paint: Paint()..color = color,
-            children: [
-              // Border Rectangle
-              RectangleComponent(
-                  size: size,
-                  paint: Paint()
-                    ..color = Colors.transparent // Keep interior transparent
-                    ..style = PaintingStyle.stroke // Set style to stroke
-                    ..strokeWidth = 0.6 // Set border width
-                    ..color = Colors.black, // Set border color to black
-                  children: [
-                    if (col == 2 && row == 3)
-                      StarComponent(
-                          size: size,
-                          innerRadius: size.x * 0.24,
-                          outerRadius: size.x * 0.48),
-                    if (col == 1 && row == 5)
-                      ArrowIconComponent(
-                        icon: Icons.north,
-                        size: size.x * 0.90,
-                        position: Vector2(size.x * 0.05,
-                            size.x * 0.05), // Font size of the arrow
-                        borderColor: Colors.blue, // Color of the arrow
-                      ),
-                    // Add the unique ID as a text label at the center
-                    TextComponent(
-                      text: uniqueId,
-                      position: Vector2(size.x / 2, size.y / 2),
-                      anchor: Anchor.center,
-                      textRenderer: TextPaint(
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: size.x * 0.4, // Adjust font size as needed
-                        ),
-                      ),
+        var rectangle = UniqueRectangleComponent(
+          uniqueId: uniqueId,
+          position:
+              Vector2(col * (size.x + columnSpacing), row * (size.x + spacing)),
+          size: size,
+          paint: Paint()..color = color,
+          children: [
+            // Border Rectangle
+            RectangleComponent(
+              size: size,
+              paint: Paint()
+                ..color = Colors.transparent // Keep interior transparent
+                ..style = PaintingStyle.stroke // Set style to stroke
+                ..strokeWidth = 0.6 // Set border width
+                ..color = Colors.black, // Set border color to black
+              children: [
+                if (col == 2 && row == 3)
+                  StarComponent(
+                    size: size,
+                    innerRadius: size.x * 0.24,
+                    outerRadius: size.x * 0.48,
+                  ),
+                if (col == 1 && row == 5)
+                  ArrowIconComponent(
+                    icon: Icons.north,
+                    size: size.x * 0.90,
+                    position: Vector2(size.x * 0.05, size.x * 0.05),
+                    borderColor: Colors.blue,
+                  ),
+                // Add the unique ID as a text label at the center
+                TextComponent(
+                  text: uniqueId,
+                  position: Vector2(size.x / 2, size.x / 2),
+                  anchor: Anchor.center,
+                  textRenderer: TextPaint(
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: size.x * 0.4, // Adjust font size as needed
                     ),
-                  ])
-            ]);
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
         add(rectangle);
       }
     }
