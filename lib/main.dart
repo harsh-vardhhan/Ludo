@@ -428,7 +428,30 @@ class Ludo extends FlameGame
         height: width * 0.20));
   }
 
-  void startGame() {}
+  void startGame() {
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
+    final childrenOfLudoBoard = ludoBoard.children.toList();
+    if (childrenOfLudoBoard.length >= 7) {
+      final seventhChild = childrenOfLudoBoard[6];
+      final home = seventhChild.children.toList();
+      final homePlate = home[0].children.toList();
+      final homeSpotContainer = homePlate[1].children.toList();
+      final homeSpotList = homeSpotContainer[1].children.toList();
+
+      final homeSpotB1 = homeSpotList
+          .whereType<HomeSpot>()
+          .firstWhere((spot) => spot.uniqueId == 'B1');
+
+      var token = Token(
+        position: Vector2(0,0),
+        size: Vector2(homeSpotB1.size.x * 0.75,homeSpotB1.size.x * 1),
+      );
+
+      homeSpotB1.add(token);
+    } else {
+      print('LudoBoard does not have children.');
+    }
+  }
 
   @override
   void onTap() {
@@ -1252,7 +1275,6 @@ class HomeSpotContainer extends RectangleComponent {
 
     for (int slotNumber = 1; slotNumber <= 4; slotNumber++) {
       String uniqueId = '$colorCode$slotNumber';
-      print('Generated uniqueId: $uniqueId');
 
       HomeSpot homeSpot = HomeSpot(
         radius: radius,
@@ -1313,7 +1335,7 @@ class HomeSpot extends CircleComponent {
   }) : super(
           radius: radius,
           position: position,
-          paint: paint ?? Paint(),
+          paint: paint,
           children: [
             // Add a child CircleComponent to draw the border
             CircleComponent(
@@ -1326,10 +1348,4 @@ class HomeSpot extends CircleComponent {
             ),
           ],
         );
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    // Render the unique ID if needed later, but for now, we just store it
-  }
 }
