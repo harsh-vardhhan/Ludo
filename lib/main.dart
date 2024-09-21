@@ -350,8 +350,7 @@ class LowerController extends RectangleComponent {
                 ..color = Color(0xFF03346E),
               children: [
                 RectangleComponent(
-                    position: Vector2(
-                        innerWidth * 0.20, innerHeight * 0.5),
+                    position: Vector2(innerWidth * 0.20, innerHeight * 0.5),
                     children: [
                       LudoDice(
                         faceSize: (innerWidth * 0.4) * 0.65,
@@ -655,7 +654,7 @@ class Home extends RectangleComponent {
   Home(
       {required double size,
       required Paint? paint,
-      required Paint? homeSpotColor,
+      required Paint homeSpotColor,
       children})
       : super(size: Vector2.all(size), paint: paint ?? Paint(), children: [
           // Define border as a separate child component for the stroke
@@ -852,7 +851,6 @@ class GreenGridComponent extends PositionComponent {
 
   // Function to create the grid of rectangles
   void _createGrid() {
-    //Vector2 rectangleSize = Vector2(20, 20); // Size of each square
     double spacing = 0; // Vertical spacing between rectangles
     double columnSpacing = 0; // Horizontal spacing between columns
 
@@ -866,12 +864,18 @@ class GreenGridComponent extends PositionComponent {
         if (row > 0 && col == 1 || row == 1 && col == 2) {
           color = Colors.green;
         }
+
+        // Create the unique ID for this block
+        String uniqueId = 'G$col$row';
+
         var rectangle = RectangleComponent(
+            // position based on column and row
             position: Vector2(
                 col * (size.x + columnSpacing), row * (size.y + spacing)),
             size: size,
             paint: Paint()..color = color,
             children: [
+              // Border Rectangle
               RectangleComponent(
                   size: size,
                   paint: Paint()
@@ -893,21 +897,18 @@ class GreenGridComponent extends PositionComponent {
                             size.x * 0.05), // Font size of the arrow
                         borderColor: Colors.green, // Color of the arrow
                       ),
-                    if (col == 0 && row == 0)
-                      Token(
-                        position: Vector2(size.x * 0.10, -size.x * 0.30),
-                        size: Vector2(size.x * 0.75, size.x * 1),
+                    // Add the unique ID as a text label at the center
+                    TextComponent(
+                      text: uniqueId,
+                      position: Vector2(size.x / 2, size.y / 2),
+                      anchor: Anchor.center,
+                      textRenderer: TextPaint(
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: size.x * 0.4, // Adjust font size as needed
+                        ),
                       ),
-                    if (col == 0 && row == 5)
-                      Token(
-                        position: Vector2(size.x * 0.10, -size.x * 0.30),
-                        size: Vector2(size.x * 0.75, size.x * 1),
-                      ),
-                    if (col == 0 && row == 3)
-                      Token(
-                        position: Vector2(size.x * 0.10, -size.x * 0.30),
-                        size: Vector2(size.x * 0.75, size.x * 1),
-                      ),
+                    ),
                   ])
             ]);
         add(rectangle);
@@ -927,7 +928,6 @@ class BlueGridComponent extends PositionComponent {
 
   // Function to create the grid of rectangles
   void _createGrid() {
-    //Vector2 rectangleSize = Vector2(20, 20); // Size of each square
     double spacing = 0; // Vertical spacing between rectangles
     double columnSpacing = 0; // Horizontal spacing between columns
 
@@ -941,12 +941,17 @@ class BlueGridComponent extends PositionComponent {
         if (col == 0 && row == 4 || col == 1 && row < 5) {
           color = Colors.blue;
         }
+
+        // Create the unique ID for this block
+        String uniqueId = 'B$col$row';
+
         var rectangle = RectangleComponent(
             position: Vector2(
                 col * (size.x + columnSpacing), row * (size.y + spacing)),
             size: size,
             paint: Paint()..color = color,
             children: [
+              // Border Rectangle
               RectangleComponent(
                   size: size,
                   paint: Paint()
@@ -967,7 +972,19 @@ class BlueGridComponent extends PositionComponent {
                         position: Vector2(size.x * 0.05,
                             size.x * 0.05), // Font size of the arrow
                         borderColor: Colors.blue, // Color of the arrow
-                      )
+                      ),
+                    // Add the unique ID as a text label at the center
+                    TextComponent(
+                      text: uniqueId,
+                      position: Vector2(size.x / 2, size.y / 2),
+                      anchor: Anchor.center,
+                      textRenderer: TextPaint(
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: size.x * 0.4, // Adjust font size as needed
+                        ),
+                      ),
+                    ),
                   ])
             ]);
         add(rectangle);
@@ -1043,7 +1060,6 @@ class RedGridComponent extends PositionComponent {
 
   // Function to create the grid of rectangles
   void _createGrid() {
-    //Vector2 rectangleSize = Vector2(20, 20); // Size of each square
     double spacing = 0; // Vertical spacing between rectangles
     double columnSpacing = 0; // Horizontal spacing between columns
 
@@ -1057,12 +1073,17 @@ class RedGridComponent extends PositionComponent {
         if (row == 0 && col == 1 || row == 1 && col > 0) {
           color = Colors.red;
         }
+
+        // Create the unique ID for this block
+        String uniqueId = 'R$col$row';
+
         var rectangle = RectangleComponent(
             position: Vector2(
                 col * (size.x + columnSpacing), row * (size.y + spacing)),
             size: size,
             paint: Paint()..color = color,
             children: [
+              // Border Rectangle
               RectangleComponent(
                   size: size,
                   paint: Paint()
@@ -1083,7 +1104,19 @@ class RedGridComponent extends PositionComponent {
                         position: Vector2(size.x * 0.05,
                             size.x * 0.05), // Font size of the arrow
                         borderColor: Colors.red, // Color of the arrow
-                      )
+                      ),
+                    // Add the unique ID as a text label at the center
+                    TextComponent(
+                      text: uniqueId,
+                      position: Vector2(size.x / 2, size.y / 2),
+                      anchor: Anchor.center,
+                      textRenderer: TextPaint(
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: size.x * 0.4, // Adjust font size as needed
+                        ),
+                      ),
+                    ),
                   ])
             ]);
         add(rectangle);
@@ -1103,26 +1136,30 @@ class YellowGridComponent extends PositionComponent {
 
   // Function to create the grid of rectangles
   void _createGrid() {
-    //Vector2 rectangleSize = Vector2(20, 20); // Size of each square
     double spacing = 0; // Vertical spacing between rectangles
     double columnSpacing = 0; // Horizontal spacing between columns
 
     int numberOfRows = 3;
     int numberOfColumns = 6;
 
-    // Loop to create 3 rows of 6 squares each
+    // Loop to create 6 columns of 3 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
         var color = Colors.transparent;
         if (row == 1 && col < 5 || row == 2 && col == 4) {
           color = Colors.yellow;
         }
+
+        // Create the unique ID for this block
+        String uniqueId = 'Y$col$row';
+
         var rectangle = RectangleComponent(
             position: Vector2(
                 col * (size.x + columnSpacing), row * (size.y + spacing)),
             size: size,
             paint: Paint()..color = color,
             children: [
+              // Border Rectangle
               RectangleComponent(
                   size: size,
                   paint: Paint()
@@ -1143,7 +1180,19 @@ class YellowGridComponent extends PositionComponent {
                         position: Vector2(size.x * 0.05,
                             size.x * 0.05), // Font size of the arrow
                         borderColor: Colors.yellow, // Color of the arrow
-                      )
+                      ),
+                    // Add the unique ID as a text label at the center
+                    TextComponent(
+                      text: uniqueId,
+                      position: Vector2(size.x / 2, size.y / 2),
+                      anchor: Anchor.center,
+                      textRenderer: TextPaint(
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: size.x * 0.4, // Adjust font size as needed
+                        ),
+                      ),
+                    ),
                   ])
             ]);
         add(rectangle);
@@ -1157,7 +1206,7 @@ class HomePlate extends RectangleComponent {
   HomePlate({
     required double size,
     required Vector2 position,
-    required Paint? homeSpotColor,
+    required Paint homeSpotColor,
   }) : super(
           size: Vector2.all(size),
           position: position,
@@ -1187,37 +1236,65 @@ class HomeSpotContainer extends RectangleComponent {
   HomeSpotContainer({
     required double size,
     required Vector2 position,
-    required Paint? homeSpotColor,
+    required Paint homeSpotColor,
     required double radius,
   }) : super(
           size: Vector2.all(size),
           position: position,
           paint: Paint()..color = Colors.transparent,
-          children: [
-            HomeSpot(
-              radius: radius,
-              position: Vector2(0, 0), // Top-left corner
-              paint: homeSpotColor,
-            ),
-            HomeSpot(
-              radius: radius,
-              position: Vector2(size - radius * 2, 0.0), // Top-right corner
-              paint: homeSpotColor,
-            ),
-            HomeSpot(
-              radius: radius,
-              position: Vector2(0, size - radius * 2), // Bottom-left corner
-              paint: homeSpotColor,
-            ),
-            HomeSpot(
-              radius: radius,
-              position: Vector2(
-                  size - radius * 2, size - radius * 2), // Bottom-right corner
-              paint: homeSpotColor,
-            ),
-          ],
-        );
+        ) {
+    _createHomeSpots(homeSpotColor, radius);
+  }
+
+  // Method to create home spots with unique IDs
+  void _createHomeSpots(Paint homeSpotColor, double radius) {
+    for (int slotNumber = 1; slotNumber <= 4; slotNumber++) {
+      HomeSpot homeSpot = HomeSpot(
+        radius: radius,
+        position: _getPositionForSlot(slotNumber, radius),
+        paint: homeSpotColor,
+      );
+      add(homeSpot);
+    }
+  }
+
+  // Method to get the position for each slot
+  Vector2 _getPositionForSlot(int slotNumber, double radius) {
+    switch (slotNumber) {
+      case 1:
+        return Vector2(0, 0); // Top-left
+      case 2:
+        return Vector2(size.x - radius * 2, 0.0); // Top-right
+      case 3:
+        return Vector2(0, size.y - radius * 2); // Bottom-left
+      case 4:
+        return Vector2(size.x - radius * 2, size.y - radius * 2); // Bottom-right
+      default:
+        return Vector2(0, 0); // Default position
+    }
+  }
+
+  // Helper method to get the color code from the Paint object
+  String _getColorCode(Paint paint) {
+    Color color = paint.color;
+    String colorCode;
+
+    if (color.value == const Color(0xfff44336).value) {
+      colorCode = 'R';
+    } else if (color.value == const Color(0xff4caf50).value) {
+      colorCode = 'G';
+    } else if (color.value == const Color(0xff2196f3).value) {
+      colorCode = 'B';
+    } else if (color.value == const Color(0xffffeb3b).value) {
+      colorCode = 'Y';
+    } else {
+      colorCode = 'U'; // For unknown colors
+    }
+
+    return colorCode;
+  }
 }
+
 
 class HomeSpot extends CircleComponent {
   // Constructor to initialize the square with size, position, and optional paint
