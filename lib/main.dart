@@ -1248,11 +1248,17 @@ class HomeSpotContainer extends RectangleComponent {
 
   // Method to create home spots with unique IDs
   void _createHomeSpots(Paint homeSpotColor, double radius) {
+    String colorCode = _getColorCode(homeSpotColor);
+
     for (int slotNumber = 1; slotNumber <= 4; slotNumber++) {
+      String uniqueId = '$colorCode$slotNumber';
+      print('Generated uniqueId: $uniqueId');
+
       HomeSpot homeSpot = HomeSpot(
         radius: radius,
         position: _getPositionForSlot(slotNumber, radius),
         paint: homeSpotColor,
+        uniqueId: uniqueId, // Assign uniqueId to each HomeSpot
       );
       add(homeSpot);
     }
@@ -1268,7 +1274,8 @@ class HomeSpotContainer extends RectangleComponent {
       case 3:
         return Vector2(0, size.y - radius * 2); // Bottom-left
       case 4:
-        return Vector2(size.x - radius * 2, size.y - radius * 2); // Bottom-right
+        return Vector2(
+            size.x - radius * 2, size.y - radius * 2); // Bottom-right
       default:
         return Vector2(0, 0); // Default position
     }
@@ -1295,13 +1302,14 @@ class HomeSpotContainer extends RectangleComponent {
   }
 }
 
-
 class HomeSpot extends CircleComponent {
-  // Constructor to initialize the square with size, position, and optional paint
+  final String uniqueId;
+
   HomeSpot({
     required double radius,
     required Vector2 position,
-    required Paint? paint,
+    required Paint paint,
+    required this.uniqueId, // Accept uniqueId
   }) : super(
           radius: radius,
           position: position,
@@ -1318,4 +1326,10 @@ class HomeSpot extends CircleComponent {
             ),
           ],
         );
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    // Render the unique ID if needed later, but for now, we just store it
+  }
 }
