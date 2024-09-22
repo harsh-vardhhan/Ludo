@@ -264,20 +264,10 @@ class LudoDice extends PositionComponent with TapCallbacks {
       final childrensOfLudoBoard = childrenOfLudoBoard.length;
 
       if (childrensOfLudoBoard >= 8) {
-        // Get token from base
-        final seventhChild = childrenOfLudoBoard[6];
-        final home = seventhChild.children.toList();
-        final homePlate = home[0].children.toList();
-        final homeSpotContainer = homePlate[1].children.toList();
-        final homeSpotList = homeSpotContainer[1].children.toList();
+        // Get token from Ludo Board
+        final tokenB1 = childrenOfLudoBoard.whereType<Token>().first;
 
-        final homeSpotB1 = homeSpotList
-            .whereType<HomeSpot>()
-            .firstWhere((spot) => spot.uniqueId == 'B1');
-
-        final tokenB1 = homeSpotB1.children.whereType<Token>().first;
-
-        // Send token to path
+        // get location of open position
         final eigthChild = childrenOfLudoBoard[7];
         final blueGridComponent =
             eigthChild.children.whereType<BlueGridComponent>().first;
@@ -286,8 +276,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
             .firstWhere((spot) => spot.uniqueId == 'B04');
 
         final targetPosition = Vector2(
-            openPosition.absolutePosition[0] - homeSpotB1.absolutePosition[0],
-            openPosition.absolutePosition[1] - homeSpotB1.absolutePosition[1]);
+            openPosition.absolutePosition.x - ludoBoard.absolutePosition.x,
+            openPosition.absolutePosition.y - ludoBoard.absolutePosition.y);
 
         final moveToEffect = MoveToEffect(
           targetPosition,
@@ -295,13 +285,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
         );
 
         tokenB1.add(moveToEffect);
-
-        moveToEffect.onComplete = () {
-          openPosition.add(tokenB1);
-          //  homeSpotB1.remove(tokenB1);
-          tokenB1.position = Vector2(0,0);
-         
-        };
       }
     }
   }
@@ -469,7 +452,7 @@ class Ludo extends FlameGame
     );
     camera.viewfinder.anchor = Anchor.topLeft;
     //world.add(camera);
-    world.add(PlayArea());
+    // world.add(PlayArea());
     // Now you can set up the camera with the screen size
     world.add(LudoBoard(
         width: width, height: width, position: Vector2(0, height * 0.125)));
@@ -493,15 +476,17 @@ class Ludo extends FlameGame
           .whereType<HomeSpot>()
           .firstWhere((spot) => spot.uniqueId == 'B1');
 
-      final spot = homeSpotB1.children.whereType<CircleComponent>().first;
-
-      var tokenB1 = Token(
-        uniqueId: 'BT1',
-        position: Vector2(homeSpotB1.size.x * 0.10, -homeSpotB1.size.x * 0.30),
-        size: Vector2(homeSpotB1.size.x * 0.80, homeSpotB1.size.x * 1.05),
-      );
-      homeSpotB1.add(tokenB1);
-      print(spot.children.toList());
+      final noToken = childrenOfLudoBoard.whereType<Token>().isEmpty;
+      if (noToken) {
+        var tokenB1 = Token(
+          uniqueId: 'BT1',
+          position: Vector2(
+              homeSpotB1.absolutePosition.x - ludoBoard.absolutePosition.x,
+              homeSpotB1.absolutePosition.y - ludoBoard.absolutePosition.y),
+          size: Vector2(homeSpotB1.size.x * 0.80, homeSpotB1.size.x * 1.05),
+        );
+        ludoBoard.add(tokenB1);
+      }
     } else {
       print('LudoBoard does not have children.');
     }
