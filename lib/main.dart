@@ -259,34 +259,36 @@ class LudoDice extends PositionComponent with TapCallbacks {
       ),
     );
 
-    final world = parent?.parent?.parent?.parent?.parent;
-    if (world is World) {
-      final ludoBoard = world.children.whereType<LudoBoard>().first;
-      final childrenOfLudoBoard = ludoBoard.children.toList();
-      final childrensOfLudoBoard = childrenOfLudoBoard.length;
+    if (newDiceValue == 6) {
+      final world = parent?.parent?.parent?.parent?.parent;
+      if (world is World) {
+        final ludoBoard = world.children.whereType<LudoBoard>().first;
+        final childrenOfLudoBoard = ludoBoard.children.toList();
+        final childrensOfLudoBoard = childrenOfLudoBoard.length;
 
-      if (childrensOfLudoBoard >= 8) {
-        // Get token from Ludo Board
-        final tokenB1 = childrenOfLudoBoard.whereType<Token>().first;
+        if (childrensOfLudoBoard >= 8) {
+          // Get token from Ludo Board
+          final tokenB1 = childrenOfLudoBoard.whereType<Token>().first;
 
-        // get location of open position
-        final eigthChild = childrenOfLudoBoard[7];
-        final blueGridComponent =
-            eigthChild.children.whereType<BlueGridComponent>().first;
-        final openPosition = blueGridComponent.children
-            .whereType<UniqueRectangleComponent>()
-            .firstWhere((spot) => spot.uniqueId == 'B04');
+          // get location of open position
+          final eigthChild = childrenOfLudoBoard[7];
+          final blueGridComponent =
+              eigthChild.children.whereType<BlueGridComponent>().first;
+          final openPosition = blueGridComponent.children
+              .whereType<UniqueRectangleComponent>()
+              .firstWhere((spot) => spot.uniqueId == 'B04');
 
-        final targetPosition = Vector2(
-            openPosition.absolutePosition.x - ludoBoard.absolutePosition.x,
-            openPosition.absolutePosition.y - ludoBoard.absolutePosition.y);
+          final targetPosition = Vector2(
+              openPosition.absolutePosition.x - ludoBoard.absolutePosition.x,
+              openPosition.absolutePosition.y - ludoBoard.absolutePosition.y);
 
-        final moveToEffect = MoveToEffect(
-          targetPosition,
-          EffectController(duration: 0.5, curve: Curves.easeInOut),
-        );
+          final moveToEffect = MoveToEffect(
+            targetPosition,
+            EffectController(duration: 0.5, curve: Curves.easeInOut),
+          );
 
-        tokenB1.add(moveToEffect);
+          tokenB1.add(moveToEffect);
+        }
       }
     }
   }
@@ -972,7 +974,8 @@ class GreenGridComponent extends PositionComponent {
                         textRenderer: TextPaint(
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: size.x * 0.4, // Adjust font size as needed
+                            fontSize:
+                                size.x * 0.4, // Adjust font size as needed
                           ),
                         ),
                       ),
@@ -1202,7 +1205,8 @@ class RedGridComponent extends PositionComponent {
                         textRenderer: TextPaint(
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: size.x * 0.4, // Adjust font size as needed
+                            fontSize:
+                                size.x * 0.4, // Adjust font size as needed
                           ),
                         ),
                       ),
@@ -1279,7 +1283,8 @@ class YellowGridComponent extends PositionComponent {
                         textRenderer: TextPaint(
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: size.x * 0.4, // Adjust font size as needed
+                            fontSize:
+                                size.x * 0.4, // Adjust font size as needed
                           ),
                         ),
                       ),
