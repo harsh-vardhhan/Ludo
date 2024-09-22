@@ -70,6 +70,8 @@ class _GameAppState extends State<GameApp> {
   }
 }
 
+const showId = false;
+
 class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
   PlayArea() : super(children: [RectangleHitbox()]);
 
@@ -962,17 +964,18 @@ class GreenGridComponent extends PositionComponent {
                         borderColor: Colors.green, // Color of the arrow
                       ),
                     // Add the unique ID as a text label at the center
-                    TextComponent(
-                      text: uniqueId,
-                      position: Vector2(size.x / 2, size.y / 2),
-                      anchor: Anchor.center,
-                      textRenderer: TextPaint(
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: size.x * 0.4, // Adjust font size as needed
+                    if (showId)
+                      TextComponent(
+                        text: uniqueId,
+                        position: Vector2(size.x / 2, size.y / 2),
+                        anchor: Anchor.center,
+                        textRenderer: TextPaint(
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: size.x * 0.4, // Adjust font size as needed
+                          ),
                         ),
                       ),
-                    ),
                   ])
             ]);
         add(rectangle);
@@ -1056,17 +1059,18 @@ class BlueGridComponent extends PositionComponent {
                     borderColor: Colors.blue,
                   ),
                 // Add the unique ID as a text label at the center
-                TextComponent(
-                  text: uniqueId,
-                  position: Vector2(size.x / 2, size.x / 2),
-                  anchor: Anchor.center,
-                  textRenderer: TextPaint(
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: size.x * 0.4, // Adjust font size as needed
+                if (showId)
+                  TextComponent(
+                    text: uniqueId,
+                    position: Vector2(size.x / 2, size.x / 2),
+                    anchor: Anchor.center,
+                    textRenderer: TextPaint(
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: size.x * 0.4, // Adjust font size as needed
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ],
@@ -1190,17 +1194,18 @@ class RedGridComponent extends PositionComponent {
                         borderColor: Colors.red, // Color of the arrow
                       ),
                     // Add the unique ID as a text label at the center
-                    TextComponent(
-                      text: uniqueId,
-                      position: Vector2(size.x / 2, size.y / 2),
-                      anchor: Anchor.center,
-                      textRenderer: TextPaint(
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: size.x * 0.4, // Adjust font size as needed
+                    if (showId)
+                      TextComponent(
+                        text: uniqueId,
+                        position: Vector2(size.x / 2, size.y / 2),
+                        anchor: Anchor.center,
+                        textRenderer: TextPaint(
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: size.x * 0.4, // Adjust font size as needed
+                          ),
                         ),
                       ),
-                    ),
                   ])
             ]);
         add(rectangle);
@@ -1266,17 +1271,18 @@ class YellowGridComponent extends PositionComponent {
                         borderColor: Colors.yellow, // Color of the arrow
                       ),
                     // Add the unique ID as a text label at the center
-                    TextComponent(
-                      text: uniqueId,
-                      position: Vector2(size.x / 2, size.y / 2),
-                      anchor: Anchor.center,
-                      textRenderer: TextPaint(
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: size.x * 0.4, // Adjust font size as needed
+                    if (showId)
+                      TextComponent(
+                        text: uniqueId,
+                        position: Vector2(size.x / 2, size.y / 2),
+                        anchor: Anchor.center,
+                        textRenderer: TextPaint(
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: size.x * 0.4, // Adjust font size as needed
+                          ),
                         ),
                       ),
-                    ),
                   ])
             ]);
         add(rectangle);
