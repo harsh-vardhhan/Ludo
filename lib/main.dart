@@ -140,6 +140,8 @@ class GameState {
   // Global list to hold matched spots
   List<Map<String, dynamic>> matchedSpots = [];
 
+  List<Map<String, dynamic>> tokenSpots = [];
+
   // Factory method to access the instance
   factory GameState() {
     return _instance;
@@ -341,30 +343,52 @@ class LudoDice extends PositionComponent with TapCallbacks {
       final childrenOfLudoBoard = ludoBoard.children.toList();
       final childrensOfLudoBoard = childrenOfLudoBoard.length;
 
+      // get token from game state
+      final token = gameState.tokenSpots
+          .firstWhere((tokenData) => tokenData['uniqueId'] == 'BT1');
+
       if (childrensOfLudoBoard >= 8) {
         // Get token from Ludo Board
         final tokenB1 = childrenOfLudoBoard.whereType<Token>().first;
 
-        // get location of position
-        final spot = gameState.matchedSpots[newDiceValue];
+        // opening position
+        if (token['position'] == '' && newDiceValue == 6) {
+          token['position'] = 'B04';
+          final spot = gameState.matchedSpots.firstWhere(
+              (tokenData) => tokenData['uniqueId'] == token['position']);
 
-        final eigthChild = childrenOfLudoBoard[7];
-        final blueGridComponent =
-            eigthChild.children.whereType<BlueGridComponent>().first;
-        final openPosition = blueGridComponent.children
-            .whereType<UniqueRectangleComponent>()
-            .firstWhere((spot) => spot.uniqueId == 'B04');
+          final targetPosition = Vector2(
+              spot['position'][0] - ludoBoard.absolutePosition.x,
+              spot['position'][1] - ludoBoard.absolutePosition.y);
 
-        final targetPosition = Vector2(
-            openPosition.absolutePosition.x - ludoBoard.absolutePosition.x,
-            openPosition.absolutePosition.y - ludoBoard.absolutePosition.y);
+          final moveToEffect = MoveToEffect(
+            targetPosition,
+            EffectController(duration: 0.5, curve: Curves.easeInOut),
+          );
 
-        final moveToEffect = MoveToEffect(
-          targetPosition,
-          EffectController(duration: 0.5, curve: Curves.easeInOut),
-        );
+          tokenB1.add(moveToEffect);
+        } else if (token['position'] != '') {
+          // any other position
+          final spotIndex = gameState.matchedSpots.indexWhere(
+              (tokenData) => tokenData['uniqueId'] == token['position']);
+          final newSpotIndex = spotIndex + newDiceValue;
+          // update token game state
+          token['position'] = gameState.matchedSpots[newSpotIndex]['uniqueId'];
 
-        tokenB1.add(moveToEffect);
+          // update visual
+          final x = gameState.matchedSpots[newSpotIndex]['position'][0];
+          final y = gameState.matchedSpots[newSpotIndex]['position'][1];
+
+          final targetPosition = Vector2(x - ludoBoard.absolutePosition.x,
+              y - ludoBoard.absolutePosition.y);
+
+          final moveToEffect = MoveToEffect(
+            targetPosition,
+            EffectController(duration: 0.5, curve: Curves.easeInOut),
+          );
+
+          tokenB1.add(moveToEffect);
+        }
       }
     }
   }
@@ -592,7 +616,7 @@ class Ludo extends FlameGame
         final spot = matchingRedSpots.first;
         gameState.matchedSpots.add({
           'uniqueId': spot.uniqueId,
-          'position': spot.position,
+          'position': spot.absolutePosition,
         });
       }
 
@@ -600,7 +624,7 @@ class Ludo extends FlameGame
         final spot = matchingBlueSpots.first;
         gameState.matchedSpots.add({
           'uniqueId': spot.uniqueId,
-          'position': spot.position,
+          'position': spot.absolutePosition,
         });
       }
 
@@ -608,7 +632,7 @@ class Ludo extends FlameGame
         final spot = matchingGreenSpots.first;
         gameState.matchedSpots.add({
           'uniqueId': spot.uniqueId,
-          'position': spot.position,
+          'position': spot.absolutePosition,
         });
       }
 
@@ -616,32 +640,42 @@ class Ludo extends FlameGame
         final spot = matchingYellowSpots.first;
         gameState.matchedSpots.add({
           'uniqueId': spot.uniqueId,
-          'position': spot.position,
+          'position': spot.absolutePosition,
         });
       }
     }
 
+    // later as per number of players
+    gameState.tokenSpots.add({
+      'uniqueId': 'BT1',
+      'position': '',
+    });
+
+    // get home spots
+    final seventhChild = childrenOfLudoBoard[6];
+    final home = seventhChild.children.toList();
+    final homePlate = home[0].children.toList();
+    final homeSpotContainer = homePlate[1].children.toList();
+    final homeSpotList = homeSpotContainer[1].children.toList();
+
     if (childrenOfLudoBoard.length >= 7) {
-      final seventhChild = childrenOfLudoBoard[6];
-      final home = seventhChild.children.toList();
-      final homePlate = home[0].children.toList();
-      final homeSpotContainer = homePlate[1].children.toList();
-      final homeSpotList = homeSpotContainer[1].children.toList();
-
-      final homeSpotB1 = homeSpotList
-          .whereType<HomeSpot>()
-          .firstWhere((spot) => spot.uniqueId == 'B1');
-
-      final noToken = childrenOfLudoBoard.whereType<Token>().isEmpty;
-      if (noToken) {
-        var tokenB1 = Token(
-          uniqueId: 'BT1',
-          position: Vector2(
-              homeSpotB1.absolutePosition.x - ludoBoard.absolutePosition.x,
-              homeSpotB1.absolutePosition.y - ludoBoard.absolutePosition.y),
-          size: Vector2(homeSpotB1.size.x * 0.80, homeSpotB1.size.x * 1.05),
-        );
-        ludoBoard.add(tokenB1);
+      for (var token in gameState.tokenSpots) {
+        final noToken = childrenOfLudoBoard.whereType<Token>().isEmpty;
+        if (noToken) {
+          if (token['uniqueId'] == 'BT1') {
+            final homeSpot = homeSpotList
+                .whereType<HomeSpot>()
+                .firstWhere((spot) => spot.uniqueId == 'B1');
+            var newToken = Token(
+              uniqueId: 'BT1',
+              position: Vector2(
+                  homeSpot.absolutePosition.x - ludoBoard.absolutePosition.x,
+                  homeSpot.absolutePosition.y - ludoBoard.absolutePosition.y),
+              size: Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05),
+            );
+            ludoBoard.add(newToken);
+          }
+        }
       }
     } else {
       print('LudoBoard does not have children.');
@@ -1294,8 +1328,9 @@ class ArrowIconComponent extends PositionComponent {
 }
 
 class RedGridComponent extends PositionComponent {
+
   RedGridComponent({
-    required double size,
+    required double size, // Allows toggling the visibility of the unique ID labels
   }) : super(
           size: Vector2.all(size),
         ) {
@@ -1310,7 +1345,7 @@ class RedGridComponent extends PositionComponent {
     int numberOfRows = 3;
     int numberOfColumns = 6;
 
-    // Loop to create 3 rows of 6 squares each
+    // Loop to create 6 columns of 3 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
         var color = Colors.transparent;
@@ -1321,55 +1356,58 @@ class RedGridComponent extends PositionComponent {
         // Create the unique ID for this block
         String uniqueId = 'R$col$row';
 
-        var rectangle = RectangleComponent(
-            position: Vector2(
-                col * (size.x + columnSpacing), row * (size.y + spacing)),
-            size: size,
-            paint: Paint()..color = color,
-            children: [
-              // Border Rectangle
-              RectangleComponent(
-                  size: size,
-                  paint: Paint()
-                    ..color = Colors.transparent // Keep interior transparent
-                    ..style = PaintingStyle.stroke // Set style to stroke
-                    ..strokeWidth = 0.6 // Set border width
-                    ..color = Colors.black, // Set border color to black
-                  children: [
-                    if (col == 2 && row == 2)
-                      StarComponent(
-                          size: size,
-                          innerRadius: size.x * 0.24,
-                          outerRadius: size.x * 0.48),
-                    if (col == 0 && row == 1)
-                      ArrowIconComponent(
-                        icon: Icons.east,
-                        size: size.x * 0.90,
-                        position: Vector2(size.x * 0.05,
-                            size.x * 0.05), // Font size of the arrow
-                        borderColor: Colors.red, // Color of the arrow
+        var rectangle = UniqueRectangleComponent(
+          uniqueId: uniqueId,
+          position: Vector2(
+              col * (size.x + columnSpacing), row * (size.x + spacing)),
+          size: Vector2.all(size.x), // Adjusting size to size.x
+          paint: Paint()..color = color,
+          children: [
+            // Border Rectangle
+            RectangleComponent(
+              size: Vector2.all(size.x), // Adjusting size to size.x
+              paint: Paint()
+                ..color = Colors.transparent // Keep interior transparent
+                ..style = PaintingStyle.stroke // Set style to stroke
+                ..strokeWidth = 0.6 // Set border width
+                ..color = Colors.black, // Set border color to black
+              children: [
+                if (col == 2 && row == 2)
+                  StarComponent(
+                    size: size, // Adjusting size to size.x
+                    innerRadius: size.x * 0.24,
+                    outerRadius: size.x * 0.48,
+                  ),
+                if (col == 0 && row == 1)
+                  ArrowIconComponent(
+                    icon: Icons.east,
+                    size: size.x * 0.90,
+                    position: Vector2(size.x * 0.05, size.x * 0.05),
+                    borderColor: Colors.red,
+                  ),
+                // Add the unique ID as a text label at the center
+                if (showId)
+                  TextComponent(
+                    text: uniqueId,
+                    position: Vector2(size.x / 2, size.x / 2),
+                    anchor: Anchor.center,
+                    textRenderer: TextPaint(
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: size.x * 0.4, // Adjust font size as needed
                       ),
-                    // Add the unique ID as a text label at the center
-                    if (showId)
-                      TextComponent(
-                        text: uniqueId,
-                        position: Vector2(size.x / 2, size.y / 2),
-                        anchor: Anchor.center,
-                        textRenderer: TextPaint(
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize:
-                                size.x * 0.4, // Adjust font size as needed
-                          ),
-                        ),
-                      ),
-                  ])
-            ]);
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        );
         add(rectangle);
       }
     }
   }
 }
+
 
 class YellowGridComponent extends PositionComponent {
   YellowGridComponent({
