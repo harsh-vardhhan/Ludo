@@ -227,7 +227,7 @@ class DiceFaceComponent extends PositionComponent {
   }
 }
 
-class LudoDice extends PositionComponent with TapCallbacks{
+class LudoDice extends PositionComponent with TapCallbacks {
   final double faceSize; // size of the square
   late final double borderRadius; // radius of the curved edges
   late final double innerRectangleWidth; // width of the inner rectangle
@@ -239,9 +239,23 @@ class LudoDice extends PositionComponent with TapCallbacks{
   final Random _random = Random(); // Random number generator
 
   @override
-  void onTapDown(TapDownEvent event) {
+  Future<void> onTapDown(TapDownEvent event) async {
     // Generate a random number between 1 and 6
     int newDiceValue = _random.nextInt(6) + 1;
+
+    // Update the dice value in the DiceFaceComponent
+    diceFace.updateDiceValue(newDiceValue);
+
+    // Apply a rotate effect to the dice when tapped
+    add(
+      RotateEffect.by(
+        tau, // Full 360-degree rotation (2π radians)
+        EffectController(
+          duration: 0.5,
+          curve: Curves.easeInOut,
+        ), // Rotation duration and curve
+      ),
+    );
 
     final world = parent?.parent?.parent?.parent?.parent;
     if (world is World) {
@@ -272,31 +286,24 @@ class LudoDice extends PositionComponent with TapCallbacks{
             .firstWhere((spot) => spot.uniqueId == 'B04');
 
         final targetPosition = Vector2(
-            openPosition.position[0], // Use .x instead of [0]
-            openPosition.position[1]// Use .y instead of [1]
-            );
+            openPosition.absolutePosition[0] - homeSpotB1.absolutePosition[0],
+            openPosition.absolutePosition[1] - homeSpotB1.absolutePosition[1]);
 
         final moveToEffect = MoveToEffect(
           targetPosition,
-          EffectController(duration: 1.0, curve: Curves.easeInOut),
+          EffectController(duration: 0.5, curve: Curves.easeInOut),
         );
 
         tokenB1.add(moveToEffect);
+
+        moveToEffect.onComplete = () {
+          openPosition.add(tokenB1);
+          //  homeSpotB1.remove(tokenB1);
+          tokenB1.position = Vector2(0,0);
+         
+        };
       }
     }
-
-    // Update the dice value in the DiceFaceComponent
-    diceFace.updateDiceValue(newDiceValue);
-
-    // Apply a rotate effect to the dice when tapped
-    add(
-      RotateEffect.by(
-        tau, // Full 360-degree rotation (2π radians)
-        EffectController(
-            duration: 0.5,
-            curve: Curves.easeInOut), // Rotation duration and curve
-      ),
-    );
   }
 
   LudoDice({required this.faceSize}) {
@@ -456,13 +463,14 @@ class Ludo extends FlameGame
   @override
   FutureOr<void> onLoad() async {
     await super.onLoad();
-    world.add(PlayArea());
-    // Now you can set up the camera with the screen size
     camera = CameraComponent.withFixedResolution(
       width: width,
       height: height,
     );
     camera.viewfinder.anchor = Anchor.topLeft;
+    //world.add(camera);
+    world.add(PlayArea());
+    // Now you can set up the camera with the screen size
     world.add(LudoBoard(
         width: width, height: width, position: Vector2(0, height * 0.125)));
     world.add(LowerController(
@@ -485,12 +493,15 @@ class Ludo extends FlameGame
           .whereType<HomeSpot>()
           .firstWhere((spot) => spot.uniqueId == 'B1');
 
+      final spot = homeSpotB1.children.whereType<CircleComponent>().first;
+
       var tokenB1 = Token(
+        uniqueId: 'BT1',
         position: Vector2(homeSpotB1.size.x * 0.10, -homeSpotB1.size.x * 0.30),
         size: Vector2(homeSpotB1.size.x * 0.80, homeSpotB1.size.x * 1.05),
       );
-
       homeSpotB1.add(tokenB1);
+      print(spot.children.toList());
     } else {
       print('LudoBoard does not have children.');
     }
@@ -825,12 +836,14 @@ class StarComponent extends PositionComponent {
 }
 
 class Token extends PositionComponent {
+  final String uniqueId; // New mandatory attribute
   final Paint borderPaint;
   final Paint transparentPaint;
   final Paint fillPaint;
   final Paint dropletFillPaint; // Paint for filling the inside of the droplet
 
   Token({
+    required this.uniqueId, // Add uniqueId to the constructor
     required Vector2 position,
     required Vector2 size,
     Color borderColor = Colors.black,
