@@ -71,6 +71,80 @@ class _GameAppState extends State<GameApp> {
 }
 
 const showId = false;
+const blueTokenPath = [
+  'B04',
+  'B03',
+  'B02',
+  'B01',
+  'B00',
+  'R52',
+  'R42',
+  'R32',
+  'R22',
+  'R12',
+  'R02',
+  'R01',
+  'R00',
+  'R10',
+  'R20',
+  'R30',
+  'R40',
+  'R50',
+  'G05',
+  'G04',
+  'G03',
+  'G02',
+  'G01',
+  'G00',
+  'G10',
+  'G20',
+  'G21',
+  'G22',
+  'G23',
+  'G24',
+  'G25',
+  'Y00',
+  'Y10',
+  'Y20',
+  'Y30',
+  'Y40',
+  'Y50',
+  'Y51',
+  'Y52',
+  'Y42',
+  'Y32',
+  'Y22',
+  'Y12',
+  'Y02',
+  'B20',
+  'B21',
+  'B22',
+  'B23',
+  'B24',
+  'B25',
+  'B15',
+  'B14',
+  'B13',
+  'B12',
+  'B11',
+  'B10',
+];
+
+class GameState {
+  // Private constructor
+  GameState._();
+
+  // Singleton instance
+  static final GameState _instance = GameState._();
+
+  // Global list to hold matched spots
+  List<Map<String, dynamic>> matchedSpots = [];
+
+  // Factory method to access the instance
+  factory GameState() {
+    return _instance;
+  }
+}
 
 class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
   PlayArea() : super(children: [RectangleHitbox()]);
@@ -259,36 +333,38 @@ class LudoDice extends PositionComponent with TapCallbacks {
       ),
     );
 
-    if (newDiceValue == 6) {
-      final world = parent?.parent?.parent?.parent?.parent;
-      if (world is World) {
-        final ludoBoard = world.children.whereType<LudoBoard>().first;
-        final childrenOfLudoBoard = ludoBoard.children.toList();
-        final childrensOfLudoBoard = childrenOfLudoBoard.length;
+    final gameState = GameState();
 
-        if (childrensOfLudoBoard >= 8) {
-          // Get token from Ludo Board
-          final tokenB1 = childrenOfLudoBoard.whereType<Token>().first;
+    final world = parent?.parent?.parent?.parent?.parent;
+    if (world is World) {
+      final ludoBoard = world.children.whereType<LudoBoard>().first;
+      final childrenOfLudoBoard = ludoBoard.children.toList();
+      final childrensOfLudoBoard = childrenOfLudoBoard.length;
 
-          // get location of open position
-          final eigthChild = childrenOfLudoBoard[7];
-          final blueGridComponent =
-              eigthChild.children.whereType<BlueGridComponent>().first;
-          final openPosition = blueGridComponent.children
-              .whereType<UniqueRectangleComponent>()
-              .firstWhere((spot) => spot.uniqueId == 'B04');
+      if (childrensOfLudoBoard >= 8) {
+        // Get token from Ludo Board
+        final tokenB1 = childrenOfLudoBoard.whereType<Token>().first;
 
-          final targetPosition = Vector2(
-              openPosition.absolutePosition.x - ludoBoard.absolutePosition.x,
-              openPosition.absolutePosition.y - ludoBoard.absolutePosition.y);
+        // get location of position
+        final spot = gameState.matchedSpots[newDiceValue];
 
-          final moveToEffect = MoveToEffect(
-            targetPosition,
-            EffectController(duration: 0.5, curve: Curves.easeInOut),
-          );
+        final eigthChild = childrenOfLudoBoard[7];
+        final blueGridComponent =
+            eigthChild.children.whereType<BlueGridComponent>().first;
+        final openPosition = blueGridComponent.children
+            .whereType<UniqueRectangleComponent>()
+            .firstWhere((spot) => spot.uniqueId == 'B04');
 
-          tokenB1.add(moveToEffect);
-        }
+        final targetPosition = Vector2(
+            openPosition.absolutePosition.x - ludoBoard.absolutePosition.x,
+            openPosition.absolutePosition.y - ludoBoard.absolutePosition.y);
+
+        final moveToEffect = MoveToEffect(
+          targetPosition,
+          EffectController(duration: 0.5, curve: Curves.easeInOut),
+        );
+
+        tokenB1.add(moveToEffect);
       }
     }
   }
@@ -467,8 +543,84 @@ class Ludo extends FlameGame
   }
 
   void startGame() {
+    final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
     final childrenOfLudoBoard = ludoBoard.children.toList();
+
+    // get spots of blue grid
+    final eigthChild = childrenOfLudoBoard[7];
+    final blueGridComponent =
+        eigthChild.children.whereType<BlueGridComponent>().first;
+
+    // get spots of red grid
+    final fourthChild = childrenOfLudoBoard[3];
+    final redGridComponent =
+        fourthChild.children.whereType<RedGridComponent>().first;
+
+    // get spots of green grid
+    final secondChild = childrenOfLudoBoard[1];
+    final greenGridComponent =
+        secondChild.children.whereType<GreenGridComponent>().first;
+
+    // get spots of yellow grid
+    final sixthChild = childrenOfLudoBoard[5];
+    final yellowGridComponent =
+        sixthChild.children.whereType<YellowGridComponent>().first;
+
+    for (var block in blueTokenPath) {
+      final matchingBlueSpots = blueGridComponent.children
+          .whereType<UniqueRectangleComponent>()
+          .where((spot) => spot.uniqueId == block)
+          .toList();
+
+      final matchingRedSpots = redGridComponent.children
+          .whereType<UniqueRectangleComponent>()
+          .where((spot) => spot.uniqueId == block)
+          .toList();
+
+      final matchingGreenSpots = greenGridComponent.children
+          .whereType<UniqueRectangleComponent>()
+          .where((spot) => spot.uniqueId == block)
+          .toList();
+
+      final matchingYellowSpots = yellowGridComponent.children
+          .whereType<UniqueRectangleComponent>()
+          .where((spot) => spot.uniqueId == block)
+          .toList();
+
+      if (matchingRedSpots.isNotEmpty) {
+        final spot = matchingRedSpots.first;
+        gameState.matchedSpots.add({
+          'uniqueId': spot.uniqueId,
+          'position': spot.position,
+        });
+      }
+
+      if (matchingBlueSpots.isNotEmpty) {
+        final spot = matchingBlueSpots.first;
+        gameState.matchedSpots.add({
+          'uniqueId': spot.uniqueId,
+          'position': spot.position,
+        });
+      }
+
+      if (matchingGreenSpots.isNotEmpty) {
+        final spot = matchingGreenSpots.first;
+        gameState.matchedSpots.add({
+          'uniqueId': spot.uniqueId,
+          'position': spot.position,
+        });
+      }
+
+      if (matchingYellowSpots.isNotEmpty) {
+        final spot = matchingYellowSpots.first;
+        gameState.matchedSpots.add({
+          'uniqueId': spot.uniqueId,
+          'position': spot.position,
+        });
+      }
+    }
+
     if (childrenOfLudoBoard.length >= 7) {
       final seventhChild = childrenOfLudoBoard[6];
       final home = seventhChild.children.toList();
@@ -936,51 +1088,52 @@ class GreenGridComponent extends PositionComponent {
         // Create the unique ID for this block
         String uniqueId = 'G$col$row';
 
-        var rectangle = RectangleComponent(
-            // position based on column and row
-            position: Vector2(
-                col * (size.x + columnSpacing), row * (size.y + spacing)),
-            size: size,
-            paint: Paint()..color = color,
-            children: [
-              // Border Rectangle
-              RectangleComponent(
-                  size: size,
-                  paint: Paint()
-                    ..color = Colors.transparent // Keep interior transparent
-                    ..style = PaintingStyle.stroke // Set style to stroke
-                    ..strokeWidth = 0.6 // Set border width
-                    ..color = Colors.black, // Set border color to black
-                  children: [
-                    if (col == 0 && row == 2)
-                      StarComponent(
-                          size: size,
-                          innerRadius: size.x * 0.24,
-                          outerRadius: size.x * 0.48),
-                    if (col == 1 && row == 0)
-                      ArrowIconComponent(
-                        icon: Icons.south,
-                        size: size.x * 0.90,
-                        position: Vector2(size.x * 0.05,
-                            size.x * 0.05), // Font size of the arrow
-                        borderColor: Colors.green, // Color of the arrow
+        var rectangle = UniqueRectangleComponent(
+          uniqueId: uniqueId,
+          position:
+              Vector2(col * (size.x + columnSpacing), row * (size.x + spacing)),
+          size: size,
+          paint: Paint()..color = color,
+          children: [
+            // Border Rectangle
+            RectangleComponent(
+              size: size,
+              paint: Paint()
+                ..color = Colors.transparent // Keep interior transparent
+                ..style = PaintingStyle.stroke // Set style to stroke
+                ..strokeWidth = 0.6 // Set border width
+                ..color = Colors.black, // Set border color to black
+              children: [
+                if (col == 0 && row == 2)
+                  StarComponent(
+                    size: size,
+                    innerRadius: size.x * 0.24,
+                    outerRadius: size.x * 0.48,
+                  ),
+                if (col == 1 && row == 0)
+                  ArrowIconComponent(
+                    icon: Icons.south,
+                    size: size.x * 0.90,
+                    position: Vector2(size.x * 0.05, size.x * 0.05),
+                    borderColor: Colors.green,
+                  ),
+                // Add the unique ID as a text label at the center
+                if (showId)
+                  TextComponent(
+                    text: uniqueId,
+                    position: Vector2(size.x / 2, size.y / 2),
+                    anchor: Anchor.center,
+                    textRenderer: TextPaint(
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: size.x * 0.4, // Adjust font size as needed
                       ),
-                    // Add the unique ID as a text label at the center
-                    if (showId)
-                      TextComponent(
-                        text: uniqueId,
-                        position: Vector2(size.x / 2, size.y / 2),
-                        anchor: Anchor.center,
-                        textRenderer: TextPaint(
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize:
-                                size.x * 0.4, // Adjust font size as needed
-                          ),
-                        ),
-                      ),
-                  ])
-            ]);
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        );
         add(rectangle);
       }
     }
@@ -1246,50 +1399,52 @@ class YellowGridComponent extends PositionComponent {
         // Create the unique ID for this block
         String uniqueId = 'Y$col$row';
 
-        var rectangle = RectangleComponent(
-            position: Vector2(
-                col * (size.x + columnSpacing), row * (size.y + spacing)),
-            size: size,
-            paint: Paint()..color = color,
-            children: [
-              // Border Rectangle
-              RectangleComponent(
-                  size: size,
-                  paint: Paint()
-                    ..color = Colors.transparent // Keep interior transparent
-                    ..style = PaintingStyle.stroke // Set style to stroke
-                    ..strokeWidth = 0.6 // Set border width
-                    ..color = Colors.black, // Set border color to black
-                  children: [
-                    if (row == 0 && col == 3)
-                      StarComponent(
-                          size: size,
-                          innerRadius: size.x * 0.24,
-                          outerRadius: size.x * 0.48),
-                    if (col == 5 && row == 1)
-                      ArrowIconComponent(
-                        icon: Icons.west,
-                        size: size.x * 0.90,
-                        position: Vector2(size.x * 0.05,
-                            size.x * 0.05), // Font size of the arrow
-                        borderColor: Colors.yellow, // Color of the arrow
+        var rectangle = UniqueRectangleComponent(
+          uniqueId: uniqueId,
+          position:
+              Vector2(col * (size.x + columnSpacing), row * (size.y + spacing)),
+          size: size,
+          paint: Paint()..color = color,
+          children: [
+            // Border Rectangle
+            RectangleComponent(
+              size: size,
+              paint: Paint()
+                ..color = Colors.transparent // Keep interior transparent
+                ..style = PaintingStyle.stroke // Set style to stroke
+                ..strokeWidth = 0.6 // Set border width
+                ..color = Colors.black, // Set border color to black
+              children: [
+                if (row == 0 && col == 3)
+                  StarComponent(
+                    size: size,
+                    innerRadius: size.x * 0.24,
+                    outerRadius: size.x * 0.48,
+                  ),
+                if (col == 5 && row == 1)
+                  ArrowIconComponent(
+                    icon: Icons.west,
+                    size: size.x * 0.90,
+                    position: Vector2(size.x * 0.05, size.x * 0.05),
+                    borderColor: Colors.yellow,
+                  ),
+                // Add the unique ID as a text label at the center
+                if (showId)
+                  TextComponent(
+                    text: uniqueId,
+                    position: Vector2(size.x / 2, size.y / 2),
+                    anchor: Anchor.center,
+                    textRenderer: TextPaint(
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: size.x * 0.4, // Adjust font size as needed
                       ),
-                    // Add the unique ID as a text label at the center
-                    if (showId)
-                      TextComponent(
-                        text: uniqueId,
-                        position: Vector2(size.x / 2, size.y / 2),
-                        anchor: Anchor.center,
-                        textRenderer: TextPaint(
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize:
-                                size.x * 0.4, // Adjust font size as needed
-                          ),
-                        ),
-                      ),
-                  ])
-            ]);
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        );
         add(rectangle);
       }
     }
