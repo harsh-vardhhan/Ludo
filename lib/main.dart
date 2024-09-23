@@ -23,17 +23,74 @@ class GameApp extends StatefulWidget {
 }
 
 class _GameAppState extends State<GameApp> {
-  late final Ludo game;
+  late Ludo game;
+  int? selectedPlayerCount;
 
   @override
   void initState() {
     super.initState();
-    game = Ludo();
+    // Don't initialize the game yet; wait for player selection
+  }
+
+  void startGame(int playerCount) {
+    setState(() {
+      selectedPlayerCount = playerCount;
+      game = Ludo(); // Initialize the game with the selected player count
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+
+    // If the player count hasn't been selected, show the menu
+    if (selectedPlayerCount == null) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xff98DED9),
+                  Color(0xffFFFFFF),
+                ],
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Select Number of Players',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => startGame(2),
+                    child: Text('2 Players'),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () => startGame(3),
+                    child: Text('3 Players'),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () => startGame(4),
+                    child: Text('4 Players'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If the player count is selected, display the game
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -69,6 +126,7 @@ class _GameAppState extends State<GameApp> {
     );
   }
 }
+
 
 const showId = false;
 const blueTokenPath = [
