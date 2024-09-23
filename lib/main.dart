@@ -360,8 +360,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
                 (tokenData) => tokenData['uniqueId'] == token['position']);
 
             final targetPosition = Vector2(
-                spot['position'][0] - ludoBoard.absolutePosition.x,
-                spot['position'][1] - ludoBoard.absolutePosition.y);
+                spot['position'][0] + (tokenB1.size.x * 0.10) - ludoBoard.absolutePosition.x,
+                spot['position'][1] - (tokenB1.size.x * 0.50) - ludoBoard.absolutePosition.y);
 
             final moveToEffect = MoveToEffect(
               targetPosition,
@@ -375,7 +375,18 @@ class LudoDice extends PositionComponent with TapCallbacks {
             final spotIndex = gameState.matchedSpots.indexWhere(
                 (tokenData) => tokenData['uniqueId'] == token['position']);
 
+            Future<void> _applyEffect(
+                PositionComponent component, Effect effect) {
+              final completer = Completer<void>();
+              effect.onComplete = completer.complete;
+              component.add(effect);
+              return completer.future;
+            }
+
             Future<void> moveToken() async {
+              // Store the original size of the token to ensure it doesn't gradually shrink
+              final originalSize = tokenB1.size.clone();
+
               for (int spot = 1; spot <= newDiceValue; spot++) {
                 final newSpotIndex = spotIndex + spot;
 
@@ -387,18 +398,43 @@ class LudoDice extends PositionComponent with TapCallbacks {
                 final x = gameState.matchedSpots[newSpotIndex]['position'][0];
                 final y = gameState.matchedSpots[newSpotIndex]['position'][1];
 
-                final targetPosition = Vector2(x - ludoBoard.absolutePosition.x,
-                    y - ludoBoard.absolutePosition.y);
-
-                final moveToEffect = MoveToEffect(
-                  targetPosition,
-                  EffectController(duration: 0.4, curve: Curves.easeInOut),
+                final targetPosition = Vector2(
+                  x + (tokenB1.size.x * 0.10) - ludoBoard.absolutePosition.x,
+                  y - (tokenB1.size.x * 0.50) - ludoBoard.absolutePosition.y,
                 );
 
-                tokenB1.add(moveToEffect);
+                // Create an async effect for increasing the size
+                await _applyEffect(
+                  tokenB1,
+                  SizeEffect.to(
+                    Vector2(
+                        originalSize.x * 1.10,
+                        originalSize.y *
+                            1.10), // Increase by 10% of original size
+                    EffectController(duration: 0.05),
+                  ),
+                );
 
-                // Add 1-second delay before moving to the next spot
-                await Future.delayed(Duration(milliseconds: 600));
+                // Move to the new position
+                await _applyEffect(
+                  tokenB1,
+                  MoveToEffect(
+                    targetPosition,
+                    EffectController(duration: 0.1, curve: Curves.easeInOut),
+                  ),
+                );
+
+                // Decrease the size back to original size
+                await _applyEffect(
+                  tokenB1,
+                  SizeEffect.to(
+                    originalSize, // Restore to original size
+                    EffectController(duration: 0.05),
+                  ),
+                );
+
+                // Add a delay before moving to the next spot
+                await Future.delayed(Duration(milliseconds: 500));
               }
               gameState.enableBlueDice = true;
             }
@@ -686,8 +722,8 @@ class Ludo extends FlameGame
             var newToken = Token(
               uniqueId: 'BT1',
               position: Vector2(
-                  homeSpot.absolutePosition.x - ludoBoard.absolutePosition.x,
-                  homeSpot.absolutePosition.y - ludoBoard.absolutePosition.y),
+                  homeSpot.absolutePosition.x + (homeSpot.size.x * 0.10) - ludoBoard.absolutePosition.x,
+                  homeSpot.absolutePosition.y - (homeSpot.size.x * 0.50) - ludoBoard.absolutePosition.y),
               size: Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05),
             );
             ludoBoard.add(newToken);
