@@ -142,6 +142,8 @@ class GameState {
 
   List<Map<String, dynamic>> tokenSpots = [];
 
+  var enableBlueDice = true;
+
   // Factory method to access the instance
   factory GameState() {
     return _instance;
@@ -318,76 +320,91 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
-    // Generate a random number between 1 and 6
-    int newDiceValue = _random.nextInt(6) + 1;
-
-    // Update the dice value in the DiceFaceComponent
-    diceFace.updateDiceValue(newDiceValue);
-
-    // Apply a rotate effect to the dice when tapped
-    add(
-      RotateEffect.by(
-        tau, // Full 360-degree rotation (2π radians)
-        EffectController(
-          duration: 0.5,
-          curve: Curves.easeInOut,
-        ), // Rotation duration and curve
-      ),
-    );
-
     final gameState = GameState();
 
-    final world = parent?.parent?.parent?.parent?.parent;
-    if (world is World) {
-      final ludoBoard = world.children.whereType<LudoBoard>().first;
-      final childrenOfLudoBoard = ludoBoard.children.toList();
-      final childrensOfLudoBoard = childrenOfLudoBoard.length;
+    if (gameState.enableBlueDice) {
+      // Generate a random number between 1 and 6
+      int newDiceValue = _random.nextInt(6) + 1;
 
-      // get token from game state
-      final token = gameState.tokenSpots
-          .firstWhere((tokenData) => tokenData['uniqueId'] == 'BT1');
+      // Update the dice value in the DiceFaceComponent
+      diceFace.updateDiceValue(newDiceValue);
 
-      if (childrensOfLudoBoard >= 8) {
-        // Get token from Ludo Board
-        final tokenB1 = childrenOfLudoBoard.whereType<Token>().first;
+      // Apply a rotate effect to the dice when tapped
+      add(
+        RotateEffect.by(
+          tau, // Full 360-degree rotation (2π radians)
+          EffectController(
+            duration: 0.5,
+            curve: Curves.easeInOut,
+          ), // Rotation duration and curve
+        ),
+      );
+      final world = parent?.parent?.parent?.parent?.parent;
+      if (world is World) {
+        final ludoBoard = world.children.whereType<LudoBoard>().first;
+        final childrenOfLudoBoard = ludoBoard.children.toList();
+        final childrensOfLudoBoard = childrenOfLudoBoard.length;
 
-        // opening position
-        if (token['position'] == '' && newDiceValue == 6) {
-          token['position'] = 'B04';
-          final spot = gameState.matchedSpots.firstWhere(
-              (tokenData) => tokenData['uniqueId'] == token['position']);
+        // get token from game state
+        final token = gameState.tokenSpots
+            .firstWhere((tokenData) => tokenData['uniqueId'] == 'BT1');
 
-          final targetPosition = Vector2(
-              spot['position'][0] - ludoBoard.absolutePosition.x,
-              spot['position'][1] - ludoBoard.absolutePosition.y);
+        if (childrensOfLudoBoard >= 8) {
+          // Get token from Ludo Board
+          final tokenB1 = childrenOfLudoBoard.whereType<Token>().first;
 
-          final moveToEffect = MoveToEffect(
-            targetPosition,
-            EffectController(duration: 0.5, curve: Curves.easeInOut),
-          );
+          // opening position
+          if (token['position'] == '' && newDiceValue == 6) {
+            token['position'] = 'B04';
+            final spot = gameState.matchedSpots.firstWhere(
+                (tokenData) => tokenData['uniqueId'] == token['position']);
 
-          tokenB1.add(moveToEffect);
-        } else if (token['position'] != '') {
-          // any other position
-          final spotIndex = gameState.matchedSpots.indexWhere(
-              (tokenData) => tokenData['uniqueId'] == token['position']);
-          final newSpotIndex = spotIndex + newDiceValue;
-          // update token game state
-          token['position'] = gameState.matchedSpots[newSpotIndex]['uniqueId'];
+            final targetPosition = Vector2(
+                spot['position'][0] - ludoBoard.absolutePosition.x,
+                spot['position'][1] - ludoBoard.absolutePosition.y);
 
-          // update visual
-          final x = gameState.matchedSpots[newSpotIndex]['position'][0];
-          final y = gameState.matchedSpots[newSpotIndex]['position'][1];
+            final moveToEffect = MoveToEffect(
+              targetPosition,
+              EffectController(duration: 0.5, curve: Curves.easeInOut),
+            );
 
-          final targetPosition = Vector2(x - ludoBoard.absolutePosition.x,
-              y - ludoBoard.absolutePosition.y);
+            tokenB1.add(moveToEffect);
+          } else if (token['position'] != '') {
+            gameState.enableBlueDice = false;
+            // any other position
+            final spotIndex = gameState.matchedSpots.indexWhere(
+                (tokenData) => tokenData['uniqueId'] == token['position']);
 
-          final moveToEffect = MoveToEffect(
-            targetPosition,
-            EffectController(duration: 0.5, curve: Curves.easeInOut),
-          );
+            Future<void> moveToken() async {
+              for (int spot = 1; spot <= newDiceValue; spot++) {
+                final newSpotIndex = spotIndex + spot;
 
-          tokenB1.add(moveToEffect);
+                // Update token game state
+                token['position'] =
+                    gameState.matchedSpots[newSpotIndex]['uniqueId'];
+
+                // Update visual
+                final x = gameState.matchedSpots[newSpotIndex]['position'][0];
+                final y = gameState.matchedSpots[newSpotIndex]['position'][1];
+
+                final targetPosition = Vector2(x - ludoBoard.absolutePosition.x,
+                    y - ludoBoard.absolutePosition.y);
+
+                final moveToEffect = MoveToEffect(
+                  targetPosition,
+                  EffectController(duration: 0.4, curve: Curves.easeInOut),
+                );
+
+                tokenB1.add(moveToEffect);
+
+                // Add 1-second delay before moving to the next spot
+                await Future.delayed(Duration(milliseconds: 600));
+              }
+              gameState.enableBlueDice = true;
+            }
+
+            moveToken();
+          }
         }
       }
     }
@@ -1328,9 +1345,9 @@ class ArrowIconComponent extends PositionComponent {
 }
 
 class RedGridComponent extends PositionComponent {
-
   RedGridComponent({
-    required double size, // Allows toggling the visibility of the unique ID labels
+    required double
+        size, // Allows toggling the visibility of the unique ID labels
   }) : super(
           size: Vector2.all(size),
         ) {
@@ -1358,8 +1375,8 @@ class RedGridComponent extends PositionComponent {
 
         var rectangle = UniqueRectangleComponent(
           uniqueId: uniqueId,
-          position: Vector2(
-              col * (size.x + columnSpacing), row * (size.x + spacing)),
+          position:
+              Vector2(col * (size.x + columnSpacing), row * (size.x + spacing)),
           size: Vector2.all(size.x), // Adjusting size to size.x
           paint: Paint()..color = color,
           children: [
@@ -1407,7 +1424,6 @@ class RedGridComponent extends PositionComponent {
     }
   }
 }
-
 
 class YellowGridComponent extends PositionComponent {
   YellowGridComponent({
