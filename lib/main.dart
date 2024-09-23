@@ -32,10 +32,12 @@ class _GameAppState extends State<GameApp> {
     // Don't initialize the game yet; wait for player selection
   }
 
-  void startGame(int playerCount) {
+  void startGame(int? playerCount) {
     setState(() {
-      selectedPlayerCount = playerCount;
-      game = Ludo(); // Initialize the game with the selected player count
+      if (playerCount != null) {
+        selectedPlayerCount = playerCount;
+        game = Ludo(selectedPlayerCount!); // Use the non-nullable value
+      }
     });
   }
 
@@ -126,7 +128,6 @@ class _GameAppState extends State<GameApp> {
     );
   }
 }
-
 
 const showId = false;
 const blueTokenPath = [
@@ -418,8 +419,12 @@ class LudoDice extends PositionComponent with TapCallbacks {
                 (tokenData) => tokenData['uniqueId'] == token['position']);
 
             final targetPosition = Vector2(
-                spot['position'][0] + (tokenB1.size.x * 0.10) - ludoBoard.absolutePosition.x,
-                spot['position'][1] - (tokenB1.size.x * 0.50) - ludoBoard.absolutePosition.y);
+                spot['position'][0] +
+                    (tokenB1.size.x * 0.10) -
+                    ludoBoard.absolutePosition.x,
+                spot['position'][1] -
+                    (tokenB1.size.x * 0.50) -
+                    ludoBoard.absolutePosition.y);
 
             final moveToEffect = MoveToEffect(
               targetPosition,
@@ -652,7 +657,11 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
 
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
-  Ludo();
+  int playerCount;
+
+  Ludo(this.playerCount) {
+    print(this.playerCount);
+  }
 
   final rand = Random();
   double get width => size.x;
@@ -762,7 +771,12 @@ class Ludo extends FlameGame
       'position': '',
     });
 
-    // get home spots
+    gameState.tokenSpots.add({
+      'uniqueId': 'BT2',
+      'position': '',
+    });
+
+    // get blue home spots
     final seventhChild = childrenOfLudoBoard[6];
     final home = seventhChild.children.toList();
     final homePlate = home[0].children.toList();
@@ -770,22 +784,40 @@ class Ludo extends FlameGame
     final homeSpotList = homeSpotContainer[1].children.toList();
 
     if (childrenOfLudoBoard.length >= 7) {
+      // Create a mapping between token IDs and homeSpot IDs
+      final tokenToHomeSpotMap = {
+        'BT1': 'B1',
+        'BT2': 'B2',
+        // Add other mappings if needed
+      };
+
       for (var token in gameState.tokenSpots) {
         final noToken = childrenOfLudoBoard.whereType<Token>().isEmpty;
-        if (noToken) {
-          if (token['uniqueId'] == 'BT1') {
-            final homeSpot = homeSpotList
-                .whereType<HomeSpot>()
-                .firstWhere((spot) => spot.uniqueId == 'B1');
-            var newToken = Token(
-              uniqueId: 'BT1',
-              position: Vector2(
-                  homeSpot.absolutePosition.x + (homeSpot.size.x * 0.10) - ludoBoard.absolutePosition.x,
-                  homeSpot.absolutePosition.y - (homeSpot.size.x * 0.50) - ludoBoard.absolutePosition.y),
-              size: Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05),
-            );
-            ludoBoard.add(newToken);
-          }
+
+        if (noToken && tokenToHomeSpotMap.containsKey(token['uniqueId'])) {
+          final homeSpotId = tokenToHomeSpotMap[token['uniqueId']];
+
+          // Find the corresponding homeSpot
+          final homeSpot = homeSpotList
+              .whereType<HomeSpot>()
+              .firstWhere((spot) => spot.uniqueId == homeSpotId);
+
+          // Create a new token
+          var newToken = Token(
+            uniqueId: token['uniqueId'],
+            position: Vector2(
+              homeSpot.absolutePosition.x +
+                  (homeSpot.size.x * 0.10) -
+                  ludoBoard.absolutePosition.x,
+              homeSpot.absolutePosition.y -
+                  (homeSpot.size.x * 0.50) -
+                  ludoBoard.absolutePosition.y,
+            ),
+            size: Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05),
+          );
+
+          // Add the new token to the board
+          ludoBoard.add(newToken);
         }
       }
     } else {
