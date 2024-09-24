@@ -204,6 +204,7 @@ class GameState {
 
   var enableBlueDice = true;
   var enableBlueToken = false;
+  var diceNumber = 5;
 
   // Factory method to access the instance
   factory GameState() {
@@ -387,6 +388,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
       // Generate a random number between 1 and 6
       int newDiceValue = _random.nextInt(6) + 1;
 
+      gameState.diceNumber = newDiceValue;
+
       // Update the dice value in the DiceFaceComponent
       diceFace.updateDiceValue(newDiceValue);
 
@@ -400,30 +403,30 @@ class LudoDice extends PositionComponent with TapCallbacks {
           ), // Rotation duration and curve
         ),
       );
+
       final world = parent?.parent?.parent?.parent?.parent;
       if (world is World) {
         final ludoBoard = world.children.whereType<LudoBoard>().first;
         final childrenOfLudoBoard = ludoBoard.children.toList();
-        final childrensOfLudoBoard = childrenOfLudoBoard.length;
 
-        // get token from game state
-        final token = gameState.tokenSpots
-            .firstWhere((tokenData) => tokenData['uniqueId'] == 'BT1');
-
-        if (childrensOfLudoBoard >= 8) {
+        if (childrenOfLudoBoard.isNotEmpty) {
           final numberOfTokens = childrenOfLudoBoard.whereType<Token>().length;
           if (numberOfTokens > 1) {
             // Get token from Ludo Board
-            final tokens = childrenOfLudoBoard.whereType<Token>().iterator;
             gameState.enableBlueToken = true;
-            while (tokens.moveNext()) {
-              final token = tokens.current;
-              print(token.uniqueId);
-            }
           } else {
-            final tokenB1 = childrenOfLudoBoard.whereType<Token>().first;
+            // if only one token on board
+            // token UI data
+            final tokenB = childrenOfLudoBoard.whereType<Token>().firstWhere(
+                (token) => token.uniqueId.startsWith('B'),
+                orElse: () => Token(
+                    uniqueId: 'default',
+                    position: Vector2.zero(),
+                    size: Vector2.zero()) // Default token
+                );
 
             // opening position
+            final token = gameState.tokenSpots.first; // check token state data
             if (token['position'] == '' && newDiceValue == 6) {
               token['position'] = 'B04';
               final spot = gameState.matchedSpots.firstWhere(
@@ -431,10 +434,10 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
               final targetPosition = Vector2(
                   spot['position'][0] +
-                      (tokenB1.size.x * 0.10) -
+                      (tokenB.size.x * 0.10) -
                       ludoBoard.absolutePosition.x,
                   spot['position'][1] -
-                      (tokenB1.size.x * 0.50) -
+                      (tokenB.size.x * 0.50) -
                       ludoBoard.absolutePosition.y);
 
               final moveToEffect = MoveToEffect(
@@ -442,12 +445,13 @@ class LudoDice extends PositionComponent with TapCallbacks {
                 EffectController(duration: 0.5, curve: Curves.easeInOut),
               );
 
-              tokenB1.add(moveToEffect);
+              tokenB.add(moveToEffect);
             } else if (token['position'] != '') {
+              // moving  position
               gameState.enableBlueDice = false;
-              // any other position
               final spotIndex = gameState.matchedSpots.indexWhere(
                   (tokenData) => tokenData['uniqueId'] == token['position']);
+
               Future<void> _applyEffect(
                   PositionComponent component, Effect effect) {
                 final completer = Completer<void>();
@@ -456,9 +460,10 @@ class LudoDice extends PositionComponent with TapCallbacks {
                 return completer.future;
               }
 
+              // moving token position mechanism
               Future<void> moveToken() async {
                 // Store the original size of the token to ensure it doesn't gradually shrink
-                final originalSize = tokenB1.size.clone();
+                final originalSize = tokenB.size.clone();
                 for (int spot = 1; spot <= newDiceValue; spot++) {
                   final newSpotIndex = spotIndex + spot;
                   // Update token game state
@@ -469,12 +474,12 @@ class LudoDice extends PositionComponent with TapCallbacks {
                   final y = gameState.matchedSpots[newSpotIndex]['position'][1];
 
                   final targetPosition = Vector2(
-                    x + (tokenB1.size.x * 0.10) - ludoBoard.absolutePosition.x,
-                    y - (tokenB1.size.x * 0.50) - ludoBoard.absolutePosition.y,
+                    x + (tokenB.size.x * 0.10) - ludoBoard.absolutePosition.x,
+                    y - (tokenB.size.x * 0.50) - ludoBoard.absolutePosition.y,
                   );
                   // Create an async effect for increasing the size
                   await _applyEffect(
-                    tokenB1,
+                    tokenB,
                     SizeEffect.to(
                       Vector2(
                           originalSize.x * 1.10,
@@ -485,7 +490,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
                   );
                   // Move to the new position
                   await _applyEffect(
-                    tokenB1,
+                    tokenB,
                     MoveToEffect(
                       targetPosition,
                       EffectController(duration: 0.1, curve: Curves.easeInOut),
@@ -493,7 +498,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
                   );
                   // Decrease the size back to original size
                   await _applyEffect(
-                    tokenB1,
+                    tokenB,
                     SizeEffect.to(
                       originalSize, // Restore to original size
                       EffectController(duration: 0.05),
@@ -1191,12 +1196,9 @@ class Token extends PositionComponent with TapCallbacks {
   Future<void> onTapDown(TapDownEvent event) async {
     final gameState = GameState();
     if (gameState.enableBlueToken) {
-      // update token data to path
-      final token = gameState.tokenSpots
-          .firstWhere((tokenData) => tokenData['uniqueId'] == this.uniqueId);
-      token['position'] = 'B04';
+      // token opening destination
       final spot = gameState.matchedSpots.firstWhere(
-          (tokenData) => tokenData['uniqueId'] == token['position']);
+          (tokenData) => tokenData['uniqueId'] == 'B04');
 
       // update token UI
       if (parent is LudoBoard) {
@@ -1204,30 +1206,37 @@ class Token extends PositionComponent with TapCallbacks {
         final childrenOfLudoBoard = ludoBoard?.children?.toList() ?? [];
 
         // Using firstWhereOrNull from collection package to return null if no match found
-        final Token? tokenB1 = childrenOfLudoBoard
+        final Token? tokenB = childrenOfLudoBoard
             .whereType<Token>()
             .firstWhereOrNull(
                 (tokenData) => tokenData.uniqueId == this.uniqueId);
 
-        if (tokenB1 != null) {
-          final targetPosition = Vector2(
-            spot['position'][0] +
-                (tokenB1.size.x * 0.10) -
-                ludoBoard.absolutePosition.x,
-            spot['position'][1] -
-                (tokenB1.size.x * 0.50) -
-                ludoBoard.absolutePosition.y,
-          );
+        // opening position
+        final token = gameState.tokenSpots.first; // check token state data
+        if (token['position'] == '' && gameState.diceNumber == 6) {
+          token['position'] = 'B04';
 
-          final moveToEffect = MoveToEffect(
-            targetPosition,
-            EffectController(duration: 0.5, curve: Curves.easeInOut),
-          );
+          if (tokenB != null) {
+            final targetPosition = Vector2(
+              spot['position'][0] +
+                  (tokenB.size.x * 0.10) -
+                  ludoBoard.absolutePosition.x,
+              spot['position'][1] -
+                  (tokenB.size.x * 0.50) -
+                  ludoBoard.absolutePosition.y,
+            );
 
-          tokenB1.add(moveToEffect);
-        } else {
-          print('Token not found');
-        }
+            final moveToEffect = MoveToEffect(
+              targetPosition,
+              EffectController(duration: 0.5, curve: Curves.easeInOut),
+            );
+
+            tokenB.add(moveToEffect);
+            gameState.enableBlueToken = false;
+          } else {
+            print('Token not found');
+          }
+        } else if (token['position'] != '') {}
       }
     }
   }
