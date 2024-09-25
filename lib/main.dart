@@ -404,6 +404,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
       List<Token> allBlueTokens = TokenManager().getBlueTokens();
       List<Token> openBlueTokens = TokenManager().getOpenBlueTokens();
+      List<Spot> allSpots = SpotManager().getSpots();
 
       final world = parent?.parent?.parent?.parent?.parent;
 
@@ -415,11 +416,9 @@ class LudoDice extends PositionComponent with TapCallbacks {
             // first open position
             final token = allBlueTokens.first;
             token.positionId = blueTokenPath.first;
-            
-            List<Spot> allSpots = SpotManager().getSpots();
-            
-            Spot? spotB04 =
-                allSpots.firstWhere((spot) => spot.uniqueId == blueTokenPath.first);
+
+            Spot? spotB04 = allSpots
+                .firstWhere((spot) => spot.uniqueId == blueTokenPath.first);
             if (spotB04 != null) {
               final targetPosition = Vector2(
                 spotB04.absolutePosition.x +
@@ -437,10 +436,55 @@ class LudoDice extends PositionComponent with TapCallbacks {
             }
           }
         } else {
+          // non six dice number
           if (openBlueTokens.length == 1) {
             // moving position for single open token
+            final token = openBlueTokens.first;
+            final currentIndex = blueTokenPath.indexOf(token.positionId);
+            final finalIndex = currentIndex + gameState.diceNumber;
+            final originalSize = token.size.clone();
 
-            
+            for (int i = currentIndex; i <= finalIndex; i++) {
+              if (i < blueTokenPath.length) {
+                String positionId = blueTokenPath[i];
+                token.positionId = positionId;
+                final spot =
+                    allSpots.firstWhere((spot) => spot.uniqueId == positionId);
+                final targetPosition = Vector2(
+                  spot.absolutePosition.x +
+                      (token.size.x * 0.10) -
+                      ludoBoard.absolutePosition.x,
+                  spot.absolutePosition.y -
+                      (token.size.x * 0.50) -
+                      ludoBoard.absolutePosition.y,
+                );
+                await _applyEffect(
+                  token,
+                  SizeEffect.to(
+                    Vector2(
+                        originalSize.x * 1.10,
+                        originalSize.y *
+                            1.10), // Increase by 10% of original size
+                    EffectController(duration: 0.05),
+                  ),
+                );
+                await _applyEffect(
+                  token,
+                  MoveToEffect(
+                    targetPosition,
+                    EffectController(duration: 0.1, curve: Curves.easeInOut),
+                  ),
+                );
+                await _applyEffect(
+                  token,
+                  SizeEffect.to(
+                    originalSize, // Restore to original size
+                    EffectController(duration: 0.05),
+                  ),
+                );
+                await Future.delayed(Duration(milliseconds: 500));
+              }
+            }
           }
         }
       }
@@ -481,6 +525,13 @@ class LudoDice extends PositionComponent with TapCallbacks {
       }
       */
     }
+  }
+
+  Future<void> _applyEffect(PositionComponent component, Effect effect) {
+    final completer = Completer<void>();
+    effect.onComplete = completer.complete;
+    component.add(effect);
+    return completer.future;
   }
 
   /*
