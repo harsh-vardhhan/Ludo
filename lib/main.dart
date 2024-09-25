@@ -417,7 +417,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   Future<void> onTapDown(TapDownEvent event) async {
     final gameState = GameState();
 
-    if (gameState.enableBlueDice) {
+    if (gameState.enableBlueDice && !gameState.enableBlueToken) {
       // Generate a random number between 1 and 6
       int newDiceValue = _random.nextInt(6) + 1;
 
@@ -452,7 +452,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
             openToken(token, blueTokenPath, allSpots, ludoBoard);
           } else {
             // dice number is 6 and open token exists
-            if (openBlueTokens.length == 1 && closeBlueTokens.isEmpty) {
+            if (openBlueTokens.singleOrNull != null &&
+                closeBlueTokens.isEmpty) {
               final token = openBlueTokens.first;
               await moveToken(
                 token: token,
@@ -461,15 +462,16 @@ class LudoDice extends PositionComponent with TapCallbacks {
                 diceNumber: gameState.diceNumber,
                 ludoBoard: ludoBoard,
               );
-            } else if (openBlueTokens.length == 1 &&
+            } else if (openBlueTokens.singleOrNull != null &&
                 closeBlueTokens.isNotEmpty) {
-              print("openBlueTokens.length == 1 && closeBlueTokens.isNotEmpty");
+              gameState.enableBlueToken = true;
+            } else if (openBlueTokens.isNotEmpty) {
               gameState.enableBlueToken = true;
             }
           }
         } else {
           // non six dice number
-          if (openBlueTokens.length == 1) {
+          if (openBlueTokens.singleOrNull != null) {
             // moving position for single open token
             final token = openBlueTokens.first;
 
@@ -480,6 +482,9 @@ class LudoDice extends PositionComponent with TapCallbacks {
               diceNumber: gameState.diceNumber,
               ludoBoard: ludoBoard,
             );
+          } else {
+            // multiple open position
+            gameState.enableBlueToken = true;
           }
         }
       }
@@ -1086,6 +1091,8 @@ Future<void> moveToken({
   required PositionComponent
       ludoBoard, // Ensure ludoBoard is a PositionComponent
 }) async {
+  final gameState = GameState();
+  gameState.enableBlueDice = false;
   // Get the current and final index
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
@@ -1148,6 +1155,7 @@ Future<void> moveToken({
       await Future.delayed(Duration(milliseconds: 500));
     }
   }
+  gameState.enableBlueDice = true;
 }
 
 class Token extends PositionComponent with TapCallbacks {
@@ -1202,9 +1210,11 @@ class Token extends PositionComponent with TapCallbacks {
               ludoBoard: ludoBoard);
           gameState.enableBlueToken = false;
         } else {
-          // opening position
-          openToken(token, blueTokenPath, allSpots, ludoBoard);
-          gameState.enableBlueToken = false;
+          if (gameState.diceNumber == 6) {
+            // opening position
+            openToken(token, blueTokenPath, allSpots, ludoBoard);
+            gameState.enableBlueToken = false;
+          }
         }
       }
     }
