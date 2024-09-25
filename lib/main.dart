@@ -198,9 +198,9 @@ class GameState {
   static final GameState _instance = GameState._();
 
   // Global list to hold matched spots
-  List<Map<String, dynamic>> matchedSpots = [];
+  // List<Map<String, dynamic>> matchedSpots = [];
 
-  List<Map<String, dynamic>> tokenSpots = [];
+  // List<Map<String, dynamic>> tokenSpots = [];
 
   var enableBlueDice = true;
   var enableBlueToken = false;
@@ -414,8 +414,10 @@ class LudoDice extends PositionComponent with TapCallbacks {
           if (openBlueTokens.isEmpty) {
             // first open position
             final token = allBlueTokens.first;
-            token.positionId = 'B04';
-            List<Spot> allSpots = SpotSingleton().getSpots();
+            token.positionId = blueTokenPath.first;
+            
+            List<Spot> allSpots = SpotManager().getSpots();
+            
             Spot? spotB04 =
                 allSpots.firstWhere((spot) => spot.uniqueId == blueTokenPath.first);
             if (spotB04 != null) {
@@ -434,7 +436,13 @@ class LudoDice extends PositionComponent with TapCallbacks {
               token.add(moveToEffect);
             }
           }
-        } else {}
+        } else {
+          if (openBlueTokens.length == 1) {
+            // moving position for single open token
+
+            
+          }
+        }
       }
 
       /*
@@ -475,6 +483,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     }
   }
 
+  /*
   Future<void> autoMove(List<Component> childrenOfLudoBoard,
       GameState gameState, LudoBoard ludoBoard, int newDiceValue) async {
     // if only one token on board
@@ -573,6 +582,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
       await moveToken();
     }
   }
+  */
 
   LudoDice({required this.faceSize}) {
     // Calculate properties based on faceSize
@@ -762,7 +772,7 @@ class Ludo extends FlameGame
   int playerCount;
 
   Ludo(this.playerCount) {
-    print(this.playerCount);
+    print(playerCount);
   }
 
   final rand = Random();
@@ -789,83 +799,8 @@ class Ludo extends FlameGame
   }
 
   void startGame() {
-    final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
     final childrenOfLudoBoard = ludoBoard.children.toList();
-
-    // get spots of blue grid
-    final eigthChild = childrenOfLudoBoard[7];
-    final blueGridComponent =
-        eigthChild.children.whereType<BlueGridComponent>().first;
-
-    // get spots of red grid
-    final fourthChild = childrenOfLudoBoard[3];
-    final redGridComponent =
-        fourthChild.children.whereType<RedGridComponent>().first;
-
-    // get spots of green grid
-    final secondChild = childrenOfLudoBoard[1];
-    final greenGridComponent =
-        secondChild.children.whereType<GreenGridComponent>().first;
-
-    // get spots of yellow grid
-    final sixthChild = childrenOfLudoBoard[5];
-    final yellowGridComponent =
-        sixthChild.children.whereType<YellowGridComponent>().first;
-
-    for (var block in blueTokenPath) {
-      final matchingBlueSpots = blueGridComponent.children
-          .whereType<Spot>()
-          .where((spot) => spot.uniqueId == block)
-          .toList();
-
-      final matchingRedSpots = redGridComponent.children
-          .whereType<Spot>()
-          .where((spot) => spot.uniqueId == block)
-          .toList();
-
-      final matchingGreenSpots = greenGridComponent.children
-          .whereType<Spot>()
-          .where((spot) => spot.uniqueId == block)
-          .toList();
-
-      final matchingYellowSpots = yellowGridComponent.children
-          .whereType<Spot>()
-          .where((spot) => spot.uniqueId == block)
-          .toList();
-
-      if (matchingRedSpots.isNotEmpty) {
-        final spot = matchingRedSpots.first;
-        gameState.matchedSpots.add({
-          'uniqueId': spot.uniqueId,
-          'position': spot.absolutePosition,
-        });
-      }
-
-      if (matchingBlueSpots.isNotEmpty) {
-        final spot = matchingBlueSpots.first;
-        gameState.matchedSpots.add({
-          'uniqueId': spot.uniqueId,
-          'position': spot.absolutePosition,
-        });
-      }
-
-      if (matchingGreenSpots.isNotEmpty) {
-        final spot = matchingGreenSpots.first;
-        gameState.matchedSpots.add({
-          'uniqueId': spot.uniqueId,
-          'position': spot.absolutePosition,
-        });
-      }
-
-      if (matchingYellowSpots.isNotEmpty) {
-        final spot = matchingYellowSpots.first;
-        gameState.matchedSpots.add({
-          'uniqueId': spot.uniqueId,
-          'position': spot.absolutePosition,
-        });
-      }
-    }
 
     if (TokenManager().getBlueTokens().isEmpty) {
       final tokenToHomeSpotMap = {
@@ -1257,6 +1192,7 @@ class Token extends PositionComponent with TapCallbacks {
           ..color = dropletFillColor, // Paint for filling droplet
         super(position: position, size: size);
 
+  /*
   @override
   Future<void> onTapDown(TapDownEvent event) async {
     final gameState = GameState();
@@ -1307,7 +1243,7 @@ class Token extends PositionComponent with TapCallbacks {
         } else if (token['position'] != '') {}
       }
     }
-  }
+  }*/
 
   @override
   void render(Canvas canvas) {
@@ -1443,13 +1379,13 @@ class GreenGridComponent extends PositionComponent {
   }
 }
 
-class SpotSingleton {
-  static final SpotSingleton _instance = SpotSingleton._internal();
+class SpotManager {
+  static final SpotManager _instance = SpotManager._internal();
   final List<Spot> spots = [];
 
-  SpotSingleton._internal();
+  SpotManager._internal();
 
-  factory SpotSingleton() {
+  factory SpotManager() {
     return _instance;
   }
 
@@ -1477,7 +1413,7 @@ class Spot extends RectangleComponent {
           paint: paint,
           children: children ?? [],
         ) {
-    SpotSingleton().addSpot(this);
+    SpotManager().addSpot(this);
   }
 }
 
