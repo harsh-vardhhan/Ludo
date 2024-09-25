@@ -453,6 +453,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
             // dice number is 6 and open token exists
             if (openBlueTokens.singleOrNull != null &&
                 closeBlueTokens.isEmpty) {
+              // single open token & no close tokens
               final token = openBlueTokens.first;
               await moveToken(
                 token: token,
@@ -462,9 +463,16 @@ class LudoDice extends PositionComponent with TapCallbacks {
               );
             } else if (openBlueTokens.singleOrNull != null &&
                 closeBlueTokens.isNotEmpty) {
+              // single open token & some close tokens
               gameState.enableBlueToken = true;
             } else if (openBlueTokens.isNotEmpty) {
-              gameState.enableBlueToken = true;
+              // mutliple open tokens
+              multiMoveToken(
+                openBlueTokens: openBlueTokens,
+                blueTokenPath: blueTokenPath,
+                gameState: gameState,
+                ludoBoard: ludoBoard,
+              );
             }
           }
         } else {
@@ -482,33 +490,12 @@ class LudoDice extends PositionComponent with TapCallbacks {
           } else {
             // multiple open position
             // check if open positions have space to move
-            final tokens = openBlueTokens.iterator;
-            final pathSize = blueTokenPath.length;
-            var movableTokens = 0;
-            var moveableToken;
-
-            while (tokens.moveNext()) {
-              final token = tokens.current;
-              final index = blueTokenPath.indexOf(token.uniqueId);
-              if (index != -1) {
-                final distance = pathSize - index;
-                if (distance > gameState.diceNumber) {
-                  movableTokens++;
-                  moveableToken = token;
-                }
-              }
-            }
-            if (movableTokens > 1) {
-              gameState.enableBlueToken = true;
-            } else {
-              if (moveableToken) {
-                moveToken(
-                    token: moveableToken,
-                    tokenPath: blueTokenPath,
-                    diceNumber: gameState.diceNumber,
-                    ludoBoard: ludoBoard);
-              }
-            }
+            multiMoveToken(
+              openBlueTokens: openBlueTokens,
+              blueTokenPath: blueTokenPath,
+              gameState: gameState,
+              ludoBoard: ludoBoard,
+            );
           }
         }
       }
@@ -1097,6 +1084,42 @@ class StarComponent extends PositionComponent {
   @override
   void update(double dt) {
     // No update logic required for this static component
+  }
+}
+
+void multiMoveToken({
+  required List<Token> openBlueTokens,
+  required List<String> blueTokenPath,
+  required GameState gameState,
+  required LudoBoard ludoBoard,
+}) {
+  final tokens = openBlueTokens.iterator;
+  final pathSize = blueTokenPath.length;
+  List<Token> movableTokens = [];
+
+  // Iterate through each token and determine if it can move
+  while (tokens.moveNext()) {
+    final token = tokens.current;
+    final index = blueTokenPath.indexOf(token.positionId);
+    if (index != -1) {
+      final distance = pathSize - index;
+      if (distance > gameState.diceNumber) {
+        movableTokens.add(token); // Add the token to the list if it's movable
+      }
+    }
+  }
+
+  // Check if multiple tokens are movable
+  if (movableTokens.length > 1) {
+    gameState.enableBlueToken = true; // Enable token movement
+  } else if (movableTokens.length == 1) {
+    final token = movableTokens.first;
+    moveToken(
+      token: token,
+      tokenPath: blueTokenPath,
+      diceNumber: gameState.diceNumber,
+      ludoBoard: ludoBoard,
+    );
   }
 }
 
