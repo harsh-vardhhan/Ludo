@@ -369,9 +369,9 @@ class DiceFaceComponent extends PositionComponent {
   }
 }
 
-void openToken(Token token, List<String> blueTokenPath, List<Spot> allSpots,
-    LudoBoard ludoBoard) {
+void openToken(Token token, List<String> blueTokenPath, LudoBoard ludoBoard) {
   token.positionId = blueTokenPath.first;
+  List<Spot> allSpots = SpotManager().getSpots();
 
   // Return a default Spot if not found
   Spot spotB04 = allSpots.firstWhere(
@@ -449,7 +449,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
           if (openBlueTokens.isEmpty) {
             // first open position
             final token = allBlueTokens.first;
-            openToken(token, blueTokenPath, allSpots, ludoBoard);
+            openToken(token, blueTokenPath, ludoBoard);
           } else {
             // dice number is 6 and open token exists
             if (openBlueTokens.singleOrNull != null &&
@@ -457,7 +457,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
               final token = openBlueTokens.first;
               await moveToken(
                 token: token,
-                allSpots: allSpots,
                 tokenPath: blueTokenPath,
                 diceNumber: gameState.diceNumber,
                 ludoBoard: ludoBoard,
@@ -477,7 +476,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
             await moveToken(
               token: token,
-              allSpots: allSpots,
               tokenPath: blueTokenPath,
               diceNumber: gameState.diceNumber,
               ludoBoard: ludoBoard,
@@ -1085,12 +1083,12 @@ Future<void> _applyEffect(PositionComponent component, Effect effect) {
 
 Future<void> moveToken({
   required Token token,
-  required List<Spot> allSpots,
   required List<String> tokenPath,
   required int diceNumber,
   required PositionComponent
       ludoBoard, // Ensure ludoBoard is a PositionComponent
 }) async {
+  List<Spot> allSpots = SpotManager().getSpots();
   final gameState = GameState();
   gameState.enableBlueDice = false;
   // Get the current and final index
@@ -1204,7 +1202,6 @@ class Token extends PositionComponent with TapCallbacks {
           // moving position
           moveToken(
               token: token,
-              allSpots: allSpots,
               tokenPath: blueTokenPath,
               diceNumber: gameState.diceNumber,
               ludoBoard: ludoBoard);
@@ -1212,7 +1209,7 @@ class Token extends PositionComponent with TapCallbacks {
         } else {
           if (gameState.diceNumber == 6) {
             // opening position
-            openToken(token, blueTokenPath, allSpots, ludoBoard);
+            openToken(token, blueTokenPath, ludoBoard);
             gameState.enableBlueToken = false;
           }
         }
