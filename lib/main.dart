@@ -369,6 +369,39 @@ class DiceFaceComponent extends PositionComponent {
   }
 }
 
+void openToken(Token token, List<String> blueTokenPath, List<Spot> allSpots,
+    LudoBoard ludoBoard) {
+  token.positionId = blueTokenPath.first;
+
+  // Return a default Spot if not found
+  Spot spotB04 = allSpots.firstWhere(
+    (spot) => spot.uniqueId == blueTokenPath.first,
+    orElse: () => Spot(
+      uniqueId: 'default', // Default values
+      position: Vector2.zero(),
+      size: Vector2(10, 10),
+      paint: Paint()..color = Colors.grey, // Grey for default spot
+    ),
+  );
+
+  // Proceed with logic using spotB04
+  final targetPosition = Vector2(
+    spotB04.absolutePosition.x +
+        (token.size.x * 0.10) -
+        ludoBoard.absolutePosition.x,
+    spotB04.absolutePosition.y -
+        (token.size.x * 0.50) -
+        ludoBoard.absolutePosition.y,
+  );
+
+  final moveToEffect = MoveToEffect(
+    targetPosition,
+    EffectController(duration: 0.1, curve: Curves.easeInOut),
+  );
+
+  token.add(moveToEffect);
+}
+
 class LudoDice extends PositionComponent with TapCallbacks {
   final double faceSize; // size of the square
   late final double borderRadius; // radius of the curved edges
@@ -416,25 +449,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
           if (openBlueTokens.isEmpty) {
             // first open position
             final token = allBlueTokens.first;
-            token.positionId = blueTokenPath.first;
-
-            Spot? spotB04 = allSpots
-                .firstWhere((spot) => spot.uniqueId == blueTokenPath.first);
-            if (spotB04 != null) {
-              final targetPosition = Vector2(
-                spotB04.absolutePosition.x +
-                    (token.size.x * 0.10) -
-                    ludoBoard.absolutePosition.x,
-                spotB04.absolutePosition.y -
-                    (token.size.x * 0.50) -
-                    ludoBoard.absolutePosition.y,
-              );
-              final moveToEffect = MoveToEffect(
-                targetPosition,
-                EffectController(duration: 0.1, curve: Curves.easeInOut),
-              );
-              token.add(moveToEffect);
-            }
+            openToken(token, blueTokenPath, allSpots, ludoBoard);
           } else {
             // dice number is 6 and open token exists
             if (openBlueTokens.length == 1 && closeBlueTokens.isEmpty) {
@@ -1173,14 +1188,12 @@ class Token extends PositionComponent with TapCallbacks {
     if (gameState.enableBlueToken) {
       List<Token> blueTokens = TokenManager().getBlueTokens();
       final token = blueTokens.firstWhere((t) => t.uniqueId == uniqueId);
-
-      if (blueTokenPath.contains(token.positionId)) {
-        // moving position
-        List<Spot> allSpots = SpotManager().getSpots();
-        final world = parent?.parent;
-
-        if (world is World) {
-          final ludoBoard = world.children.whereType<LudoBoard>().first;
+      List<Spot> allSpots = SpotManager().getSpots();
+      final world = parent?.parent;
+      if (world is World) {
+        final ludoBoard = world.children.whereType<LudoBoard>().first;
+        if (blueTokenPath.contains(token.positionId)) {
+          // moving position
           moveToken(
               token: token,
               allSpots: allSpots,
@@ -1188,10 +1201,11 @@ class Token extends PositionComponent with TapCallbacks {
               diceNumber: gameState.diceNumber,
               ludoBoard: ludoBoard);
           gameState.enableBlueToken = false;
+        } else {
+          // opening position
+          openToken(token, blueTokenPath, allSpots, ludoBoard);
+          gameState.enableBlueToken = false;
         }
-      } else {
-        // opening position
-        
       }
     }
   }
