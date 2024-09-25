@@ -438,7 +438,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
       List<Token> allBlueTokens = TokenManager().getBlueTokens();
       List<Token> openBlueTokens = TokenManager().getOpenBlueTokens();
       List<Token> closeBlueTokens = TokenManager().getCloseBlueTokens();
-      List<Spot> allSpots = SpotManager().getSpots();
 
       final world = parent?.parent?.parent?.parent?.parent;
 
@@ -482,7 +481,34 @@ class LudoDice extends PositionComponent with TapCallbacks {
             );
           } else {
             // multiple open position
-            gameState.enableBlueToken = true;
+            // check if open positions have space to move
+            final tokens = openBlueTokens.iterator;
+            final pathSize = blueTokenPath.length;
+            var movableTokens = 0;
+            var moveableToken;
+
+            while (tokens.moveNext()) {
+              final token = tokens.current;
+              final index = blueTokenPath.indexOf(token.uniqueId);
+              if (index != -1) {
+                final distance = pathSize - index;
+                if (distance > gameState.diceNumber) {
+                  movableTokens++;
+                  moveableToken = token;
+                }
+              }
+            }
+            if (movableTokens > 1) {
+              gameState.enableBlueToken = true;
+            } else {
+              if (moveableToken) {
+                moveToken(
+                    token: moveableToken,
+                    tokenPath: blueTokenPath,
+                    diceNumber: gameState.diceNumber,
+                    ludoBoard: ludoBoard);
+              }
+            }
           }
         }
       }
