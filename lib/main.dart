@@ -389,8 +389,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
       int newDiceValue = _random.nextInt(6) + 1;
 
       gameState.diceNumber = newDiceValue;
-
-      // Update the dice value in the DiceFaceComponent
       diceFace.updateDiceValue(newDiceValue);
 
       // Apply a rotate effect to the dice when tapped
@@ -404,6 +402,42 @@ class LudoDice extends PositionComponent with TapCallbacks {
         ),
       );
 
+      List<Token> allBlueTokens = TokenManager().getBlueTokens();
+      List<Token> openBlueTokens = TokenManager().getOpenBlueTokens();
+
+      final world = parent?.parent?.parent?.parent?.parent;
+
+      if (world is World) {
+        final ludoBoard = world.children.whereType<LudoBoard>().first;
+
+        if (gameState.diceNumber == 6) {
+          if (openBlueTokens.isEmpty) {
+            // first open position
+            final token = allBlueTokens.first;
+            token.positionId = 'B04';
+            List<Spot> allSpots = SpotSingleton().getSpots();
+            Spot? spotB04 =
+                allSpots.firstWhere((spot) => spot.uniqueId == blueTokenPath.first);
+            if (spotB04 != null) {
+              final targetPosition = Vector2(
+                spotB04.absolutePosition.x +
+                    (token.size.x * 0.10) -
+                    ludoBoard.absolutePosition.x,
+                spotB04.absolutePosition.y -
+                    (token.size.x * 0.50) -
+                    ludoBoard.absolutePosition.y,
+              );
+              final moveToEffect = MoveToEffect(
+                targetPosition,
+                EffectController(duration: 0.1, curve: Curves.easeInOut),
+              );
+              token.add(moveToEffect);
+            }
+          }
+        } else {}
+      }
+
+      /*
       final world = parent?.parent?.parent?.parent?.parent;
       if (world is World) {
         final ludoBoard = world.children.whereType<LudoBoard>().first;
@@ -437,6 +471,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
           }
         }
       }
+      */
     }
   }
 
@@ -686,13 +721,10 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
 }
 
 class TokenManager {
-  // Single instance of TokenManager
   static final TokenManager _instance = TokenManager._internal();
 
-  // Private constructor
   TokenManager._internal();
 
-  // Public factory method to return the single instance
   factory TokenManager() {
     return _instance;
   }
@@ -705,17 +737,25 @@ class TokenManager {
         uniqueId: entry.key,
         positionId: entry.value,
         position: Vector2(100, 100), // Adjust position
-        size: Vector2(50, 50),       // Adjust size
+        size: Vector2(50, 50), // Adjust size
       );
       allTokens.add(token);
     }
   }
 
-  List<Token> getAllTokens() {
-    return allTokens;
+  // Get all tokens whose uniqueId starts with 'B'
+  List<Token> getBlueTokens() {
+    return allTokens.where((token) => token.uniqueId.startsWith('B')).toList();
+  }
+
+  // Get all tokens whose uniqueId starts with 'B' and positionId has 3 characters
+  List<Token> getOpenBlueTokens() {
+    return allTokens
+        .where((token) =>
+            token.uniqueId.startsWith('B') && token.positionId.length == 3)
+        .toList();
   }
 }
-
 
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
@@ -775,22 +815,22 @@ class Ludo extends FlameGame
 
     for (var block in blueTokenPath) {
       final matchingBlueSpots = blueGridComponent.children
-          .whereType<UniqueRectangleComponent>()
+          .whereType<Spot>()
           .where((spot) => spot.uniqueId == block)
           .toList();
 
       final matchingRedSpots = redGridComponent.children
-          .whereType<UniqueRectangleComponent>()
+          .whereType<Spot>()
           .where((spot) => spot.uniqueId == block)
           .toList();
 
       final matchingGreenSpots = greenGridComponent.children
-          .whereType<UniqueRectangleComponent>()
+          .whereType<Spot>()
           .where((spot) => spot.uniqueId == block)
           .toList();
 
       final matchingYellowSpots = yellowGridComponent.children
-          .whereType<UniqueRectangleComponent>()
+          .whereType<Spot>()
           .where((spot) => spot.uniqueId == block)
           .toList();
 
@@ -827,27 +867,33 @@ class Ludo extends FlameGame
       }
     }
 
-    // get blue home spots
-    final seventhChild = childrenOfLudoBoard[6];
-    final home = seventhChild.children.toList();
-    final homePlate = home[0].children.toList();
-    final homeSpotContainer = homePlate[1].children.toList();
-    final homeSpotList = homeSpotContainer[1].children.toList();
+    if (TokenManager().getBlueTokens().isEmpty) {
+      final tokenToHomeSpotMap = {
+        'BT1': 'B1',
+      };
+      TokenManager().initializeTokens(tokenToHomeSpotMap);
+      // get blue home spots
+      final seventhChild = childrenOfLudoBoard[6];
+      final home = seventhChild.children.toList();
+      final homePlate = home[0].children.toList();
+      final homeSpotContainer = homePlate[1].children.toList();
+      final homeSpotList = homeSpotContainer[1].children.toList();
 
-    for (var token in TokenManager().getAllTokens()) {
-      final homeSpot = homeSpotList
-          .whereType<HomeSpot>()
-          .firstWhere((spot) => spot.uniqueId == token.positionId);
-      token.position = Vector2(
-        homeSpot.absolutePosition.x +
-            (homeSpot.size.x * 0.10) -
-            ludoBoard.absolutePosition.x,
-        homeSpot.absolutePosition.y -
-            (homeSpot.size.x * 0.50) -
-            ludoBoard.absolutePosition.y,
-      );
-      token.size =  Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-      ludoBoard.add(token);
+      for (var token in TokenManager().getBlueTokens()) {
+        final homeSpot = homeSpotList
+            .whereType<HomeSpot>()
+            .firstWhere((spot) => spot.uniqueId == token.positionId);
+        token.position = Vector2(
+          homeSpot.absolutePosition.x +
+              (homeSpot.size.x * 0.10) -
+              ludoBoard.absolutePosition.x,
+          homeSpot.absolutePosition.y -
+              (homeSpot.size.x * 0.50) -
+              ludoBoard.absolutePosition.y,
+        );
+        token.size = Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+        ludoBoard.add(token);
+      }
     }
   }
 
@@ -1181,7 +1227,7 @@ class StarComponent extends PositionComponent {
 
 class Token extends PositionComponent with TapCallbacks {
   final String uniqueId; // Mandatory unique ID for the token
-  final String positionId; // Mandatory position ID for the token
+  String positionId; // Mandatory position ID for the token
   final Paint borderPaint;
   final Paint transparentPaint;
   final Paint fillPaint;
@@ -1345,7 +1391,7 @@ class GreenGridComponent extends PositionComponent {
         // Create the unique ID for this block
         String uniqueId = 'G$col$row';
 
-        var rectangle = UniqueRectangleComponent(
+        var rectangle = Spot(
           uniqueId: uniqueId,
           position:
               Vector2(col * (size.x + columnSpacing), row * (size.x + spacing)),
@@ -1397,10 +1443,29 @@ class GreenGridComponent extends PositionComponent {
   }
 }
 
-class UniqueRectangleComponent extends RectangleComponent {
+class SpotSingleton {
+  static final SpotSingleton _instance = SpotSingleton._internal();
+  final List<Spot> spots = [];
+
+  SpotSingleton._internal();
+
+  factory SpotSingleton() {
+    return _instance;
+  }
+
+  void addSpot(Spot spot) {
+    spots.add(spot);
+  }
+
+  List<Spot> getSpots() {
+    return List.unmodifiable(spots);
+  }
+}
+
+class Spot extends RectangleComponent {
   final String uniqueId;
 
-  UniqueRectangleComponent({
+  Spot({
     required this.uniqueId,
     required Vector2 position,
     required Vector2 size,
@@ -1411,7 +1476,9 @@ class UniqueRectangleComponent extends RectangleComponent {
           size: size,
           paint: paint,
           children: children ?? [],
-        );
+        ) {
+    SpotSingleton().addSpot(this);
+  }
 }
 
 class BlueGridComponent extends PositionComponent {
@@ -1442,7 +1509,7 @@ class BlueGridComponent extends PositionComponent {
         // Create the unique ID for this block
         String uniqueId = 'B$col$row';
 
-        var rectangle = UniqueRectangleComponent(
+        var rectangle = Spot(
           uniqueId: uniqueId,
           position:
               Vector2(col * (size.x + columnSpacing), row * (size.x + spacing)),
@@ -1579,7 +1646,7 @@ class RedGridComponent extends PositionComponent {
         // Create the unique ID for this block
         String uniqueId = 'R$col$row';
 
-        var rectangle = UniqueRectangleComponent(
+        var rectangle = Spot(
           uniqueId: uniqueId,
           position:
               Vector2(col * (size.x + columnSpacing), row * (size.x + spacing)),
@@ -1659,7 +1726,7 @@ class YellowGridComponent extends PositionComponent {
         // Create the unique ID for this block
         String uniqueId = 'Y$col$row';
 
-        var rectangle = UniqueRectangleComponent(
+        var rectangle = Spot(
           uniqueId: uniqueId,
           position:
               Vector2(col * (size.x + columnSpacing), row * (size.y + spacing)),
