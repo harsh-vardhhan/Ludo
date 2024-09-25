@@ -404,6 +404,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
       List<Token> allBlueTokens = TokenManager().getBlueTokens();
       List<Token> openBlueTokens = TokenManager().getOpenBlueTokens();
+      List<Token> closeBlueTokens = TokenManager().getCloseBlueTokens();
       List<Spot> allSpots = SpotManager().getSpots();
 
       final world = parent?.parent?.parent?.parent?.parent;
@@ -434,206 +435,41 @@ class LudoDice extends PositionComponent with TapCallbacks {
               );
               token.add(moveToEffect);
             }
+          } else {
+            // dice number is 6 and open token exists
+            if (openBlueTokens.length == 1 && closeBlueTokens.isEmpty) {
+              final token = openBlueTokens.first;
+              await moveToken(
+                token: token,
+                allSpots: allSpots,
+                tokenPath: blueTokenPath,
+                diceNumber: gameState.diceNumber,
+                ludoBoard: ludoBoard,
+              );
+            } else if (openBlueTokens.length == 1 &&
+                closeBlueTokens.isNotEmpty) {
+              print("openBlueTokens.length == 1 && closeBlueTokens.isNotEmpty");
+              gameState.enableBlueToken = true;
+            }
           }
         } else {
           // non six dice number
           if (openBlueTokens.length == 1) {
             // moving position for single open token
             final token = openBlueTokens.first;
-            final currentIndex = blueTokenPath.indexOf(token.positionId);
-            final finalIndex = currentIndex + gameState.diceNumber;
-            final originalSize = token.size.clone();
 
-            for (int i = currentIndex; i <= finalIndex; i++) {
-              if (i < blueTokenPath.length) {
-                String positionId = blueTokenPath[i];
-                token.positionId = positionId;
-                final spot =
-                    allSpots.firstWhere((spot) => spot.uniqueId == positionId);
-                final targetPosition = Vector2(
-                  spot.absolutePosition.x +
-                      (token.size.x * 0.10) -
-                      ludoBoard.absolutePosition.x,
-                  spot.absolutePosition.y -
-                      (token.size.x * 0.50) -
-                      ludoBoard.absolutePosition.y,
-                );
-                await _applyEffect(
-                  token,
-                  SizeEffect.to(
-                    Vector2(
-                        originalSize.x * 1.10,
-                        originalSize.y *
-                            1.10), // Increase by 10% of original size
-                    EffectController(duration: 0.05),
-                  ),
-                );
-                await _applyEffect(
-                  token,
-                  MoveToEffect(
-                    targetPosition,
-                    EffectController(duration: 0.1, curve: Curves.easeInOut),
-                  ),
-                );
-                await _applyEffect(
-                  token,
-                  SizeEffect.to(
-                    originalSize, // Restore to original size
-                    EffectController(duration: 0.05),
-                  ),
-                );
-                await Future.delayed(Duration(milliseconds: 500));
-              }
-            }
+            await moveToken(
+              token: token,
+              allSpots: allSpots,
+              tokenPath: blueTokenPath,
+              diceNumber: gameState.diceNumber,
+              ludoBoard: ludoBoard,
+            );
           }
         }
       }
-
-      /*
-      final world = parent?.parent?.parent?.parent?.parent;
-      if (world is World) {
-        final ludoBoard = world.children.whereType<LudoBoard>().first;
-        final childrenOfLudoBoard = ludoBoard.children.toList();
-
-        if (childrenOfLudoBoard.isNotEmpty) {
-          final numberOfTokens = childrenOfLudoBoard.whereType<Token>().length;
-          if (numberOfTokens > 1) {
-            final openTokens = gameState.tokenSpots
-                .where((token) =>
-                    token['uniqueId'].startsWith('B') &&
-                    token['position'] != '')
-                .toList();
-            if (openTokens.length > 1) {
-              // Get token from Ludo Board
-              gameState.enableBlueToken = true;
-            } else if (openTokens.length == 1) {
-              print("automove 1");
-              await autoMove(
-                  childrenOfLudoBoard, gameState, ludoBoard, newDiceValue);
-            } else {
-              // multiple tokens in home base
-              if (gameState.diceNumber == 6) {
-                gameState.enableBlueToken = true;
-              }
-            }
-          } else {
-            print("automove 2");
-            await autoMove(
-                childrenOfLudoBoard, gameState, ludoBoard, newDiceValue);
-          }
-        }
-      }
-      */
     }
   }
-
-  Future<void> _applyEffect(PositionComponent component, Effect effect) {
-    final completer = Completer<void>();
-    effect.onComplete = completer.complete;
-    component.add(effect);
-    return completer.future;
-  }
-
-  /*
-  Future<void> autoMove(List<Component> childrenOfLudoBoard,
-      GameState gameState, LudoBoard ludoBoard, int newDiceValue) async {
-    // if only one token on board
-    // token UI data
-    final tokenB = childrenOfLudoBoard.whereType<Token>().firstWhere(
-          (token) => token.uniqueId.startsWith('B'),
-          orElse: () => Token(
-            uniqueId: 'default',
-            positionId: 'B1',
-            position: Vector2.zero(),
-            size: Vector2.zero(), // Default token
-          ),
-        );
-
-    // opening position
-    final token = gameState.tokenSpots.first; // check token state data
-    if (token['position'] == '' && newDiceValue == 6) {
-      token['position'] = 'B04';
-      final spot = gameState.matchedSpots.firstWhere(
-          (tokenData) => tokenData['uniqueId'] == token['position']);
-
-      final targetPosition = Vector2(
-          spot['position'][0] +
-              (tokenB.size.x * 0.10) -
-              ludoBoard.absolutePosition.x,
-          spot['position'][1] -
-              (tokenB.size.x * 0.50) -
-              ludoBoard.absolutePosition.y);
-
-      final moveToEffect = MoveToEffect(
-        targetPosition,
-        EffectController(duration: 0.5, curve: Curves.easeInOut),
-      );
-
-      tokenB.add(moveToEffect);
-    } else if (token['position'] != '') {
-      // moving position
-      gameState.enableBlueDice = false;
-      final spotIndex = gameState.matchedSpots.indexWhere(
-          (tokenData) => tokenData['uniqueId'] == token['position']);
-
-      Future<void> _applyEffect(PositionComponent component, Effect effect) {
-        final completer = Completer<void>();
-        effect.onComplete = completer.complete;
-        component.add(effect);
-        return completer.future;
-      }
-
-      // moving token position mechanism
-      Future<void> moveToken() async {
-        // Store the original size of the token to ensure it doesn't gradually shrink
-        final originalSize = tokenB.size.clone();
-        for (int spot = 1; spot <= newDiceValue; spot++) {
-          final newSpotIndex = spotIndex + spot;
-          // Update token game state
-          token['position'] = gameState.matchedSpots[newSpotIndex]['uniqueId'];
-          // Update visual
-          final x = gameState.matchedSpots[newSpotIndex]['position'][0];
-          final y = gameState.matchedSpots[newSpotIndex]['position'][1];
-
-          final targetPosition = Vector2(
-            x + (tokenB.size.x * 0.10) - ludoBoard.absolutePosition.x,
-            y - (tokenB.size.x * 0.50) - ludoBoard.absolutePosition.y,
-          );
-          // Create an async effect for increasing the size
-          await _applyEffect(
-            tokenB,
-            SizeEffect.to(
-              Vector2(originalSize.x * 1.10,
-                  originalSize.y * 1.10), // Increase by 10% of original size
-              EffectController(duration: 0.05),
-            ),
-          );
-          // Move to the new position
-          await _applyEffect(
-            tokenB,
-            MoveToEffect(
-              targetPosition,
-              EffectController(duration: 0.1, curve: Curves.easeInOut),
-            ),
-          );
-          // Decrease the size back to original size
-          await _applyEffect(
-            tokenB,
-            SizeEffect.to(
-              originalSize, // Restore to original size
-              EffectController(duration: 0.05),
-            ),
-          );
-          // Add a delay before moving to the next spot
-          await Future.delayed(Duration(milliseconds: 500));
-        }
-        gameState.enableBlueDice = true;
-      }
-
-      await moveToken();
-    }
-  }
-  */
 
   LudoDice({required this.faceSize}) {
     // Calculate properties based on faceSize
@@ -816,6 +652,14 @@ class TokenManager {
             token.uniqueId.startsWith('B') && token.positionId.length == 3)
         .toList();
   }
+
+  // Get all tokens whose uniqueId starts with 'B' and positionId has 3 characters
+  List<Token> getCloseBlueTokens() {
+    return allTokens
+        .where((token) =>
+            token.uniqueId.startsWith('B') && token.positionId.length == 2)
+        .toList();
+  }
 }
 
 class Ludo extends FlameGame
@@ -856,6 +700,7 @@ class Ludo extends FlameGame
     if (TokenManager().getBlueTokens().isEmpty) {
       final tokenToHomeSpotMap = {
         'BT1': 'B1',
+        'BT2': 'B2',
       };
       TokenManager().initializeTokens(tokenToHomeSpotMap);
       // get blue home spots
@@ -1211,6 +1056,85 @@ class StarComponent extends PositionComponent {
   }
 }
 
+Future<void> _applyEffect(PositionComponent component, Effect effect) {
+  final completer = Completer<void>();
+  effect.onComplete = completer.complete;
+  component.add(effect);
+  return completer.future;
+}
+
+Future<void> moveToken({
+  required Token token,
+  required List<Spot> allSpots,
+  required List<String> tokenPath,
+  required int diceNumber,
+  required PositionComponent
+      ludoBoard, // Ensure ludoBoard is a PositionComponent
+}) async {
+  // Get the current and final index
+  final currentIndex = tokenPath.indexOf(token.positionId);
+  final finalIndex = currentIndex + diceNumber;
+  final originalSize = token.size.clone();
+
+  // Loop through the positions from current to final index
+  for (int i = currentIndex; i <= finalIndex; i++) {
+    if (i < tokenPath.length) {
+      String positionId = tokenPath[i];
+      token.positionId = positionId;
+
+      // Find the corresponding spot using positionId
+      final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
+
+      // Calculate target position for the token based on the spot's absolute position
+      final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
+      final ludoBoardGlobalPosition =
+          ludoBoard.absolutePositionOf(Vector2.zero());
+
+      final targetPosition = Vector2(
+        spotGlobalPosition.x +
+            (token.size.x * 0.10) -
+            ludoBoardGlobalPosition.x,
+        spotGlobalPosition.y -
+            (token.size.x * 0.50) -
+            ludoBoardGlobalPosition.y,
+      );
+
+      // Apply size increase effect
+      await _applyEffect(
+        token,
+        SizeEffect.to(
+          Vector2(
+            originalSize.x * 1.10,
+            originalSize.y * 1.10,
+          ), // Increase by 10% of original size
+          EffectController(duration: 0.05),
+        ),
+      );
+
+      // Move the token to the target position
+      await _applyEffect(
+        token,
+        MoveToEffect(
+          targetPosition,
+          EffectController(duration: 0.1, curve: Curves.easeInOut),
+        ),
+      );
+
+      // Restore token to original size
+      await _applyEffect(
+        token,
+        SizeEffect.to(
+          originalSize, // Restore to original size
+          EffectController(duration: 0.05),
+        ),
+      );
+
+      // Add a delay between each move (optional)
+      await Future.delayed(Duration(milliseconds: 500));
+    }
+  }
+}
+
 class Token extends PositionComponent with TapCallbacks {
   final String uniqueId; // Mandatory unique ID for the token
   String positionId; // Mandatory position ID for the token
@@ -1243,58 +1167,34 @@ class Token extends PositionComponent with TapCallbacks {
           ..color = dropletFillColor, // Paint for filling droplet
         super(position: position, size: size);
 
-  /*
   @override
   Future<void> onTapDown(TapDownEvent event) async {
     final gameState = GameState();
     if (gameState.enableBlueToken) {
-      // token opening destination
-      final spot = gameState.matchedSpots
-          .firstWhere((tokenData) => tokenData['uniqueId'] == 'B04');
+      List<Token> blueTokens = TokenManager().getBlueTokens();
+      final token = blueTokens.firstWhere((t) => t.uniqueId == uniqueId);
 
-      // update token UI
-      if (parent is LudoBoard) {
-        final ludoBoard = parent as LudoBoard; // Type casting to LudoBoard
-        final childrenOfLudoBoard = ludoBoard?.children?.toList() ?? [];
+      if (blueTokenPath.contains(token.positionId)) {
+        // moving position
+        List<Spot> allSpots = SpotManager().getSpots();
+        final world = parent?.parent;
 
-        // Using firstWhereOrNull from collection package to return null if no match found
-        final Token? tokenB = childrenOfLudoBoard
-            .whereType<Token>()
-            .firstWhereOrNull(
-                (tokenData) => tokenData.uniqueId == this.uniqueId);
-
+        if (world is World) {
+          final ludoBoard = world.children.whereType<LudoBoard>().first;
+          moveToken(
+              token: token,
+              allSpots: allSpots,
+              tokenPath: blueTokenPath,
+              diceNumber: gameState.diceNumber,
+              ludoBoard: ludoBoard);
+          gameState.enableBlueToken = false;
+        }
+      } else {
         // opening position
-        final token = gameState.tokenSpots.firstWhere((filteredToken) =>
-            filteredToken['uniqueId'] ==
-            tokenB?.uniqueId); // check token state data
-
-        if (token['position'] == '' && gameState.diceNumber == 6) {
-          token['position'] = 'B04';
-
-          if (tokenB != null) {
-            final targetPosition = Vector2(
-              spot['position'][0] +
-                  (tokenB.size.x * 0.10) -
-                  ludoBoard.absolutePosition.x,
-              spot['position'][1] -
-                  (tokenB.size.x * 0.50) -
-                  ludoBoard.absolutePosition.y,
-            );
-
-            final moveToEffect = MoveToEffect(
-              targetPosition,
-              EffectController(duration: 0.5, curve: Curves.easeInOut),
-            );
-
-            tokenB.add(moveToEffect);
-            gameState.enableBlueToken = false;
-          } else {
-            print('Token not found');
-          }
-        } else if (token['position'] != '') {}
+        
       }
     }
-  }*/
+  }
 
   @override
   void render(Canvas canvas) {
