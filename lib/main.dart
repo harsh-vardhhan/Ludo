@@ -448,6 +448,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
           (token) => token.uniqueId.startsWith('B'),
           orElse: () => Token(
             uniqueId: 'default',
+            positionId: 'B1',
             position: Vector2.zero(),
             size: Vector2.zero(), // Default token
           ),
@@ -684,6 +685,38 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
   }
 }
 
+class TokenManager {
+  // Single instance of TokenManager
+  static final TokenManager _instance = TokenManager._internal();
+
+  // Private constructor
+  TokenManager._internal();
+
+  // Public factory method to return the single instance
+  factory TokenManager() {
+    return _instance;
+  }
+
+  List<Token> allTokens = [];
+
+  void initializeTokens(Map<String, String> tokenToHomeSpotMap) {
+    for (var entry in tokenToHomeSpotMap.entries) {
+      final token = Token(
+        uniqueId: entry.key,
+        positionId: entry.value,
+        position: Vector2(100, 100), // Adjust position
+        size: Vector2(50, 50),       // Adjust size
+      );
+      allTokens.add(token);
+    }
+  }
+
+  List<Token> getAllTokens() {
+    return allTokens;
+  }
+}
+
+
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
   int playerCount;
@@ -794,17 +827,6 @@ class Ludo extends FlameGame
       }
     }
 
-    // later as per number of players
-    gameState.tokenSpots.add({
-      'uniqueId': 'BT1',
-      'position': '',
-    });
-
-    gameState.tokenSpots.add({
-      'uniqueId': 'BT2',
-      'position': '',
-    });
-
     // get blue home spots
     final seventhChild = childrenOfLudoBoard[6];
     final home = seventhChild.children.toList();
@@ -812,45 +834,20 @@ class Ludo extends FlameGame
     final homeSpotContainer = homePlate[1].children.toList();
     final homeSpotList = homeSpotContainer[1].children.toList();
 
-    if (childrenOfLudoBoard.length >= 7) {
-      // Create a mapping between token IDs and homeSpot IDs
-      final tokenToHomeSpotMap = {
-        'BT1': 'B1',
-        'BT2': 'B2',
-        // Add other mappings if needed
-      };
-
-      for (var token in gameState.tokenSpots) {
-        final noToken = childrenOfLudoBoard.whereType<Token>().isEmpty;
-
-        if (noToken && tokenToHomeSpotMap.containsKey(token['uniqueId'])) {
-          final homeSpotId = tokenToHomeSpotMap[token['uniqueId']];
-
-          // Find the corresponding homeSpot
-          final homeSpot = homeSpotList
-              .whereType<HomeSpot>()
-              .firstWhere((spot) => spot.uniqueId == homeSpotId);
-
-          // Create a new token
-          var newToken = Token(
-            uniqueId: token['uniqueId'],
-            position: Vector2(
-              homeSpot.absolutePosition.x +
-                  (homeSpot.size.x * 0.10) -
-                  ludoBoard.absolutePosition.x,
-              homeSpot.absolutePosition.y -
-                  (homeSpot.size.x * 0.50) -
-                  ludoBoard.absolutePosition.y,
-            ),
-            size: Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05),
-          );
-
-          // Add the new token to the board
-          ludoBoard.add(newToken);
-        }
-      }
-    } else {
-      print('LudoBoard does not have children.');
+    for (var token in TokenManager().getAllTokens()) {
+      final homeSpot = homeSpotList
+          .whereType<HomeSpot>()
+          .firstWhere((spot) => spot.uniqueId == token.positionId);
+      token.position = Vector2(
+        homeSpot.absolutePosition.x +
+            (homeSpot.size.x * 0.10) -
+            ludoBoard.absolutePosition.x,
+        homeSpot.absolutePosition.y -
+            (homeSpot.size.x * 0.50) -
+            ludoBoard.absolutePosition.y,
+      );
+      token.size =  Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+      ludoBoard.add(token);
     }
   }
 
@@ -1183,19 +1180,21 @@ class StarComponent extends PositionComponent {
 }
 
 class Token extends PositionComponent with TapCallbacks {
-  final String uniqueId; // New mandatory attribute
+  final String uniqueId; // Mandatory unique ID for the token
+  final String positionId; // Mandatory position ID for the token
   final Paint borderPaint;
   final Paint transparentPaint;
   final Paint fillPaint;
   final Paint dropletFillPaint; // Paint for filling the inside of the droplet
 
   Token({
-    required this.uniqueId, // Add uniqueId to the constructor
-    required Vector2 position,
-    required Vector2 size,
-    Color borderColor = Colors.black,
-    Color innerCircleColor = Colors.blueAccent,
-    Color dropletFillColor = Colors.white, // Default fill color for droplet
+    required this.uniqueId, // Mandatory uniqueId
+    required this.positionId, // Mandatory positionId
+    required Vector2 position, // Position of the token
+    required Vector2 size, // Size of the token
+    Color borderColor = Colors.black, // Default border color
+    Color innerCircleColor = Colors.blueAccent, // Default inner fill color
+    Color dropletFillColor = Colors.white, // Default droplet fill color
   })  : borderPaint = Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.2
@@ -1235,7 +1234,7 @@ class Token extends PositionComponent with TapCallbacks {
         final token = gameState.tokenSpots.firstWhere((filteredToken) =>
             filteredToken['uniqueId'] ==
             tokenB?.uniqueId); // check token state data
-            
+
         if (token['position'] == '' && gameState.diceNumber == 6) {
           token['position'] = 'B04';
 
