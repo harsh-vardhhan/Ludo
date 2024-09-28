@@ -1173,8 +1173,8 @@ Future<void> moveToken({
         token,
         SizeEffect.to(
           Vector2(
-            originalSize.x * 1.10,
-            originalSize.y * 1.10,
+            originalSize.x * 1.30,
+            originalSize.y * 1.30,
           ), // Increase by 10% of original size
           EffectController(duration: 0.05),
         ),
@@ -1185,7 +1185,7 @@ Future<void> moveToken({
         token,
         MoveToEffect(
           targetPosition,
-          EffectController(duration: 0.1, curve: Curves.easeInOut),
+          EffectController(duration: 0.05, curve: Curves.easeInOut),
         ),
       );
 
@@ -1199,7 +1199,7 @@ Future<void> moveToken({
       );
 
       // Add a delay between each move (optional)
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(Duration(milliseconds: 300));
     }
   }
   gameState.enableBlueDice = true;
