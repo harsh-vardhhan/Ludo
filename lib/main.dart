@@ -202,6 +202,7 @@ class GameState {
   var enableBlueDice = true;
   var enableBlueToken = false;
   var diceNumber = 5;
+  List<Player> players = [];
 
   // Factory method to access the instance
   factory GameState() {
@@ -697,6 +698,27 @@ class TokenManager {
   }
 }
 
+class Player {
+  String playerId;
+  List<Token> tokens; // Tokens belonging to the player
+  bool isActive; // Is the player still active in the game?
+  bool isCurrentTurn; // Is it the player's turn right now?
+  int score; // Player's current score
+  int totalTokensInHome; // Number of tokens in the home position
+  bool hasWon; // Has the player won the game?
+
+  // Constructor to initialize the player's attributes
+  Player({
+    required this.playerId,
+    required this.tokens,
+    this.isActive = true, // Default: player is active when initialized
+    this.isCurrentTurn = false, // Default: not the player's turn initially
+    this.score = 0, // Default: score starts at 0
+    this.totalTokensInHome = 0, // Default: no tokens in home initially
+    this.hasWon = false, // Default: player hasn't won yet
+  });
+}
+
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
   int playerCount;
@@ -729,51 +751,103 @@ class Ludo extends FlameGame
   }
 
   void startGame() {
+    final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
     final childrenOfLudoBoard = ludoBoard.children.toList();
 
     if (TokenManager().getBlueTokens().isEmpty) {
-      final tokenToHomeSpotMap = {
+      final tokenToHome = {
         'BT1': 'B1',
         'BT2': 'B2',
+        'BT3': 'B3',
+        'BT4': 'B4',
+      };
+      TokenManager().initializeTokens(tokenToHome);
+
+      final child = childrenOfLudoBoard[6];
+      final home = child.children.toList();
+      final homePlate = home[0].children.toList();
+      final homeSpotContainer = homePlate[1].children.toList();
+      final homeSpotList = homeSpotContainer[1].children.toList();
+
+      for (var token in TokenManager().getBlueTokens()) {
+        final homeSpot = homeSpotList
+            .whereType<HomeSpot>()
+            .firstWhere((spot) => spot.uniqueId == token.positionId);
+        token.innerCircleColor = Colors.blue;
+        token.position = Vector2(
+          homeSpot.absolutePosition.x +
+              (homeSpot.size.x * 0.10) -
+              ludoBoard.absolutePosition.x,
+          homeSpot.absolutePosition.y -
+              (homeSpot.size.x * 0.50) -
+              ludoBoard.absolutePosition.y,
+        );
+        token.size = Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+        ludoBoard.add(token);
+      }
+
+      if (gameState.players.isEmpty) {
+        Player bluePlayer = Player(
+          playerId: 'PB',
+          tokens: TokenManager().getBlueTokens(),
+          isCurrentTurn: true,
+        );
+        gameState.players.add(bluePlayer);
+      } else {
+        Player bluePlayer = Player(
+          playerId: 'PB',
+          tokens: TokenManager().getBlueTokens(),
+        );
+        gameState.players.add(bluePlayer);
+      }
+    }
+
+    if (TokenManager().getGreenTokens().isEmpty) {
+      final tokenToHome = {
         'GT1': 'G1',
         'GT2': 'G2',
+        'GT3': 'G3',
+        'GT4': 'G4',
       };
-      TokenManager().initializeTokens(tokenToHomeSpotMap);
+      TokenManager().initializeTokens(tokenToHome);
 
-      final List<int> childIndices = [2, 6]; // Third and seventh child
-      final List<List<Token>> tokenLists = [
-        TokenManager().getGreenTokens(), // Third child's tokens
-        TokenManager().getBlueTokens() // Seventh child's tokens
-      ];
-      final List<MaterialColor> tokenColors = [Colors.green, Colors.blue];
+      final child = childrenOfLudoBoard[2];
+      final home = child.children.toList();
+      final homePlate = home[0].children.toList();
+      final homeSpotContainer = homePlate[1].children.toList();
+      final homeSpotList = homeSpotContainer[1].children.toList();
 
-      for (int i = 0; i < childIndices.length; i++) {
-        final childIndex = childIndices[i];
-        final tokens = tokenLists[i];
+      for (var token in TokenManager().getGreenTokens()) {
+        final homeSpot = homeSpotList
+            .whereType<HomeSpot>()
+            .firstWhere((spot) => spot.uniqueId == token.positionId);
+        token.innerCircleColor = Colors.green;
+        token.position = Vector2(
+          homeSpot.absolutePosition.x +
+              (homeSpot.size.x * 0.10) -
+              ludoBoard.absolutePosition.x,
+          homeSpot.absolutePosition.y -
+              (homeSpot.size.x * 0.50) -
+              ludoBoard.absolutePosition.y,
+        );
+        token.size = Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+        ludoBoard.add(token);
+      }
 
-        final child = childrenOfLudoBoard[childIndex];
-        final home = child.children.toList();
-        final homePlate = home[0].children.toList();
-        final homeSpotContainer = homePlate[1].children.toList();
-        final homeSpotList = homeSpotContainer[1].children.toList();
-
-        for (var token in tokens) {
-          final homeSpot = homeSpotList
-              .whereType<HomeSpot>()
-              .firstWhere((spot) => spot.uniqueId == token.positionId);
-          token.innerCircleColor = tokenColors[i];
-          token.position = Vector2(
-            homeSpot.absolutePosition.x +
-                (homeSpot.size.x * 0.10) -
-                ludoBoard.absolutePosition.x,
-            homeSpot.absolutePosition.y -
-                (homeSpot.size.x * 0.50) -
-                ludoBoard.absolutePosition.y,
-          );
-          token.size = Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-          ludoBoard.add(token);
-        }
+      if (gameState.players.isEmpty) {
+        Player greenPlayer = Player(
+          playerId: 'GB',
+          tokens: TokenManager().getBlueTokens(),
+          isCurrentTurn: true,
+        );
+        gameState.players.add(greenPlayer);
+      } else {
+        Player greenPlayer = Player(
+          playerId: 'GB',
+          tokens: TokenManager().getBlueTokens(),
+        );
+        gameState.players.add(greenPlayer);
       }
     }
   }
