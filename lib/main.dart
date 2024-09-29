@@ -551,6 +551,104 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 }
 
+class UpperController extends RectangleComponent with HasGameReference<Ludo> {
+  UpperController({
+    required double width,
+    required double height,
+    Vector2? position, // Add position parameter
+  }) : super(
+          size: Vector2(width, height),
+          paint: Paint()..color = Colors.transparent, // Adjust color as needed
+        ) {
+    final double innerWidth = width * 0.45; // Width of the inner rectangles
+    final double innerHeight = height; // Same height as the outer rectangle
+
+    final leftToken = RectangleComponent(
+        size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
+        position: Vector2(2.2, innerWidth * 0.05), // Sticks to the left
+        paint: Paint()..color = Color(0xFFA0DEFF),
+        children: [
+          CustomRectangleComponent(
+              transparentRight: true,
+              transparentLeft: false,
+              size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
+              position: Vector2(0, 0),
+              paint: Paint()
+                ..color = Colors.black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 1.0
+                ..color = Color(0xFF03346E),
+              children: []),
+        ]);
+
+    final leftDice = RectangleComponent(
+        size: Vector2(innerWidth * 0.4, innerHeight),
+        position: Vector2(innerWidth * 0.4, 0), // Sticks to the left
+        paint: Paint()..color = Color(0xFFA0DEFF),
+        children: [
+          RectangleComponent(
+              size: Vector2(innerWidth * 0.4, innerHeight),
+              paint: Paint()
+                ..color = Colors.transparent
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 4.0
+                ..color = Color(0xFF03346E),
+              children: [
+                RectangleComponent(
+                    position: Vector2(innerWidth * 0.20, innerHeight * 0.5),
+                    children: [
+                      LudoDice(
+                        faceSize: (innerWidth * 0.4) * 0.65,
+                      )
+                    ]),
+              ]),
+        ] // Adjust color as needed
+        );
+
+    final rightDice = RectangleComponent(
+        size: Vector2(innerWidth * 0.4, innerHeight),
+        position: Vector2(width - innerWidth * 0.8, 0), // Sticks to the right
+        paint: Paint()..color = Color(0xFFFFF455),
+        children: [
+          RectangleComponent(
+              size: Vector2(innerWidth * 0.4, innerHeight),
+              paint: Paint()
+                ..color = Colors.transparent
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 4.0
+                ..color = Color(0xFF03346E))
+        ]);
+
+    final rightToken = RectangleComponent(
+        size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
+        position: Vector2(width - innerWidth * 0.4 - 2.5, innerWidth * 0.05),
+        paint: Paint()..color = Color(0xFFFFF455),
+        children: [
+          CustomRectangleComponent(
+              transparentLeft: true,
+              size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
+              position: Vector2(0, 0),
+              paint: Paint()
+                ..color = Colors.black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 1.0
+                ..color = Color(0xFF03346E),
+              children: []),
+        ]);
+
+    add(leftDice);
+    add(leftToken);
+
+    add(rightDice);
+    add(rightToken);
+
+    // Set the position of the UpperController
+    this.position = position ??
+        Vector2.zero(); // Default to (0, 0) if no position is provided
+  }
+}
+
+
 class LowerController extends RectangleComponent with HasGameReference<Ludo> {
   LowerController({
     required double width,
@@ -742,10 +840,14 @@ class Ludo extends FlameGame
     //world.add(camera);
     // world.add(PlayArea());
     // Now you can set up the camera with the screen size
+    world.add(UpperController(
+        position: Vector2(0, width * 0.05),
+        width: width,
+        height: width * 0.20));
     world.add(LudoBoard(
-        width: width, height: width, position: Vector2(0, height * 0.125)));
+        width: width, height: width, position: Vector2(0, height * 0.175)));
     world.add(LowerController(
-        position: Vector2(0, width + (width * 0.25)),
+        position: Vector2(0, width + (width * 0.35)),
         width: width,
         height: width * 0.20));
   }
