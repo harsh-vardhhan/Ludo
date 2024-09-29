@@ -197,6 +197,8 @@ class GameState {
   // Singleton instance
   static final GameState _instance = GameState._();
 
+  List<int> diceChances = List.filled(3, 0, growable: false);
+  int consecutiveSixes = 0; // Track consecutive 6s
   var enableBlueDice = true;
   var enableBlueToken = false;
   var diceNumber = 5;
@@ -440,6 +442,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
         final ludoBoard = world.children.whereType<LudoBoard>().first;
 
         if (gameState.diceNumber == 6) {
+          gameState.consecutiveSixes++;
+
           if (openBlueTokens.isEmpty) {
             // first open position
             final token = allBlueTokens.first;
@@ -657,11 +661,11 @@ class TokenManager {
   void initializeTokens(Map<String, String> tokenToHomeSpotMap) {
     for (var entry in tokenToHomeSpotMap.entries) {
       final token = Token(
-        uniqueId: entry.key,
-        positionId: entry.value,
-        position: Vector2(100, 100), // Adjust position
-        size: Vector2(50, 50), // Adjust size
-      );
+          uniqueId: entry.key,
+          positionId: entry.value,
+          position: Vector2(100, 100), // Adjust position
+          size: Vector2(50, 50), // Adjust size
+          innerCircleColor: Colors.transparent);
       allTokens.add(token);
     }
   }
@@ -669,6 +673,11 @@ class TokenManager {
   // Get all tokens whose uniqueId starts with 'B'
   List<Token> getBlueTokens() {
     return allTokens.where((token) => token.uniqueId.startsWith('B')).toList();
+  }
+
+  // Get all tokens whose uniqueId starts with 'B'
+  List<Token> getGreenTokens() {
+    return allTokens.where((token) => token.uniqueId.startsWith('G')).toList();
   }
 
   // Get all tokens whose uniqueId starts with 'B' and positionId has 3 characters
@@ -727,29 +736,44 @@ class Ludo extends FlameGame
       final tokenToHomeSpotMap = {
         'BT1': 'B1',
         'BT2': 'B2',
+        'GT1': 'G1',
+        'GT2': 'G2',
       };
       TokenManager().initializeTokens(tokenToHomeSpotMap);
-      // get blue home spots
-      final seventhChild = childrenOfLudoBoard[6];
-      final home = seventhChild.children.toList();
-      final homePlate = home[0].children.toList();
-      final homeSpotContainer = homePlate[1].children.toList();
-      final homeSpotList = homeSpotContainer[1].children.toList();
 
-      for (var token in TokenManager().getBlueTokens()) {
-        final homeSpot = homeSpotList
-            .whereType<HomeSpot>()
-            .firstWhere((spot) => spot.uniqueId == token.positionId);
-        token.position = Vector2(
-          homeSpot.absolutePosition.x +
-              (homeSpot.size.x * 0.10) -
-              ludoBoard.absolutePosition.x,
-          homeSpot.absolutePosition.y -
-              (homeSpot.size.x * 0.50) -
-              ludoBoard.absolutePosition.y,
-        );
-        token.size = Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-        ludoBoard.add(token);
+      final List<int> childIndices = [2, 6]; // Third and seventh child
+      final List<List<Token>> tokenLists = [
+        TokenManager().getGreenTokens(), // Third child's tokens
+        TokenManager().getBlueTokens() // Seventh child's tokens
+      ];
+      final List<MaterialColor> tokenColors = [Colors.green, Colors.blue];
+
+      for (int i = 0; i < childIndices.length; i++) {
+        final childIndex = childIndices[i];
+        final tokens = tokenLists[i];
+
+        final child = childrenOfLudoBoard[childIndex];
+        final home = child.children.toList();
+        final homePlate = home[0].children.toList();
+        final homeSpotContainer = homePlate[1].children.toList();
+        final homeSpotList = homeSpotContainer[1].children.toList();
+
+        for (var token in tokens) {
+          final homeSpot = homeSpotList
+              .whereType<HomeSpot>()
+              .firstWhere((spot) => spot.uniqueId == token.positionId);
+          token.innerCircleColor = tokenColors[i];
+          token.position = Vector2(
+            homeSpot.absolutePosition.x +
+                (homeSpot.size.x * 0.10) -
+                ludoBoard.absolutePosition.x,
+            homeSpot.absolutePosition.y -
+                (homeSpot.size.x * 0.50) -
+                ludoBoard.absolutePosition.y,
+          );
+          token.size = Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+          ludoBoard.add(token);
+        }
       }
     }
   }
@@ -1207,16 +1231,18 @@ class Token extends PositionComponent with TapCallbacks {
   final Paint transparentPaint;
   final Paint fillPaint;
   final Paint dropletFillPaint; // Paint for filling the inside of the droplet
+  Color _innerCircleColor;
 
   Token({
     required this.uniqueId, // Mandatory uniqueId
     required this.positionId, // Mandatory positionId
     required Vector2 position, // Position of the token
     required Vector2 size, // Size of the token
+    required Color innerCircleColor, // Mandatory inner fill color
     Color borderColor = Colors.black, // Default border color
-    Color innerCircleColor = Colors.blueAccent, // Default inner fill color
     Color dropletFillColor = Colors.white, // Default droplet fill color
-  })  : borderPaint = Paint()
+  })  : _innerCircleColor = innerCircleColor,
+        borderPaint = Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = size.x * 0.05
           ..color = borderColor,
@@ -1226,11 +1252,17 @@ class Token extends PositionComponent with TapCallbacks {
           ..color = Colors.transparent, // Transparent line
         fillPaint = Paint()
           ..style = PaintingStyle.fill
-          ..color = innerCircleColor,
+          ..color = innerCircleColor, // Use the passed innerCircleColor
         dropletFillPaint = Paint()
           ..style = PaintingStyle.fill
           ..color = dropletFillColor, // Paint for filling droplet
         super(position: position, size: size);
+
+  // Setter for innerCircleColor, updates the fillPaint color
+  set innerCircleColor(Color color) {
+    _innerCircleColor = color;
+    fillPaint.color = color; // Update the paint color when the color changes
+  }
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
@@ -1238,7 +1270,6 @@ class Token extends PositionComponent with TapCallbacks {
     if (gameState.enableBlueToken) {
       List<Token> blueTokens = TokenManager().getBlueTokens();
       final token = blueTokens.firstWhere((t) => t.uniqueId == uniqueId);
-      List<Spot> allSpots = SpotManager().getSpots();
       final world = parent?.parent;
       if (world is World) {
         final ludoBoard = world.children.whereType<LudoBoard>().first;
@@ -1474,7 +1505,7 @@ class BlueGridComponent extends PositionComponent {
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = size.x * 0.025  // Set border width
+                ..strokeWidth = size.x * 0.025 // Set border width
                 ..color = Colors.black, // Set border color to black
               children: [
                 if (col == 2 && row == 3)
@@ -1611,7 +1642,7 @@ class RedGridComponent extends PositionComponent {
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = size.x * 0.025  // Set border width
+                ..strokeWidth = size.x * 0.025 // Set border width
                 ..color = Colors.black, // Set border color to black
               children: [
                 if (col == 2 && row == 2)
@@ -1691,7 +1722,7 @@ class YellowGridComponent extends PositionComponent {
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = size.x * 0.025  // Set border width
+                ..strokeWidth = size.x * 0.025 // Set border width
                 ..color = Colors.black, // Set border color to black
               children: [
                 if (row == 0 && col == 3)
