@@ -197,11 +197,6 @@ class GameState {
   // Singleton instance
   static final GameState _instance = GameState._();
 
-  // Global list to hold matched spots
-  // List<Map<String, dynamic>> matchedSpots = [];
-
-  // List<Map<String, dynamic>> tokenSpots = [];
-
   var enableBlueDice = true;
   var enableBlueToken = false;
   var diceNumber = 5;
@@ -790,12 +785,12 @@ class LudoBoard extends PositionComponent {
     Vector2? position, // Add position parameter
   }) {
     // Define the percentage widths for the components in each row
-    final double firstComponentWidth = width * 0.40;
-    final double secondComponentWidth = width * 0.20;
-    final double thirdComponentWidth = width * 0.40;
+    final double firstComponentWidth = width * 0.398;
+    final double secondComponentWidth = width * 0.199;
+    final double thirdComponentWidth = width * 0.398;
 
-    final double firstRowHeight = width * 0.40;
-    final double secondRowHeight = width * 0.20;
+    final double firstRowHeight = width * 0.398;
+    final double secondRowHeight = width * 0.199;
 
     // Spacing between components
     const double horizontalSpacing = 0.0;
@@ -1034,7 +1029,7 @@ class StarComponent extends PositionComponent {
   }) : borderPaint = Paint()
           ..color = borderColor
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0 {
+          ..strokeWidth = size.x * 0.035 {
     this.size = size; // Set the size
   }
 
@@ -1223,7 +1218,7 @@ class Token extends PositionComponent with TapCallbacks {
     Color dropletFillColor = Colors.white, // Default droplet fill color
   })  : borderPaint = Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.2
+          ..strokeWidth = size.x * 0.05
           ..color = borderColor,
         transparentPaint = Paint()
           ..style = PaintingStyle.stroke
@@ -1361,7 +1356,7 @@ class GreenGridComponent extends PositionComponent {
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = 0.6 // Set border width
+                ..strokeWidth = size.x * 0.025 // Set border width
                 ..color = Colors.black, // Set border color to black
               children: [
                 if (col == 0 && row == 2)
@@ -1479,7 +1474,7 @@ class BlueGridComponent extends PositionComponent {
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = 0.6 // Set border width
+                ..strokeWidth = size.x * 0.025  // Set border width
                 ..color = Colors.black, // Set border color to black
               children: [
                 if (col == 2 && row == 3)
@@ -1616,7 +1611,7 @@ class RedGridComponent extends PositionComponent {
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = 0.6 // Set border width
+                ..strokeWidth = size.x * 0.025  // Set border width
                 ..color = Colors.black, // Set border color to black
               children: [
                 if (col == 2 && row == 2)
@@ -1696,7 +1691,7 @@ class YellowGridComponent extends PositionComponent {
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = 0.6 // Set border width
+                ..strokeWidth = size.x * 0.025  // Set border width
                 ..color = Colors.black, // Set border color to black
               children: [
                 if (row == 0 && col == 3)
