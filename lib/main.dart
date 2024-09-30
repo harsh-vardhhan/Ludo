@@ -409,6 +409,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   late final RectangleComponent innerRectangle; // inner rectangle component
   late final DiceFaceComponent diceFace; // The dice face showing dots
 
+  // final Player player;
   final Random _random = Random(); // Random number generator
 
   @override
@@ -502,7 +503,10 @@ class LudoDice extends PositionComponent with TapCallbacks {
     }
   }
 
-  LudoDice({required this.faceSize}) {
+  LudoDice({
+    required this.faceSize,
+    //required this.player
+  }) {
     // Calculate properties based on faceSize
     borderRadius = faceSize / 5;
     innerRectangleWidth = faceSize * 0.9;
@@ -562,6 +566,7 @@ class UpperController extends RectangleComponent with HasGameReference<Ludo> {
         ) {
     final double innerWidth = width * 0.45; // Width of the inner rectangles
     final double innerHeight = height; // Same height as the outer rectangle
+    final gameState = GameState();
 
     final leftToken = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
@@ -610,12 +615,7 @@ class UpperController extends RectangleComponent with HasGameReference<Ludo> {
                 ..color = Color(0xFF03346E),
               children: [
                 RectangleComponent(
-                    position: Vector2(innerWidth * 0.20, innerHeight * 0.5),
-                    children: [
-                      LudoDice(
-                        faceSize: (innerWidth * 0.4) * 0.65,
-                      )
-                    ]),
+                    position: Vector2(innerWidth * 0.20, innerHeight * 0.5)),
               ])
         ]);
 
@@ -659,6 +659,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
         ) {
     final double innerWidth = width * 0.45; // Width of the inner rectangles
     final double innerHeight = height; // Same height as the outer rectangle
+    final gameState = GameState();
 
     final leftToken = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
@@ -692,12 +693,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
                 ..color = Color(0xFF03346E),
               children: [
                 RectangleComponent(
-                    position: Vector2(innerWidth * 0.20, innerHeight * 0.5),
-                    children: [
-                      LudoDice(
-                        faceSize: (innerWidth * 0.4) * 0.65,
-                      )
-                    ]),
+                    position: Vector2(innerWidth * 0.20, innerHeight * 0.5)),
               ]),
         ] // Adjust color as needed
         );
@@ -890,18 +886,32 @@ class Ludo extends FlameGame
 
       if (gameState.players.isEmpty) {
         Player bluePlayer = Player(
-          playerId: 'PB',
+          playerId: 'BP',
           tokens: TokenManager().getBlueTokens(),
           isCurrentTurn: true,
         );
         gameState.players.add(bluePlayer);
       } else {
         Player bluePlayer = Player(
-          playerId: 'PB',
+          playerId: 'BP',
           tokens: TokenManager().getBlueTokens(),
         );
         gameState.players.add(bluePlayer);
       }
+
+      // dice for player blue
+      final lowerController = world.children.whereType<LowerController>().first;
+      final lowerControllerComponents = lowerController.children.toList();
+      final leftDice = lowerControllerComponents[0]
+          .children
+          .whereType<RectangleComponent>()
+          .first;
+      final leftDiceContainer =
+          leftDice.children.whereType<RectangleComponent>().first;
+
+      leftDiceContainer.add(LudoDice(
+        faceSize: leftDice.size.x * 0.70,
+      ));
     }
 
     if (TokenManager().getGreenTokens().isEmpty) {
@@ -938,18 +948,32 @@ class Ludo extends FlameGame
 
       if (gameState.players.isEmpty) {
         Player greenPlayer = Player(
-          playerId: 'GB',
+          playerId: 'GP',
           tokens: TokenManager().getBlueTokens(),
           isCurrentTurn: true,
         );
         gameState.players.add(greenPlayer);
       } else {
         Player greenPlayer = Player(
-          playerId: 'GB',
+          playerId: 'GP',
           tokens: TokenManager().getBlueTokens(),
         );
         gameState.players.add(greenPlayer);
       }
+
+      // dice for player green
+      final upperController = world.children.whereType<UpperController>().first;
+      final upperControllerComponents = upperController.children.toList();
+      final rightDice = upperControllerComponents[2]
+          .children
+          .whereType<RectangleComponent>()
+          .first;
+      final rightDiceContainer =
+          rightDice.children.whereType<RectangleComponent>().first;
+
+      rightDiceContainer.add(LudoDice(
+        faceSize: rightDice.size.x * 0.70,
+      ));
     }
   }
 
