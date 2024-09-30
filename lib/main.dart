@@ -190,6 +190,65 @@ const blueTokenPath = [
   'B10',
 ];
 
+const greenTokenPath = [
+  'G21',
+  'G22',
+  'G23',
+  'G24',
+  'G25',
+  'Y00',
+  'Y10',
+  'Y20',
+  'Y30',
+  'Y40',
+  'Y50',
+  'Y51',
+  'Y52',
+  'Y42',
+  'Y32',
+  'Y22',
+  'Y12',
+  'Y02',
+  'B20',
+  'B21',
+  'B22',
+  'B23',
+  'B24',
+  'B25',
+  'B15',
+  'B05',
+  'B04',
+  'B03',
+  'B02',
+  'B01',
+  'B00',
+  'R52',
+  'R42',
+  'R32',
+  'R22',
+  'R12',
+  'R02',
+  'R01',
+  'R00',
+  'R10',
+  'R20',
+  'R30',
+  'R40',
+  'R50',
+  'G05',
+  'G04',
+  'G03',
+  'G02',
+  'G01',
+  'G00',
+  'G10',
+  'G11',
+  'G12',
+  'G13',
+  'G14',
+  'G15',
+];
+
 class GameState {
   // Private constructor
   GameState._();
@@ -199,14 +258,26 @@ class GameState {
 
   List<int> diceChances = List.filled(3, 0, growable: false);
   int consecutiveSixes = 0; // Track consecutive 6s
-  var enableBlueDice = true;
-  var enableBlueToken = false;
   var diceNumber = 5;
   List<Player> players = [];
+  int currentPlayerIndex = 0;
 
   // Factory method to access the instance
   factory GameState() {
     return _instance;
+  }
+
+  void rotateTurn() {
+    // Mark current player as not having their turn anymore
+    players[currentPlayerIndex].isCurrentTurn = false;
+    do {
+      // Move to the next player
+      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    } while (!players[currentPlayerIndex].isActive ||
+        players[currentPlayerIndex].hasWon);
+    // Mark the next player as the current player
+    players[currentPlayerIndex].isCurrentTurn = true;
+    print(currentPlayerIndex);
   }
 }
 
@@ -401,6 +472,7 @@ void openToken(Token token, List<String> blueTokenPath, LudoBoard ludoBoard) {
 }
 
 class LudoDice extends PositionComponent with TapCallbacks {
+  final gameState = GameState();
   final double faceSize; // size of the square
   late final double borderRadius; // radius of the curved edges
   late final double innerRectangleWidth; // width of the inner rectangle
@@ -411,6 +483,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   final Player player;
   final Random _random = Random(); // Random number generator
+
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
@@ -434,11 +507,12 @@ class LudoDice extends PositionComponent with TapCallbacks {
         ),
       );
 
-      final playerId = player.playerId[0];
+      final playerId = player.playerId[gameState.currentPlayerIndex];
 
       List<Token> allTokens = TokenManager().getAllTokens(playerId);
       List<Token> openTokens = TokenManager().getOpenTokens(playerId);
       List<Token> closeTokens = TokenManager().getCloseTokens(playerId);
+      List<String> tokenPath = TokenManager().getTokenPath(playerId);
 
       final world = parent?.parent?.parent?.parent?.parent;
 
@@ -447,37 +521,38 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
         if (gameState.diceNumber == 6) {
           gameState.consecutiveSixes++;
-
-          if (openTokens.isEmpty) {
-            // first open position
-
-            final token = allTokens.first;
-            openToken(token, blueTokenPath, ludoBoard);
-          } else {
-            // dice number is 6 and open token exists
-            if (openTokens.singleOrNull != null &&
-                closeTokens.isEmpty) {
-              // single open token & no close tokens
-              final token = openTokens.first;
-              await moveToken(
-                token: token,
-                tokenPath: blueTokenPath,
-                diceNumber: gameState.diceNumber,
-                ludoBoard: ludoBoard,
-              );
-            } else if (openTokens.singleOrNull != null &&
-                closeTokens.isNotEmpty) {
-              // single open token & some close tokens
-              gameState.enableBlueToken = true;
-            } else if (openTokens.isNotEmpty) {
-              // mutliple open tokens
-              multiMoveToken(
-                openTokens: openTokens,
-                blueTokenPath: blueTokenPath,
-                gameState: gameState,
-                ludoBoard: ludoBoard,
-              );
+          if (gameState.consecutiveSixes < 3) {
+            if (openTokens.isEmpty) {
+              // first open position
+              final token = allTokens.first;
+              openToken(token, tokenPath, ludoBoard);
+            } else {
+              // dice number is 6 and open token exists
+              if (openTokens.singleOrNull != null && closeTokens.isEmpty) {
+                // single open token & no close tokens
+                final token = openTokens.first;
+                await moveToken(
+                  token: token,
+                  tokenPath: tokenPath,
+                  diceNumber: gameState.diceNumber,
+                  ludoBoard: ludoBoard,
+                );
+              } else if (openTokens.singleOrNull != null &&
+                  closeTokens.isNotEmpty) {
+                // single open token & some close tokens
+              } else if (openTokens.isNotEmpty) {
+                // mutliple open tokens
+                multiMoveToken(
+                  openTokens: openTokens,
+                  tokenPath: tokenPath,
+                  gameState: gameState,
+                  ludoBoard: ludoBoard,
+                );
+              }
             }
+          } else {
+            gameState.consecutiveSixes = 0;
+            gameState.rotateTurn();
           }
         } else {
           // non six dice number
@@ -487,7 +562,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
             await moveToken(
               token: token,
-              tokenPath: blueTokenPath,
+              tokenPath: tokenPath,
               diceNumber: gameState.diceNumber,
               ludoBoard: ludoBoard,
             );
@@ -496,11 +571,12 @@ class LudoDice extends PositionComponent with TapCallbacks {
             // check if open positions have space to move
             multiMoveToken(
               openTokens: openTokens,
-              blueTokenPath: blueTokenPath,
+              tokenPath: tokenPath,
               gameState: gameState,
               ludoBoard: ludoBoard,
             );
           }
+          gameState.rotateTurn();
         }
       }
     }
@@ -764,7 +840,9 @@ class TokenManager {
   }
 
   List<Token> getAllTokens(player) {
-    return allTokens.where((token) => token.uniqueId.startsWith(player)).toList();
+    return allTokens
+        .where((token) => token.uniqueId.startsWith(player))
+        .toList();
   }
 
   List<Token> getOpenTokens(player) {
@@ -779,6 +857,16 @@ class TokenManager {
         .where((token) =>
             token.uniqueId.startsWith(player) && token.positionId.length == 2)
         .toList();
+  }
+
+  List<String> getTokenPath(player) {
+    if (player == 'B') {
+      return blueTokenPath;
+    } else if (player == 'G') {
+      return greenTokenPath;
+    } else {
+      return [];
+    }
   }
 
   // Get all tokens whose uniqueId starts with 'B'
@@ -1316,18 +1404,18 @@ class StarComponent extends PositionComponent {
 
 void multiMoveToken({
   required List<Token> openTokens,
-  required List<String> blueTokenPath,
+  required List<String> tokenPath,
   required GameState gameState,
   required LudoBoard ludoBoard,
 }) {
   final tokens = openTokens.iterator;
-  final pathSize = blueTokenPath.length;
+  final pathSize = tokenPath.length;
   List<Token> movableTokens = [];
 
   // Iterate through each token and determine if it can move
   while (tokens.moveNext()) {
     final token = tokens.current;
-    final index = blueTokenPath.indexOf(token.positionId);
+    final index = tokenPath.indexOf(token.positionId);
     if (index != -1) {
       final distance = pathSize - index;
       if (distance > gameState.diceNumber) {
@@ -1338,12 +1426,12 @@ void multiMoveToken({
 
   // Check if multiple tokens are movable
   if (movableTokens.length > 1) {
-    gameState.enableBlueToken = true; // Enable token movement
+    // gameState.enableBlueToken = true; // Enable token movement
   } else if (movableTokens.length == 1) {
     final token = movableTokens.first;
     moveToken(
       token: token,
-      tokenPath: blueTokenPath,
+      tokenPath: tokenPath,
       diceNumber: gameState.diceNumber,
       ludoBoard: ludoBoard,
     );
@@ -1365,8 +1453,6 @@ Future<void> moveToken({
       ludoBoard, // Ensure ludoBoard is a PositionComponent
 }) async {
   List<Spot> allSpots = SpotManager().getSpots();
-  final gameState = GameState();
-  gameState.enableBlueDice = false;
   // Get the current and final index
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
@@ -1429,7 +1515,6 @@ Future<void> moveToken({
       await Future.delayed(Duration(milliseconds: 300));
     }
   }
-  gameState.enableBlueDice = true;
 }
 
 class Token extends PositionComponent with TapCallbacks {
@@ -1475,7 +1560,6 @@ class Token extends PositionComponent with TapCallbacks {
   @override
   Future<void> onTapDown(TapDownEvent event) async {
     final gameState = GameState();
-    if (gameState.enableBlueToken) {
       List<Token> blueTokens = TokenManager().getBlueTokens();
       final token = blueTokens.firstWhere((t) => t.uniqueId == uniqueId);
       final world = parent?.parent;
@@ -1488,16 +1572,13 @@ class Token extends PositionComponent with TapCallbacks {
               tokenPath: blueTokenPath,
               diceNumber: gameState.diceNumber,
               ludoBoard: ludoBoard);
-          gameState.enableBlueToken = false;
         } else {
           if (gameState.diceNumber == 6) {
             // opening position
             openToken(token, blueTokenPath, ludoBoard);
-            gameState.enableBlueToken = false;
           }
         }
       }
-    }
   }
 
   @override
