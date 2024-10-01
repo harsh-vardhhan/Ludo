@@ -525,6 +525,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
             if (openTokens.isEmpty) {
               // first open position
               final token = allTokens.first;
+              token.state = TokenState.onBoard;
               openToken(token, tokenPath, ludoBoard);
             } else {
               // dice number is 6 and open token exists
@@ -899,6 +900,27 @@ class Player {
     this.totalTokensInHome = 0, // Default: no tokens in home initially
     this.hasWon = false, // Default: player hasn't won yet
   });
+  
+  // Helper method to check if all tokens are in base
+  bool allTokensInBase() {
+    return tokens.every((token) => token.isInBase());
+  }
+
+  // Helper method to get the tokens that are on the board
+  List<Token> getTokensOnBoard() {
+    return tokens.where((token) => token.isOnBoard()).toList();
+  }
+
+  // Helper method to check if only one token is on the board
+  bool hasOneTokenOnBoard() {
+    return getTokensOnBoard().length == 1;
+  }
+
+  // Helper method to check if there are multiple tokens on the board
+  bool hasMultipleTokensOnBoard() {
+    return getTokensOnBoard().length > 1;
+  }
+
 }
 
 class Ludo extends FlameGame
@@ -1517,9 +1539,18 @@ Future<void> moveToken({
   }
 }
 
+// Enum to define token states
+enum TokenState {
+  inBase,
+  onBoard,
+  inHome,
+}
+
 class Token extends PositionComponent with TapCallbacks {
   final String uniqueId; // Mandatory unique ID for the token
   String positionId; // Mandatory position ID for the token
+  TokenState state;
+
   final Paint borderPaint;
   final Paint transparentPaint;
   final Paint fillPaint;
@@ -1534,6 +1565,7 @@ class Token extends PositionComponent with TapCallbacks {
     required Color innerCircleColor, // Mandatory inner fill color
     Color borderColor = Colors.black, // Default border color
     Color dropletFillColor = Colors.white, // Default droplet fill color
+    this.state = TokenState.inBase,
   })  : _innerCircleColor = innerCircleColor,
         borderPaint = Paint()
           ..style = PaintingStyle.stroke
@@ -1551,6 +1583,10 @@ class Token extends PositionComponent with TapCallbacks {
           ..color = dropletFillColor, // Paint for filling droplet
         super(position: position, size: size);
 
+  bool isInBase() => state == TokenState.inBase;
+  bool isOnBoard() => state == TokenState.onBoard;
+  bool isInHome() => state == TokenState.inHome;
+  
   // Setter for innerCircleColor, updates the fillPaint color
   set innerCircleColor(Color color) {
     _innerCircleColor = color;
