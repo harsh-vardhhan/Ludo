@@ -281,6 +281,11 @@ class GameState {
     canMoveTokenOnBoard = true;
   }
 
+  void enableMoveFromBoth() {
+    canMoveTokenFromBase = true;
+    canMoveTokenOnBoard = true;
+  }
+
   void resetTokenMovement() {
     canMoveTokenFromBase = false;
     canMoveTokenOnBoard = false;
@@ -595,10 +600,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
             } else {
               // If multiple tokens can move, allow manual tapping
               player.enableToken = true;
-              if (tokensInBase.isNotEmpty) {
+              if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
+                gameState.enableMoveFromBoth();
+              } else if (tokensInBase.isNotEmpty) {
                 gameState.enableMoveFromBase();
-              }
-              if (tokensOnBoard.isNotEmpty) {
+              } else if (tokensOnBoard.isNotEmpty) {
                 gameState.enableMoveOnBoard();
               }
             }
