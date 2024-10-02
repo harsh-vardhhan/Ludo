@@ -263,21 +263,39 @@ class GameState {
   List<Player> players = [];
   int currentPlayerIndex = 0;
 
+  bool canMoveTokenFromBase = false;
+  bool canMoveTokenOnBoard = false;
+
   // Factory method to access the instance
   factory GameState() {
     return _instance;
   }
 
-  // Get the current player
-  Player get currentPlayer => players[currentPlayerIndex];
+  void enableMoveFromBase() {
+    canMoveTokenFromBase = true;
+    canMoveTokenOnBoard = false;
+  }
 
-  // Function to switch to the next player's turn
+  void enableMoveOnBoard() {
+    canMoveTokenFromBase = false;
+    canMoveTokenOnBoard = true;
+  }
+
+  void resetTokenMovement() {
+    canMoveTokenFromBase = false;
+    canMoveTokenOnBoard = false;
+  }
+
   void switchToNextPlayer() {
     currentPlayer.isCurrentTurn = false;
     currentPlayer.resetExtraTurns(); // Reset extra turns when switching turns
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
     players[currentPlayerIndex].isCurrentTurn = true;
+    players[currentPlayerIndex].enableDice = true;
   }
+
+  // Get the current player
+  Player get currentPlayer => players[currentPlayerIndex];
 }
 
 class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
@@ -491,6 +509,17 @@ void applyMoveEffect(Token token, Vector2 targetPosition) {
   token.add(moveToEffect);
 }
 
+List<String> getTokenPath(String playerId) {
+  switch (playerId) {
+    case 'BP':
+      return blueTokenPath;
+    case 'GP':
+      return greenTokenPath;
+    default:
+      return [];
+  }
+}
+
 class LudoDice extends PositionComponent with TapCallbacks {
   final gameState = GameState();
   final double faceSize; // size of the square
@@ -508,91 +537,97 @@ class LudoDice extends PositionComponent with TapCallbacks {
   Future<void> onTapDown(TapDownEvent event) async {
     final gameState = GameState();
 
-    // Ensure only the current player's dice can be tapped
-    if (player.isCurrentTurn && player == gameState.currentPlayer) {
-      int diceNumber = _random.nextInt(6) + 1;
+    if (player.enableDice) {
+      player.enableDice = false;
+      if (player.isCurrentTurn && player == gameState.currentPlayer) {
+        int diceNumber = _random.nextInt(6) + 1;
 
-      gameState.diceNumber = diceNumber;
-      diceFace.updateDiceValue(diceNumber);
+        gameState.diceNumber = diceNumber;
+        diceFace.updateDiceValue(diceNumber);
 
-      // Apply a rotate effect to the dice when tapped
-      add(
-        RotateEffect.by(
-          tau, // Full 360-degree rotation (2π radians)
-          EffectController(
-            duration: 0.5,
-            curve: Curves.easeInOut,
+        // Apply a rotate effect to the dice when tapped
+        add(
+          RotateEffect.by(
+            tau, // Full 360-degree rotation (2π radians)
+            EffectController(
+              duration: 0.5,
+              curve: Curves.easeInOut,
+            ),
           ),
-        ),
-      );
+        );
 
-      List<Token> tokensInBase = player.tokens
-          .where((token) => token.state == TokenState.inBase)
-          .toList();
-      List<Token> tokensOnBoard = player.tokens
-          .where((token) => token.state == TokenState.onBoard)
-          .toList();
+        final world = parent?.parent?.parent?.parent?.parent;
+        if (world is World) {
+          final ludoBoard = world.children.whereType<LudoBoard>().first;
 
-      // Helper function to get token path based on player ID
-      List<String> getTokenPath(String playerId) {
-        switch (playerId) {
-          case 'BP':
-            return blueTokenPath;
-          case 'GP':
-            return greenTokenPath;
-          default:
-            return [];
-        }
-      }
+          // Handle token movement logic based on dice number
+          if (diceNumber == 6) {
+            // Grant extra turn
+            player.grantAnotherTurn();
 
-      final world = parent?.parent?.parent?.parent?.parent;
-      if (world is World) {
-        final ludoBoard = world.children.whereType<LudoBoard>().first;
+            // Handle token movement when dice is 6
+            List<Token> tokensInBase = player.tokens
+                .where((token) => token.state == TokenState.inBase)
+                .toList();
+            List<Token> tokensOnBoard = player.tokens
+                .where((token) => token.state == TokenState.onBoard)
+                .toList();
 
-        if (diceNumber == 6) {
-          // Check if player rolled three consecutive sixes
-          if (player.hasRolledThreeConsecutiveSixes()) {
-            // Skip the player's turn after 3 consecutive sixes
-            print('Player ${player.playerId} rolled 3 sixes! Turn skipped.');
-            gameState.switchToNextPlayer();
-            return;
-          }
-
-          // Allow token movement when rolling a six
-          if (tokensInBase.isNotEmpty) {
-            Token tokenToOpen = tokensInBase.first;
-            moveOutOfBase(
-                token: tokenToOpen,
+            if (tokensInBase.length == 1) {
+              // Move the only token out of base automatically
+              moveOutOfBase(
+                token: tokensInBase.first,
                 tokenPath: getTokenPath(player.playerId),
-                ludoBoard: ludoBoard);
-          } else if (tokensOnBoard.isNotEmpty) {
-            Token tokenToMove = tokensOnBoard.first;
-            moveForward(
-                token: tokenToMove,
+                ludoBoard: ludoBoard,
+              );
+              player.enableDice = true;
+              gameState.resetTokenMovement();
+            } else if (tokensInBase.isEmpty && tokensOnBoard.length == 1) {
+              // Automatically move the only token on the board
+              moveForward(
+                token: tokensOnBoard.first,
                 tokenPath: getTokenPath(player.playerId),
                 diceNumber: diceNumber,
-                ludoBoard: ludoBoard);
-          }
-
-          // Player gets another turn when rolling a six
-          player.grantAnotherTurn();
-        } else {
-          // Reset extra turns (including consecutive sixes) if a non-six number is rolled
-          player.resetExtraTurns();
-
-          if (tokensOnBoard.isNotEmpty) {
-            Token tokenToMove = tokensOnBoard.first;
-            moveForward(
-                token: tokenToMove,
-                tokenPath: getTokenPath(player.playerId),
-                diceNumber: diceNumber,
-                ludoBoard: ludoBoard);
+                ludoBoard: ludoBoard,
+              );
+              gameState.switchToNextPlayer();
+              player.enableDice = true;
+            } else {
+              // If multiple tokens can move, allow manual tapping
+              player.enableToken = true;
+              if (tokensInBase.isNotEmpty) {
+                gameState.enableMoveFromBase();
+              }
+              if (tokensOnBoard.isNotEmpty) {
+                gameState.enableMoveOnBoard();
+              }
+            }
           } else {
-            print('No tokens available to move for player ${player.playerId}.');
-          }
+            // Non-six roll, only enable movement on the board if multiple tokens exist
+            List<Token> tokensOnBoard = player.tokens
+                .where((token) => token.state == TokenState.onBoard)
+                .toList();
 
-          // Switch to the next player after moving a token for non-six rolls
-          gameState.switchToNextPlayer();
+            if (tokensOnBoard.length == 1) {
+              // Automatically move the only token on the board
+              moveForward(
+                token: tokensOnBoard.first,
+                tokenPath: getTokenPath(player.playerId),
+                diceNumber: diceNumber,
+                ludoBoard: ludoBoard,
+              );
+              gameState.switchToNextPlayer();
+            } else if (tokensOnBoard.isNotEmpty) {
+              // Allow manual tapping for multiple tokens
+              player.enableToken = true;
+              gameState.enableMoveOnBoard();
+            } else {
+              // No tokens to move, switch turn
+              print(
+                  'No tokens available to move for player ${player.playerId}.');
+              gameState.switchToNextPlayer();
+            }
+          }
         }
       }
     }
@@ -750,7 +785,6 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
         ) {
     final double innerWidth = width * 0.45; // Width of the inner rectangles
     final double innerHeight = height; // Same height as the outer rectangle
-    final gameState = GameState();
 
     final leftToken = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
@@ -846,7 +880,7 @@ class TokenManager {
   void initializeTokens(Map<String, String> tokenToHomeSpotMap) {
     for (var entry in tokenToHomeSpotMap.entries) {
       final token = Token(
-          uniqueId: entry.key,
+          tokenId: entry.key,
           positionId: entry.value,
           position: Vector2(100, 100), // Adjust position
           size: Vector2(50, 50), // Adjust size
@@ -857,21 +891,21 @@ class TokenManager {
 
   List<Token> getAllTokens(player) {
     return allTokens
-        .where((token) => token.uniqueId.startsWith(player))
+        .where((token) => token.tokenId.startsWith(player))
         .toList();
   }
 
   List<Token> getOpenTokens(player) {
     return allTokens
         .where((token) =>
-            token.uniqueId.startsWith(player) && token.positionId.length == 3)
+            token.tokenId.startsWith(player) && token.positionId.length == 3)
         .toList();
   }
 
   List<Token> getCloseTokens(player) {
     return allTokens
         .where((token) =>
-            token.uniqueId.startsWith(player) && token.positionId.length == 2)
+            token.tokenId.startsWith(player) && token.positionId.length == 2)
         .toList();
   }
 
@@ -887,12 +921,12 @@ class TokenManager {
 
   // Get all tokens whose uniqueId starts with 'B'
   List<Token> getBlueTokens() {
-    return allTokens.where((token) => token.uniqueId.startsWith('B')).toList();
+    return allTokens.where((token) => token.tokenId.startsWith('B')).toList();
   }
 
   // Get all tokens whose uniqueId starts with 'B'
   List<Token> getGreenTokens() {
-    return allTokens.where((token) => token.uniqueId.startsWith('G')).toList();
+    return allTokens.where((token) => token.tokenId.startsWith('G')).toList();
   }
 }
 
@@ -905,6 +939,8 @@ class Player {
   int totalTokensInHome; // Number of tokens in the home position
   bool hasWon; // Has the player won the game?
   int extraTurns; // Count of extra turns granted
+  bool enableDice;
+  bool enableToken;
 
   // Constructor to initialize the player's attributes
   Player({
@@ -915,7 +951,9 @@ class Player {
     this.score = 0, // Default: score starts at 0
     this.totalTokensInHome = 0, // Default: no tokens in home initially
     this.hasWon = false, // Default: player hasn't won yet
-    this.extraTurns = 0, // Default to 0 extra turns
+    this.extraTurns = 0,
+    this.enableDice = false, // Default to 0 extra turns
+    this.enableToken = false,
   });
 
   // Helper method to check if all tokens are in base
@@ -946,6 +984,12 @@ class Player {
   // Method to grant another turn (includes handling six rolls)
   void grantAnotherTurn() {
     extraTurns++; // Increment the count of extra turns
+  }
+
+  void consumeExtraTurn() {
+    if (extraTurns > 0) {
+      extraTurns--;
+    }
   }
 
   // Method to check if three consecutive sixes were rolled
@@ -1039,23 +1083,33 @@ class Ludo extends FlameGame
         ludoBoard.add(token);
       }
 
+      const playerId = 'BP';
+      final tokens = TokenManager().getBlueTokens();
+
       if (gameState.players.isEmpty) {
         Player bluePlayer = Player(
-          playerId: 'BP',
-          tokens: TokenManager().getBlueTokens(),
+          playerId: playerId,
+          tokens: tokens,
           isCurrentTurn: true,
+          enableDice: true,
         );
         gameState.players.add(bluePlayer);
+        for (var token in tokens) {
+          token.player = bluePlayer;
+        }
       } else {
         Player bluePlayer = Player(
-          playerId: 'BP',
-          tokens: TokenManager().getBlueTokens(),
+          playerId: playerId,
+          tokens: tokens,
         );
         gameState.players.add(bluePlayer);
+        for (var token in tokens) {
+          token.player = bluePlayer;
+        }
       }
 
       final player =
-          gameState.players.firstWhere((player) => player.playerId == 'BP');
+          gameState.players.firstWhere((player) => player.playerId == playerId);
 
       // dice for player blue
       final lowerController = world.children.whereType<LowerController>().first;
@@ -1105,23 +1159,33 @@ class Ludo extends FlameGame
         ludoBoard.add(token);
       }
 
+      const playerId = 'GP';
+      final tokens = TokenManager().getGreenTokens();
+
       if (gameState.players.isEmpty) {
         Player greenPlayer = Player(
-          playerId: 'GP',
-          tokens: TokenManager().getGreenTokens(),
+          playerId: playerId,
+          tokens: tokens,
           isCurrentTurn: true,
+          enableDice: true,
         );
         gameState.players.add(greenPlayer);
+        for (var token in tokens) {
+          token.player = greenPlayer;
+        }
       } else {
         Player greenPlayer = Player(
-          playerId: 'GP',
-          tokens: TokenManager().getGreenTokens(),
+          playerId: playerId,
+          tokens: tokens,
         );
         gameState.players.add(greenPlayer);
+        for (var token in tokens) {
+          token.player = greenPlayer;
+        }
       }
 
       final player =
-          gameState.players.firstWhere((player) => player.playerId == 'GP');
+          gameState.players.firstWhere((player) => player.playerId == playerId);
 
       // dice for player green
       final upperController = world.children.whereType<UpperController>().first;
@@ -1591,25 +1655,26 @@ enum TokenState {
 }
 
 class Token extends PositionComponent with TapCallbacks {
-  final String uniqueId; // Mandatory unique ID for the token
+  late final Player player; // Unique ID for the player
+  final String tokenId; // Mandatory unique ID for the token
   String positionId; // Mandatory position ID for the token
-  TokenState state;
+  TokenState state; // Current state of the token
 
-  final Paint borderPaint;
-  final Paint transparentPaint;
-  final Paint fillPaint;
+  final Paint borderPaint; // Paint for the token's border
+  final Paint transparentPaint; // Paint for transparent areas
+  final Paint fillPaint; // Paint for filling the token
   final Paint dropletFillPaint; // Paint for filling the inside of the droplet
-  Color _innerCircleColor;
+  Color _innerCircleColor; // Inner circle color for the token
 
   Token({
-    required this.uniqueId, // Mandatory uniqueId
-    required this.positionId, // Mandatory positionId
-    required Vector2 position, // Position of the token
+    required this.tokenId, // Mandatory unique ID for the token
+    required this.positionId, // Mandatory position ID for the token
+    required Vector2 position, // Initial position of the token
     required Vector2 size, // Size of the token
     required Color innerCircleColor, // Mandatory inner fill color
     Color borderColor = Colors.black, // Default border color
     Color dropletFillColor = Colors.white, // Default droplet fill color
-    this.state = TokenState.inBase,
+    this.state = TokenState.inBase, // Default state
   })  : _innerCircleColor = innerCircleColor,
         borderPaint = Paint()
           ..style = PaintingStyle.stroke
@@ -1635,6 +1700,69 @@ class Token extends PositionComponent with TapCallbacks {
   set innerCircleColor(Color color) {
     _innerCircleColor = color;
     fillPaint.color = color; // Update the paint color when the color changes
+  }
+
+  @override
+  Future<void> onTapDown(TapDownEvent event) async {
+    super.onTapDown(event);
+
+    final world = parent?.parent;
+
+    if (player.enableToken) {
+      player.enableToken = false;
+      if (world is World) {
+        final ludoBoard = world.children.whereType<LudoBoard>().first;
+        final gameState = GameState();
+
+        if (gameState.currentPlayer.playerId == player.playerId) {
+          if (gameState.diceNumber == 6) {
+            // Handle movement logic
+            if (state == TokenState.inBase && gameState.canMoveTokenFromBase) {
+              moveOutOfBase(
+                  token: this,
+                  tokenPath: getTokenPath(player.playerId),
+                  ludoBoard: ludoBoard);
+              // Do not consume the extra turn yet
+            } else if (state == TokenState.onBoard &&
+                gameState.canMoveTokenOnBoard) {
+              moveForward(
+                  token: this,
+                  tokenPath: getTokenPath(player.playerId),
+                  diceNumber: gameState.diceNumber,
+                  ludoBoard: ludoBoard);
+              // Do not consume the extra turn yet
+            }
+            player.enableDice = true;
+            // Allow the player to take another action since they rolled a six
+            return; // Exit early to keep the turn for the player
+          }
+
+          // Non-six logic
+          if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
+            moveForward(
+                token: this,
+                tokenPath: getTokenPath(player.playerId),
+                diceNumber: gameState.diceNumber,
+                ludoBoard: ludoBoard);
+          }
+
+          // Consume the extra turn after a valid movement
+          player.consumeExtraTurn();
+          handleTurnEnd(); // Check if the turn should switch
+        }
+      }
+    }
+  }
+
+  void handleTurnEnd() {
+    final gameState = GameState();
+    if (player.extraTurns > 0) {
+      // If the player still has extra turns, they can roll again or take action
+      print('${player.playerId} gets an extra turn!');
+    } else {
+      // Switch to the next player if no extra turns remain
+      gameState.switchToNextPlayer();
+    }
   }
 
   @override
