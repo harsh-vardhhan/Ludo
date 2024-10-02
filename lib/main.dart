@@ -1031,16 +1031,13 @@ class Player {
 
   // Method to grant another turn (includes handling six rolls)
   void grantAnotherTurn() {
-    print("******grantAnotherTurn*******");
     extraTurns++; // Increment the count of extra turns
   }
 
   void consumeExtraTurn() {
-    print("******consumeExtraTurn*******");
     if (extraTurns > 0) {
       extraTurns--;
     }
-    print(extraTurns);
   }
 
   // Method to check if three consecutive sixes were rolled
