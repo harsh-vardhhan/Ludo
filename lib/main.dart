@@ -293,8 +293,11 @@ class GameState {
 
   void switchToNextPlayer() {
     currentPlayer.isCurrentTurn = false;
+    currentPlayer.enableDice = false;
+
     currentPlayer.resetExtraTurns(); // Reset extra turns when switching turns
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    
     players[currentPlayerIndex].isCurrentTurn = true;
     players[currentPlayerIndex].enableDice = true;
   }
@@ -561,79 +564,83 @@ class LudoDice extends PositionComponent with TapCallbacks {
           ),
         );
 
-        final world = parent?.parent?.parent?.parent?.parent;
-        if (world is World) {
-          final ludoBoard = world.children.whereType<LudoBoard>().first;
+        if (player.hasRolledThreeConsecutiveSixes() == false) {
+          final world = parent?.parent?.parent?.parent?.parent;
+          if (world is World) {
+            final ludoBoard = world.children.whereType<LudoBoard>().first;
 
-          // Handle token movement logic based on dice number
-          if (diceNumber == 6) {
-            // Grant extra turn
-            player.grantAnotherTurn();
+            // Handle token movement logic based on dice number
+            if (diceNumber == 6) {
+              // Grant extra turn
+              player.grantAnotherTurn();
 
-            // Handle token movement when dice is 6
-            List<Token> tokensInBase = player.tokens
-                .where((token) => token.state == TokenState.inBase)
-                .toList();
-            List<Token> tokensOnBoard = player.tokens
-                .where((token) => token.state == TokenState.onBoard)
-                .toList();
+              // Handle token movement when dice is 6
+              List<Token> tokensInBase = player.tokens
+                  .where((token) => token.state == TokenState.inBase)
+                  .toList();
+              List<Token> tokensOnBoard = player.tokens
+                  .where((token) => token.state == TokenState.onBoard)
+                  .toList();
 
-            if (tokensInBase.length == 1) {
-              // Move the only token out of base automatically
-              moveOutOfBase(
-                token: tokensInBase.first,
-                tokenPath: getTokenPath(player.playerId),
-                ludoBoard: ludoBoard,
-              );
-              player.enableDice = true;
-              gameState.resetTokenMovement();
-            } else if (tokensInBase.isEmpty && tokensOnBoard.length == 1) {
-              // Automatically move the only token on the board
-              moveForward(
-                token: tokensOnBoard.first,
-                tokenPath: getTokenPath(player.playerId),
-                diceNumber: diceNumber,
-                ludoBoard: ludoBoard,
-              );
-              gameState.switchToNextPlayer();
-              player.enableDice = true;
+              if (tokensInBase.length == 1) {
+                // Move the only token out of base automatically
+                moveOutOfBase(
+                  token: tokensInBase.first,
+                  tokenPath: getTokenPath(player.playerId),
+                  ludoBoard: ludoBoard,
+                );
+                player.enableDice = true;
+                gameState.resetTokenMovement();
+              } else if (tokensInBase.isEmpty && tokensOnBoard.length == 1) {
+                // Automatically move the only token on the board
+                moveForward(
+                  token: tokensOnBoard.first,
+                  tokenPath: getTokenPath(player.playerId),
+                  diceNumber: diceNumber,
+                  ludoBoard: ludoBoard,
+                );
+                gameState.switchToNextPlayer();
+                player.enableDice = true;
+              } else {
+                // If multiple tokens can move, allow manual tapping
+                player.enableToken = true;
+                if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
+                  gameState.enableMoveFromBoth();
+                } else if (tokensInBase.isNotEmpty) {
+                  gameState.enableMoveFromBase();
+                } else if (tokensOnBoard.isNotEmpty) {
+                  gameState.enableMoveOnBoard();
+                }
+              }
             } else {
-              // If multiple tokens can move, allow manual tapping
-              player.enableToken = true;
-              if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
-                gameState.enableMoveFromBoth();
-              } else if (tokensInBase.isNotEmpty) {
-                gameState.enableMoveFromBase();
+              // Non-six roll, only enable movement on the board if multiple tokens exist
+              List<Token> tokensOnBoard = player.tokens
+                  .where((token) => token.state == TokenState.onBoard)
+                  .toList();
+
+              if (tokensOnBoard.length == 1) {
+                // Automatically move the only token on the board
+                moveForward(
+                  token: tokensOnBoard.first,
+                  tokenPath: getTokenPath(player.playerId),
+                  diceNumber: diceNumber,
+                  ludoBoard: ludoBoard,
+                );
+                gameState.switchToNextPlayer();
               } else if (tokensOnBoard.isNotEmpty) {
+                // Allow manual tapping for multiple tokens
+                player.enableToken = true;
                 gameState.enableMoveOnBoard();
+              } else {
+                // No tokens to move, switch turn
+                print(
+                    'No tokens available to move for player ${player.playerId}.');
+                gameState.switchToNextPlayer();
               }
             }
-          } else {
-            // Non-six roll, only enable movement on the board if multiple tokens exist
-            List<Token> tokensOnBoard = player.tokens
-                .where((token) => token.state == TokenState.onBoard)
-                .toList();
-
-            if (tokensOnBoard.length == 1) {
-              // Automatically move the only token on the board
-              moveForward(
-                token: tokensOnBoard.first,
-                tokenPath: getTokenPath(player.playerId),
-                diceNumber: diceNumber,
-                ludoBoard: ludoBoard,
-              );
-              gameState.switchToNextPlayer();
-            } else if (tokensOnBoard.isNotEmpty) {
-              // Allow manual tapping for multiple tokens
-              player.enableToken = true;
-              gameState.enableMoveOnBoard();
-            } else {
-              // No tokens to move, switch turn
-              print(
-                  'No tokens available to move for player ${player.playerId}.');
-              gameState.switchToNextPlayer();
-            }
           }
+        } else {
+          gameState.switchToNextPlayer();
         }
       }
     }
@@ -1000,7 +1007,7 @@ class Player {
 
   // Method to check if three consecutive sixes were rolled
   bool hasRolledThreeConsecutiveSixes() {
-    return extraTurns >= 3; // Three consecutive turns would mean 3 sixes
+    return extraTurns >= 2; // Three consecutive turns would mean 3 sixes
   }
 }
 
