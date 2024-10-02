@@ -294,10 +294,11 @@ class GameState {
   void switchToNextPlayer() {
     currentPlayer.isCurrentTurn = false;
     currentPlayer.enableDice = false;
+    currentPlayer.enableToken = false;
 
     currentPlayer.resetExtraTurns(); // Reset extra turns when switching turns
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-    
+
     players[currentPlayerIndex].isCurrentTurn = true;
     players[currentPlayerIndex].enableDice = true;
   }
@@ -545,105 +546,139 @@ class LudoDice extends PositionComponent with TapCallbacks {
   Future<void> onTapDown(TapDownEvent event) async {
     final gameState = GameState();
 
-    if (player.enableDice) {
-      player.enableDice = false;
-      if (player.isCurrentTurn && player == gameState.currentPlayer) {
-        int diceNumber = _random.nextInt(6) + 1;
-
-        gameState.diceNumber = diceNumber;
-        diceFace.updateDiceValue(diceNumber);
-
-        // Apply a rotate effect to the dice when tapped
-        add(
-          RotateEffect.by(
-            tau, // Full 360-degree rotation (2π radians)
-            EffectController(
-              duration: 0.5,
-              curve: Curves.easeInOut,
-            ),
-          ),
-        );
-
-        if (player.hasRolledThreeConsecutiveSixes() == false) {
-          final world = parent?.parent?.parent?.parent?.parent;
-          if (world is World) {
-            final ludoBoard = world.children.whereType<LudoBoard>().first;
-
-            // Handle token movement logic based on dice number
-            if (diceNumber == 6) {
-              // Grant extra turn
-              player.grantAnotherTurn();
-
-              // Handle token movement when dice is 6
-              List<Token> tokensInBase = player.tokens
-                  .where((token) => token.state == TokenState.inBase)
-                  .toList();
-              List<Token> tokensOnBoard = player.tokens
-                  .where((token) => token.state == TokenState.onBoard)
-                  .toList();
-
-              if (tokensInBase.length == 1) {
-                // Move the only token out of base automatically
-                moveOutOfBase(
-                  token: tokensInBase.first,
-                  tokenPath: getTokenPath(player.playerId),
-                  ludoBoard: ludoBoard,
-                );
-                player.enableDice = true;
-                gameState.resetTokenMovement();
-              } else if (tokensInBase.isEmpty && tokensOnBoard.length == 1) {
-                // Automatically move the only token on the board
-                moveForward(
-                  token: tokensOnBoard.first,
-                  tokenPath: getTokenPath(player.playerId),
-                  diceNumber: diceNumber,
-                  ludoBoard: ludoBoard,
-                );
-                gameState.switchToNextPlayer();
-                player.enableDice = true;
-              } else {
-                // If multiple tokens can move, allow manual tapping
-                player.enableToken = true;
-                if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
-                  gameState.enableMoveFromBoth();
-                } else if (tokensInBase.isNotEmpty) {
-                  gameState.enableMoveFromBase();
-                } else if (tokensOnBoard.isNotEmpty) {
-                  gameState.enableMoveOnBoard();
-                }
-              }
-            } else {
-              // Non-six roll, only enable movement on the board if multiple tokens exist
-              List<Token> tokensOnBoard = player.tokens
-                  .where((token) => token.state == TokenState.onBoard)
-                  .toList();
-
-              if (tokensOnBoard.length == 1) {
-                // Automatically move the only token on the board
-                moveForward(
-                  token: tokensOnBoard.first,
-                  tokenPath: getTokenPath(player.playerId),
-                  diceNumber: diceNumber,
-                  ludoBoard: ludoBoard,
-                );
-                gameState.switchToNextPlayer();
-              } else if (tokensOnBoard.isNotEmpty) {
-                // Allow manual tapping for multiple tokens
-                player.enableToken = true;
-                gameState.enableMoveOnBoard();
-              } else {
-                // No tokens to move, switch turn
-                print(
-                    'No tokens available to move for player ${player.playerId}.');
-                gameState.switchToNextPlayer();
-              }
-            }
-          }
-        } else {
-          gameState.switchToNextPlayer();
-        }
-      }
+    if (!player.enableDice ||
+        !player.isCurrentTurn ||
+        player != gameState.currentPlayer) {
+      return; // Exit if the player cannot roll the dice
     }
+
+    // Disable dice to prevent multiple taps
+    player.enableDice = false;
+
+    // Roll the dice and update the dice face
+    final int diceNumber = _rollDice();
+    gameState.diceNumber = diceNumber;
+    diceFace.updateDiceValue(diceNumber);
+
+    // Apply dice rotation effect
+    _applyDiceRollEffect();
+
+    final world = parent?.parent?.parent?.parent?.parent;
+    if (world is! World) return; // Ensure the world is available
+
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
+
+    if (diceNumber == 6) {
+      _handleSixRoll(ludoBoard, diceNumber);
+    } else {
+      _handleNonSixRoll(ludoBoard, diceNumber);
+    }
+  }
+
+  // Roll the dice and return the result
+  int _rollDice() => _random.nextInt(6) + 1;
+
+  // Apply a 360-degree rotation effect to the dice
+  void _applyDiceRollEffect() {
+    add(
+      RotateEffect.by(
+        tau, // Full 360-degree rotation (2π radians)
+        EffectController(
+          duration: 0.5,
+          curve: Curves.easeInOut,
+        ),
+      ),
+    );
+  }
+
+  // Handle logic when the player rolls a 6
+  void _handleSixRoll(LudoBoard ludoBoard, int diceNumber) {
+    player.grantAnotherTurn(); // Grant extra turn for rolling a six
+
+    if (player.hasRolledThreeConsecutiveSixes()) {
+      gameState.switchToNextPlayer();
+      return;
+    }
+
+    final tokensInBase = player.tokens
+        .where((token) => token.state == TokenState.inBase)
+        .toList();
+    final tokensOnBoard = player.tokens
+        .where((token) => token.state == TokenState.onBoard)
+        .toList();
+
+    if (_canMoveSingleToken(tokensInBase, tokensOnBoard)) {
+      _moveSingleToken(ludoBoard, diceNumber, tokensInBase, tokensOnBoard);
+    } else {
+      _enableManualTokenSelection(tokensInBase, tokensOnBoard);
+    }
+  }
+
+  // Handle logic for non-six dice rolls
+  void _handleNonSixRoll(LudoBoard ludoBoard, int diceNumber) {
+    final tokensOnBoard = player.tokens
+        .where((token) => token.state == TokenState.onBoard)
+        .toList();
+
+    if (tokensOnBoard.length == 1) {
+      _moveForwardSingleToken(ludoBoard, diceNumber, tokensOnBoard.first);
+      gameState.switchToNextPlayer();
+    } else if (tokensOnBoard.isNotEmpty) {
+      player.enableToken = true;
+      gameState.enableMoveOnBoard();
+    } else {
+      print('No tokens available to move for player ${player.playerId}.');
+      gameState.switchToNextPlayer();
+    }
+  }
+
+  // Check if the player can move a single token (either from base or on the board)
+  bool _canMoveSingleToken(
+      List<Token> tokensInBase, List<Token> tokensOnBoard) {
+    return (tokensInBase.length == 1 && tokensOnBoard.isEmpty) ||
+        (tokensOnBoard.length == 1 && tokensInBase.isEmpty);
+  }
+
+  // Move a single token based on whether it's in base or on the board
+  void _moveSingleToken(LudoBoard ludoBoard, int diceNumber,
+      List<Token> tokensInBase, List<Token> tokensOnBoard) {
+    if (tokensInBase.length == 1) {
+      moveOutOfBase(
+        token: tokensInBase.first,
+        tokenPath: getTokenPath(player.playerId),
+        ludoBoard: ludoBoard,
+      );
+      gameState.resetTokenMovement();
+      player.enableDice = true;
+    } else if (tokensOnBoard.length == 1) {
+      _moveForwardSingleToken(ludoBoard, diceNumber, tokensOnBoard.first);
+      gameState.switchToNextPlayer();
+      player.enableDice = true;
+    }
+  }
+
+  // Enable manual selection if multiple tokens can move
+  void _enableManualTokenSelection(
+      List<Token> tokensInBase, List<Token> tokensOnBoard) {
+    player.enableToken = true;
+    if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
+      gameState.enableMoveFromBoth();
+    } else if (tokensInBase.isNotEmpty) {
+      gameState.enableMoveFromBase();
+    } else if (tokensOnBoard.isNotEmpty) {
+      gameState.enableMoveOnBoard();
+    }
+  }
+
+  // Move the token forward on the board
+  void _moveForwardSingleToken(
+      LudoBoard ludoBoard, int diceNumber, Token token) {
+    moveForward(
+      token: token,
+      tokenPath: getTokenPath(player.playerId),
+      diceNumber: diceNumber,
+      ludoBoard: ludoBoard,
+    );
   }
 
   LudoDice({required this.faceSize, required this.player}) {
@@ -996,18 +1031,21 @@ class Player {
 
   // Method to grant another turn (includes handling six rolls)
   void grantAnotherTurn() {
+    print("******grantAnotherTurn*******");
     extraTurns++; // Increment the count of extra turns
   }
 
   void consumeExtraTurn() {
+    print("******consumeExtraTurn*******");
     if (extraTurns > 0) {
       extraTurns--;
     }
+    print(extraTurns);
   }
 
   // Method to check if three consecutive sixes were rolled
   bool hasRolledThreeConsecutiveSixes() {
-    return extraTurns >= 2; // Three consecutive turns would mean 3 sixes
+    return extraTurns == 3; // Three consecutive turns would mean 3 sixes
   }
 }
 
