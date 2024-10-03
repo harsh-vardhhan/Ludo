@@ -1161,10 +1161,16 @@ class Ludo extends FlameGame
       );
       homePlate.add(lightEffectForHome);
     } else {
-      final colorEffect = homePlate.children.whereType<ColorEffect>().first;
-      homePlate.remove(colorEffect);
-      homePlate.setColor(Colors.blue);
-      // set color of homePlate
+      final lightEffectForHome = ColorEffect(
+        Colors.blue,
+        EffectController(
+          duration: 0.2,
+          reverseDuration: 0.2,
+          infinite: true,
+          alternate: true,
+        ),
+      );
+      homePlate.add(lightEffectForHome);
     }
   }
 
@@ -1188,9 +1194,16 @@ class Ludo extends FlameGame
       );
       homePlate.add(lightEffectForHome);
     } else {
-      final colorEffect = homePlate.children.whereType<ColorEffect>().first;
-      homePlate.remove(colorEffect);
-      homePlate.setColor(Colors.green);
+      final lightEffectForHome = ColorEffect(
+        Colors.green,
+        EffectController(
+          duration: 0.2,
+          reverseDuration: 0.2,
+          infinite: true,
+          alternate: true,
+        ),
+      );
+      homePlate.add(lightEffectForHome);
     }
   }
 
