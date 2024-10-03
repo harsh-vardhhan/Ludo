@@ -249,6 +249,33 @@ const greenTokenPath = [
   'G15',
 ];
 
+class BlinkGreenBaseEvent {}
+
+class BlinkBlueBaseEvent {}
+
+class EventBus {
+  static final EventBus _instance = EventBus._internal();
+
+  factory EventBus() {
+    return _instance;
+  }
+
+  EventBus._internal();
+
+  final Map<Type, List<void Function(dynamic)>> _listeners = {};
+
+  void on<T>(void Function(T event) listener) {
+    // Cast the listener to a dynamic function to allow for storing
+    _listeners[T] ??= [];
+    _listeners[T]!.add(
+        (event) => listener(event as T)); // Cast the event to the correct type
+  }
+
+  void emit<T>(T event) {
+    _listeners[T]?.forEach((listener) => listener(event));
+  }
+}
+
 class GameState {
   // Private constructor
   GameState._();
@@ -301,6 +328,12 @@ class GameState {
 
     players[currentPlayerIndex].isCurrentTurn = true;
     players[currentPlayerIndex].enableDice = true;
+
+    if (players[currentPlayerIndex].playerId == 'GP') {
+      EventBus().emit(BlinkGreenBaseEvent());
+    } else if (players[currentPlayerIndex].playerId == 'BP') {
+      EventBus().emit(BlinkBlueBaseEvent());
+    }
   }
 
   // Get the current player
@@ -615,17 +648,20 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Handle logic for non-six dice rolls
-  void _handleNonSixRoll(LudoBoard ludoBoard, int diceNumber) {
+  void _handleNonSixRoll(LudoBoard ludoBoard, int diceNumber) async {
     final tokensOnBoard = player.tokens
         .where((token) => token.state == TokenState.onBoard)
         .toList();
 
+    final tokensInBase = player.tokens
+        .where((token) => token.state == TokenState.inBase)
+        .toList();
+
     if (tokensOnBoard.length == 1) {
-      _moveForwardSingleToken(ludoBoard, diceNumber, tokensOnBoard.first);
+      await _moveForwardSingleToken(ludoBoard, diceNumber, tokensOnBoard.first);
       gameState.switchToNextPlayer();
     } else if (tokensOnBoard.isNotEmpty) {
-      player.enableToken = true;
-      gameState.enableMoveOnBoard();
+      _enableManualTokenSelection(tokensInBase, tokensOnBoard);
     } else {
       print('No tokens available to move for player ${player.playerId}.');
       gameState.switchToNextPlayer();
@@ -641,7 +677,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   // Move a single token based on whether it's in base or on the board
   void _moveSingleToken(LudoBoard ludoBoard, int diceNumber,
-      List<Token> tokensInBase, List<Token> tokensOnBoard) {
+      List<Token> tokensInBase, List<Token> tokensOnBoard) async {
     if (tokensInBase.length == 1) {
       moveOutOfBase(
         token: tokensInBase.first,
@@ -651,7 +687,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
       gameState.resetTokenMovement();
       player.enableDice = true;
     } else if (tokensOnBoard.length == 1) {
-      _moveForwardSingleToken(ludoBoard, diceNumber, tokensOnBoard.first);
+      await _moveForwardSingleToken(ludoBoard, diceNumber, tokensOnBoard.first);
       gameState.switchToNextPlayer();
       player.enableDice = true;
     }
@@ -671,14 +707,15 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Move the token forward on the board
-  void _moveForwardSingleToken(
-      LudoBoard ludoBoard, int diceNumber, Token token) {
-    moveForward(
+  Future<void> _moveForwardSingleToken(
+      LudoBoard ludoBoard, int diceNumber, Token token) async {
+    await moveForward(
       token: token,
       tokenPath: getTokenPath(player.playerId),
       diceNumber: diceNumber,
       ludoBoard: ludoBoard,
     );
+    return Future.value();
   }
 
   LudoDice({required this.faceSize, required this.player}) {
@@ -1092,6 +1129,69 @@ class Ludo extends FlameGame
         position: Vector2(0, width + (width * 0.35)),
         width: width,
         height: width * 0.20));
+
+    EventBus().on<BlinkGreenBaseEvent>((event) {
+      blinkGreenBase(true);
+      blinkBlueBase(false); // Call your blinkGreenBase method
+    });
+
+    EventBus().on<BlinkBlueBaseEvent>((event) {
+      blinkGreenBase(false);
+      blinkBlueBase(true); // Call your blinkGreenBase method
+    });
+  }
+
+  void blinkBlueBase(bool shouldBlink) {
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
+    final childrenOfLudoBoard = ludoBoard.children.toList();
+    final child = childrenOfLudoBoard[6];
+    final home = child.children.toList();
+    final homePlate = home[0] as Home;
+
+    // Only add the blinking effect if shouldBlink is true
+    if (shouldBlink) {
+      final lightEffectForHome = ColorEffect(
+        Color(0xFF4FC3F7),
+        EffectController(
+          duration: 0.2,
+          reverseDuration: 0.2,
+          infinite: true,
+          alternate: true,
+        ),
+      );
+      homePlate.add(lightEffectForHome);
+    } else {
+      final colorEffect = homePlate.children.whereType<ColorEffect>().first;
+      homePlate.remove(colorEffect);
+      homePlate.setColor(Colors.blue);
+      // set color of homePlate
+    }
+  }
+
+  void blinkGreenBase(bool shouldBlink) {
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
+    final childrenOfLudoBoard = ludoBoard.children.toList();
+    final child = childrenOfLudoBoard[2];
+    final home = child.children.toList();
+    final homePlate = home[0] as Home;
+
+    // Only add the blinking effect if shouldBlink is true
+    if (shouldBlink) {
+      final lightEffectForHome = ColorEffect(
+        Colors.lightGreen,
+        EffectController(
+          duration: 0.2,
+          reverseDuration: 0.2,
+          infinite: true,
+          alternate: true,
+        ),
+      );
+      homePlate.add(lightEffectForHome);
+    } else {
+      final colorEffect = homePlate.children.whereType<ColorEffect>().first;
+      homePlate.remove(colorEffect);
+      homePlate.setColor(Colors.green);
+    }
   }
 
   void startGame() {
@@ -1141,6 +1241,7 @@ class Ludo extends FlameGame
           isCurrentTurn: true,
           enableDice: true,
         );
+        blinkBlueBase(true);
         gameState.players.add(bluePlayer);
         for (var token in tokens) {
           token.player = bluePlayer;
@@ -1217,6 +1318,7 @@ class Ludo extends FlameGame
           isCurrentTurn: true,
           enableDice: true,
         );
+        blinkGreenBase(true);
         gameState.players.add(greenPlayer);
         for (var token in tokens) {
           token.player = greenPlayer;
@@ -1473,29 +1575,46 @@ class DiagonalRectangleComponent extends PositionComponent {
 }
 
 class Home extends RectangleComponent {
-  Home(
-      {required double size,
-      required Paint? paint,
-      required Paint homeSpotColor,
-      children})
-      : super(size: Vector2.all(size), paint: paint ?? Paint(), children: [
-          // Define border as a separate child component for the stroke
-          RectangleComponent(
-            size: Vector2.all(size),
-            paint: Paint()
-              ..color = Colors.transparent
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 1.0
-              ..color = Colors.black,
-          ),
-          HomePlate(
+  Home({
+    required double size,
+    required Paint? paint,
+    required Paint homeSpotColor,
+    List<Component>? children,
+  }) : super(
+          size: Vector2.all(size),
+          paint: paint ?? Paint(), // Default color
+          children: [
+            // Define border as a separate child component for the stroke
+            RectangleComponent(
+              size: Vector2.all(size),
+              paint: Paint()
+                ..color = Colors.transparent
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 1.0
+                ..color = Colors.black,
+            ),
+            HomePlate(
               size: size / 1.5,
               position: Vector2(
                 size / 2 - (size / 1.5) / 2, // Calculate center x
                 size / 2 - (size / 1.5) / 2, // Calculate center y
               ),
-              homeSpotColor: homeSpotColor)
-        ]);
+              homeSpotColor: homeSpotColor,
+            ),
+          ],
+        );
+
+  // Updated method to set color with optional paintId
+  @override
+  void setColor(Color color, {Object? paintId}) {
+    paint.color = color; // Change the paint color of the main rectangle
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas); // Call super to render the main component
+    // Render children
+  }
 }
 
 class SquareBlocks extends RectangleComponent {
@@ -1773,7 +1892,7 @@ class Token extends PositionComponent with TapCallbacks {
               // Do not consume the extra turn yet
             } else if (state == TokenState.onBoard &&
                 gameState.canMoveTokenOnBoard) {
-              moveForward(
+              await moveForward(
                   token: this,
                   tokenPath: getTokenPath(player.playerId),
                   diceNumber: gameState.diceNumber,
@@ -1787,7 +1906,7 @@ class Token extends PositionComponent with TapCallbacks {
 
           // Non-six logic
           if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
-            moveForward(
+            await moveForward(
                 token: this,
                 tokenPath: getTokenPath(player.playerId),
                 diceNumber: gameState.diceNumber,
@@ -1805,6 +1924,8 @@ class Token extends PositionComponent with TapCallbacks {
   void handleTurnEnd() {
     final gameState = GameState();
     if (player.extraTurns > 0) {
+      print("********player.extraTurns*******");
+      print(player.extraTurns);
       // If the player still has extra turns, they can roll again or take action
       print('${player.playerId} gets an extra turn!');
     } else {
