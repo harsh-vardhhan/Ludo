@@ -574,7 +574,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   final Player player;
   final Random _random = Random(); // Random number generator
-  int _rollDice() => 5 + _random.nextInt(2);
+  int _rollDice() => _random.nextInt(6) + 1;
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
