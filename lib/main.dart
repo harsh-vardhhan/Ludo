@@ -574,6 +574,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   final Player player;
   final Random _random = Random(); // Random number generator
+  int _rollDice() => 5 + _random.nextInt(2);
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
@@ -607,9 +608,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
       _handleNonSixRoll(ludoBoard, diceNumber);
     }
   }
-
-  // Roll the dice and return the result
-  int _rollDice() => _random.nextInt(6) + 1;
 
   // Apply a 360-degree rotation effect to the dice
   void _applyDiceRollEffect() {
@@ -1069,12 +1067,6 @@ class Player {
   // Method to grant another turn (includes handling six rolls)
   void grantAnotherTurn() {
     extraTurns++; // Increment the count of extra turns
-  }
-
-  void consumeExtraTurn() {
-    if (extraTurns > 0) {
-      extraTurns--;
-    }
   }
 
   // Method to check if three consecutive sixes were rolled
@@ -1926,24 +1918,9 @@ class Token extends PositionComponent with TapCallbacks {
                 ludoBoard: ludoBoard);
           }
 
-          // Consume the extra turn after a valid movement
-          player.consumeExtraTurn();
-          handleTurnEnd(); // Check if the turn should switch
+          gameState.switchToNextPlayer();
         }
       }
-    }
-  }
-
-  void handleTurnEnd() {
-    final gameState = GameState();
-    if (player.extraTurns > 0) {
-      print("********player.extraTurns*******");
-      print(player.extraTurns);
-      // If the player still has extra turns, they can roll again or take action
-      print('${player.playerId} gets an extra turn!');
-    } else {
-      // Switch to the next player if no extra turns remain
-      gameState.switchToNextPlayer();
     }
   }
 
