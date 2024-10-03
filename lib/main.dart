@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flame/geometry.dart';
 import 'package:collection/collection.dart';
+import 'package:flame_audio/flame_audio.dart';
+
 
 void main() {
   runApp(const GameApp());
@@ -1782,6 +1784,8 @@ Future<void> moveForward({
             (token.size.x * 0.50) -
             ludoBoardGlobalPosition.y,
       );
+
+      FlameAudio.play('move.mp3');
 
       // Apply size increase effect
       await _applyEffect(
