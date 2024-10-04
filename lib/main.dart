@@ -596,8 +596,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
     gameState.diceNumber = diceNumber;
     diceFace.updateDiceValue(diceNumber);
 
+    FlameAudio.play('dice.mp3');
     // Apply dice rotation effect
-    _applyDiceRollEffect();
+    await _applyDiceRollEffect();
+
+    await Future.delayed(Duration(milliseconds: 700));
 
     final world = parent?.parent?.parent?.parent?.parent;
     if (world is! World) return; // Ensure the world is available
@@ -612,7 +615,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Apply a 360-degree rotation effect to the dice
-  void _applyDiceRollEffect() {
+  FutureOr<void> _applyDiceRollEffect() {
     add(
       RotateEffect.by(
         tau, // Full 360-degree rotation (2π radians)
@@ -622,6 +625,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
         ),
       ),
     );
+    return Future.value();
   }
 
   // Handle logic when the player rolls a 6
@@ -1763,7 +1767,7 @@ Future<void> moveForward({
   final originalSize = token.size.clone();
 
   // Loop through the positions from current to final index
-  for (int i = currentIndex; i <= finalIndex; i++) {
+  for (int i = currentIndex + 1; i <= finalIndex; i++) {
     if (i < tokenPath.length) {
       String positionId = tokenPath[i];
       token.positionId = positionId;
