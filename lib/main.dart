@@ -13,7 +13,6 @@ import 'package:flame/geometry.dart';
 import 'package:collection/collection.dart';
 import 'package:flame_audio/flame_audio.dart';
 
-
 void main() {
   runApp(const GameApp());
 }
@@ -500,6 +499,7 @@ class DiceFaceComponent extends PositionComponent {
 }
 
 void moveOutOfBase({
+  required World world,
   required Token token,
   required List<String> tokenPath,
   required LudoBoard ludoBoard,
@@ -515,7 +515,18 @@ void moveOutOfBase({
   Vector2 targetPosition = calculateTargetPosition(token, spot, ludoBoard);
 
   // Apply the movement effect to move the token out of base
-  applyMoveEffect(token, targetPosition);
+  applyMoveEffect(world, token, targetPosition);
+}
+
+void applyMoveEffect(World world, Token token, Vector2 targetPosition) async {
+  final moveToEffect = MoveToEffect(
+    targetPosition,
+    EffectController(duration: 0.1, curve: Curves.easeInOut),
+  );
+
+  await token.add(moveToEffect);
+  await Future.delayed(Duration(milliseconds: 300));
+  tokenCollision(world);
 }
 
 Spot findSpotById(String spotId) {
@@ -544,15 +555,6 @@ Vector2 calculateTargetPosition(Token token, Spot spot, LudoBoard ludoBoard) {
   );
 }
 
-void applyMoveEffect(Token token, Vector2 targetPosition) {
-  final moveToEffect = MoveToEffect(
-    targetPosition,
-    EffectController(duration: 0.1, curve: Curves.easeInOut),
-  );
-
-  token.add(moveToEffect);
-}
-
 List<String> getTokenPath(String playerId) {
   switch (playerId) {
     case 'BP':
@@ -575,8 +577,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
   late final DiceFaceComponent diceFace; // The dice face showing dots
 
   final Player player;
-  final Random _random = Random(); // Random number generator
-  int _rollDice() => _random.nextInt(6) + 1;
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
@@ -592,7 +592,9 @@ class LudoDice extends PositionComponent with TapCallbacks {
     player.enableDice = false;
 
     // Roll the dice and update the dice face
-    final int diceNumber = _rollDice();
+    final Random random = Random(); // Random number generator
+    int rollDice() => random.nextBool() ? 6 : 1;
+    final int diceNumber = rollDice();
     gameState.diceNumber = diceNumber;
     diceFace.updateDiceValue(diceNumber);
 
@@ -608,9 +610,9 @@ class LudoDice extends PositionComponent with TapCallbacks {
     final ludoBoard = world.children.whereType<LudoBoard>().first;
 
     if (diceNumber == 6) {
-      _handleSixRoll(ludoBoard, diceNumber);
+      await _handleSixRoll(world, ludoBoard, diceNumber);
     } else {
-      _handleNonSixRoll(ludoBoard, diceNumber);
+      await _handleNonSixRoll(world, ludoBoard, diceNumber);
     }
   }
 
@@ -629,7 +631,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Handle logic when the player rolls a 6
-  void _handleSixRoll(LudoBoard ludoBoard, int diceNumber) {
+  Future<void> _handleSixRoll(
+      World world, LudoBoard ludoBoard, int diceNumber) async {
     player.grantAnotherTurn(); // Grant extra turn for rolling a six
 
     if (player.hasRolledThreeConsecutiveSixes()) {
@@ -645,14 +648,18 @@ class LudoDice extends PositionComponent with TapCallbacks {
         .toList();
 
     if (_canMoveSingleToken(tokensInBase, tokensOnBoard)) {
-      _moveSingleToken(ludoBoard, diceNumber, tokensInBase, tokensOnBoard);
+      _moveSingleToken(
+          world, ludoBoard, diceNumber, tokensInBase, tokensOnBoard);
     } else {
       _enableManualTokenSelection(tokensInBase, tokensOnBoard);
     }
+
+    return Future.value();
   }
 
   // Handle logic for non-six dice rolls
-  void _handleNonSixRoll(LudoBoard ludoBoard, int diceNumber) async {
+  Future<void> _handleNonSixRoll(
+      World world, LudoBoard ludoBoard, int diceNumber) async {
     final tokensOnBoard = player.tokens
         .where((token) => token.state == TokenState.onBoard)
         .toList();
@@ -662,7 +669,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
         .toList();
 
     if (tokensOnBoard.length == 1) {
-      await _moveForwardSingleToken(ludoBoard, diceNumber, tokensOnBoard.first);
+      await _moveForwardSingleToken(
+          world, ludoBoard, diceNumber, tokensOnBoard.first);
       gameState.switchToNextPlayer();
     } else if (tokensOnBoard.isNotEmpty) {
       _enableManualTokenSelection(tokensInBase, tokensOnBoard);
@@ -670,6 +678,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
       print('No tokens available to move for player ${player.playerId}.');
       gameState.switchToNextPlayer();
     }
+    return Future.value();
   }
 
   // Check if the player can move a single token (either from base or on the board)
@@ -680,10 +689,15 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Move a single token based on whether it's in base or on the board
-  void _moveSingleToken(LudoBoard ludoBoard, int diceNumber,
-      List<Token> tokensInBase, List<Token> tokensOnBoard) async {
+  Future<void> _moveSingleToken(
+      World world,
+      LudoBoard ludoBoard,
+      int diceNumber,
+      List<Token> tokensInBase,
+      List<Token> tokensOnBoard) async {
     if (tokensInBase.length == 1) {
       moveOutOfBase(
+        world: world,
         token: tokensInBase.first,
         tokenPath: getTokenPath(player.playerId),
         ludoBoard: ludoBoard,
@@ -691,14 +705,16 @@ class LudoDice extends PositionComponent with TapCallbacks {
       gameState.resetTokenMovement();
       player.enableDice = true;
     } else if (tokensOnBoard.length == 1) {
-      await _moveForwardSingleToken(ludoBoard, diceNumber, tokensOnBoard.first);
+      await _moveForwardSingleToken(
+          world, ludoBoard, diceNumber, tokensOnBoard.first);
       gameState.switchToNextPlayer();
       player.enableDice = true;
     }
+    return Future.value();
   }
 
   // Enable manual selection if multiple tokens can move
-  void _enableManualTokenSelection(
+  Future<void> _enableManualTokenSelection(
       List<Token> tokensInBase, List<Token> tokensOnBoard) {
     player.enableToken = true;
     if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
@@ -708,17 +724,20 @@ class LudoDice extends PositionComponent with TapCallbacks {
     } else if (tokensOnBoard.isNotEmpty) {
       gameState.enableMoveOnBoard();
     }
+    return Future.value();
   }
 
   // Move the token forward on the board
   Future<void> _moveForwardSingleToken(
-      LudoBoard ludoBoard, int diceNumber, Token token) async {
+      World world, LudoBoard ludoBoard, int diceNumber, Token token) async {
     await moveForward(
+      world: world,
       token: token,
       tokenPath: getTokenPath(player.playerId),
       diceNumber: diceNumber,
       ludoBoard: ludoBoard,
     );
+    tokenCollision(world);
     return Future.value();
   }
 
@@ -965,6 +984,7 @@ class TokenManager {
   }
 
   List<Token> allTokens = [];
+  List<Token> miniTokens = [];
 
   void initializeTokens(Map<String, String> tokenToHomeSpotMap) {
     for (var entry in tokenToHomeSpotMap.entries) {
@@ -1094,6 +1114,90 @@ class PathManager {
   }
 }
 
+void tokenCollision(world) {
+  final tokens = TokenManager().allTokens; // Source data
+
+  final homeSpot = getHomeSpot(world, 6)
+      .whereType<HomeSpot>()
+      .firstWhere((spot) => spot.uniqueId == 'B1');
+
+  // Step 1: Store original size and position of tokens based on homeSpot
+  final Vector2 originalSize =
+      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+
+  // Step 2: Count occurrences of each positionId
+  final Map<String, int> positionIdCount = {};
+  for (var token in tokens) {
+    positionIdCount[token.positionId] =
+        (positionIdCount[token.positionId] ?? 0) + 1;
+  }
+
+  // Step 3: Filter out tokens that have duplicate positionIds (more than one occurrence)
+  final duplicateTokens = tokens.where((token) {
+    return positionIdCount[token.positionId]! > 1;
+  }).toList();
+
+  final currentMiniTokens =
+      TokenManager().miniTokens; // Get the current miniTokens
+  Set<String> duplicateTokenIds = duplicateTokens
+      .map((token) => token.tokenId)
+      .toSet(); // Create a set of tokenIds from duplicateTokens
+
+  // Step 4: Filter miniTokens to find tokens that are not in duplicateTokens
+  final tokensNotInDuplicateTokens = currentMiniTokens
+      .where((token) => !duplicateTokenIds.contains(token.tokenId))
+      .toList();
+
+  // Step 5: Adjust size and position for tokens not in duplicateTokens
+  if (tokensNotInDuplicateTokens.isNotEmpty) {
+    for (var i = 0; i < tokensNotInDuplicateTokens.length; i++) {
+      var token = tokensNotInDuplicateTokens[i];
+      // Restore the original size
+      token.size = originalSize;
+    }
+  }
+
+  // Step 6: Group duplicateTokens by positionId and apply margin incrementally
+  if (duplicateTokens.isNotEmpty) {
+    TokenManager().miniTokens = duplicateTokens;
+
+    // Group tokens by positionId
+    final Map<String, List<Token>> groupedTokens = {};
+    for (var token in duplicateTokens) {
+      if (!groupedTokens.containsKey(token.positionId)) {
+        groupedTokens[token.positionId] = [];
+      }
+      groupedTokens[token.positionId]!.add(token);
+    }
+
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
+
+    // Apply size adjustment and incremental margin within each group
+    groupedTokens.forEach((positionId, group) {
+      for (var i = 0; i < group.length; i++) {
+        var token = group[i];
+        // Scale relative to the original size
+        token.size = originalSize * 0.70;
+        final spot = findSpotById(token.positionId);
+        token.position = Vector2(
+            spot.absolutePosition.x + (i * 5) - ludoBoard.absolutePosition.x,
+            spot.absolutePosition.y - ludoBoard.absolutePosition.y);
+      }
+    });
+  }
+}
+
+List<Component> getHomeSpot(world, i) {
+  final ludoBoard = world.children.whereType<LudoBoard>().first;
+  final childrenOfLudoBoard = ludoBoard.children.toList();
+  final child = childrenOfLudoBoard[i];
+  final home = child.children.toList();
+  final homePlate = home[0].children.toList();
+  final homeSpotContainer = homePlate[1].children.toList();
+  final homeSpotList = homeSpotContainer[1].children.toList();
+  return homeSpotList;
+}
+
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
   int playerCount;
@@ -1114,9 +1218,7 @@ class Ludo extends FlameGame
       height: height,
     );
     camera.viewfinder.anchor = Anchor.topLeft;
-    //world.add(camera);
-    // world.add(PlayArea());
-    // Now you can set up the camera with the screen size
+
     world.add(UpperController(
         position: Vector2(0, width * 0.05),
         width: width,
@@ -1208,7 +1310,6 @@ class Ludo extends FlameGame
   void startGame() {
     final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
-    final childrenOfLudoBoard = ludoBoard.children.toList();
 
     if (TokenManager().getBlueTokens().isEmpty) {
       final tokenToHome = {
@@ -1219,14 +1320,8 @@ class Ludo extends FlameGame
       };
       TokenManager().initializeTokens(tokenToHome);
 
-      final child = childrenOfLudoBoard[6];
-      final home = child.children.toList();
-      final homePlate = home[0].children.toList();
-      final homeSpotContainer = homePlate[1].children.toList();
-      final homeSpotList = homeSpotContainer[1].children.toList();
-
       for (var token in TokenManager().getBlueTokens()) {
-        final homeSpot = homeSpotList
+        final homeSpot = getHomeSpot(world, 6)
             .whereType<HomeSpot>()
             .firstWhere((spot) => spot.uniqueId == token.positionId);
         token.innerCircleColor = Colors.blue;
@@ -1296,14 +1391,8 @@ class Ludo extends FlameGame
       };
       TokenManager().initializeTokens(tokenToHome);
 
-      final child = childrenOfLudoBoard[2];
-      final home = child.children.toList();
-      final homePlate = home[0].children.toList();
-      final homeSpotContainer = homePlate[1].children.toList();
-      final homeSpotList = homeSpotContainer[1].children.toList();
-
       for (var token in TokenManager().getGreenTokens()) {
-        final homeSpot = homeSpotList
+        final homeSpot = getHomeSpot(world, 2)
             .whereType<HomeSpot>()
             .firstWhere((spot) => spot.uniqueId == token.positionId);
         token.innerCircleColor = Colors.green;
@@ -1711,6 +1800,7 @@ class StarComponent extends PositionComponent {
 }
 
 void multiMoveToken({
+  required World world,
   required List<Token> openTokens,
   required List<String> tokenPath,
   required GameState gameState,
@@ -1738,6 +1828,7 @@ void multiMoveToken({
   } else if (movableTokens.length == 1) {
     final token = movableTokens.first;
     moveForward(
+      world: world,
       token: token,
       tokenPath: tokenPath,
       diceNumber: gameState.diceNumber,
@@ -1754,6 +1845,7 @@ Future<void> _applyEffect(PositionComponent component, Effect effect) {
 }
 
 Future<void> moveForward({
+  required World world,
   required Token token,
   required List<String> tokenPath,
   required int diceNumber,
@@ -1825,6 +1917,7 @@ Future<void> moveForward({
       await Future.delayed(Duration(milliseconds: 300));
     }
   }
+  tokenCollision(world);
 }
 
 // Enum to define token states
@@ -1899,13 +1992,18 @@ class Token extends PositionComponent with TapCallbacks {
             // Handle movement logic
             if (state == TokenState.inBase && gameState.canMoveTokenFromBase) {
               moveOutOfBase(
+                  world: world,
                   token: this,
                   tokenPath: getTokenPath(player.playerId),
                   ludoBoard: ludoBoard);
+              // same delay as opening token duration
+              await Future.delayed(Duration(milliseconds: 100));
+              // tokenCollision(world);
               // Do not consume the extra turn yet
             } else if (state == TokenState.onBoard &&
                 gameState.canMoveTokenOnBoard) {
               await moveForward(
+                  world: world,
                   token: this,
                   tokenPath: getTokenPath(player.playerId),
                   diceNumber: gameState.diceNumber,
@@ -1920,6 +2018,7 @@ class Token extends PositionComponent with TapCallbacks {
           // Non-six logic
           if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
             await moveForward(
+                world: world,
                 token: this,
                 tokenPath: getTokenPath(player.playerId),
                 diceNumber: gameState.diceNumber,
