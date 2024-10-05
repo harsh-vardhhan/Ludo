@@ -737,6 +737,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
       diceNumber: diceNumber,
       ludoBoard: ludoBoard,
     );
+    await Future.delayed(Duration(milliseconds: 300));
     tokenCollision(world);
     return Future.value();
   }
@@ -1116,6 +1117,7 @@ class PathManager {
 
 void tokenCollision(world) {
   final tokens = TokenManager().allTokens; // Source data
+  final ludoBoard = world.children.whereType<LudoBoard>().first;
 
   final homeSpot = getHomeSpot(world, 6)
       .whereType<HomeSpot>()
@@ -1154,11 +1156,27 @@ void tokenCollision(world) {
       var token = tokensNotInDuplicateTokens[i];
       // Restore the original size
       token.size = originalSize;
+      final spot = findSpotById(token.positionId);
+      final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
+      final ludoBoardGlobalPosition =
+          ludoBoard.absolutePositionOf(Vector2.zero());
+
+      token.position = Vector2(
+        spotGlobalPosition.x +
+            (token.size.x * 0.10) -
+            ludoBoardGlobalPosition.x,
+        spotGlobalPosition.y -
+            (token.size.x * 0.50) -
+            ludoBoardGlobalPosition.y,
+      );
     }
   }
 
   // Step 6: Group duplicateTokens by positionId and apply margin incrementally
   if (duplicateTokens.isNotEmpty) {
+
+    print(duplicateTokens);
+    
     TokenManager().miniTokens = duplicateTokens;
 
     // Group tokens by positionId
@@ -1170,18 +1188,29 @@ void tokenCollision(world) {
       groupedTokens[token.positionId]!.add(token);
     }
 
-    final ludoBoard = world.children.whereType<LudoBoard>().first;
-
     // Apply size adjustment and incremental margin within each group
     groupedTokens.forEach((positionId, group) {
-      for (var i = 0; i < group.length; i++) {
-        var token = group[i];
-        // Scale relative to the original size
-        token.size = originalSize * 0.70;
-        final spot = findSpotById(token.positionId);
-        token.position = Vector2(
-            spot.absolutePosition.x + (i * 5) - ludoBoard.absolutePosition.x,
-            spot.absolutePosition.y - ludoBoard.absolutePosition.y);
+      if (group.length == 2) {
+        for (var i = 0; i < group.length; i++) {
+          var token = group[i];
+          // Scale relative to the original size
+          token.size = originalSize * 0.70;
+          final spot = findSpotById(token.positionId);
+          token.position = Vector2(
+              spot.absolutePosition.x + (i * 10) - ludoBoard.absolutePosition.x,
+              spot.absolutePosition.y - ludoBoard.absolutePosition.y);
+        }
+      }
+      if (group.length >= 3) {
+        for (var i = 0; i < group.length; i++) {
+          var token = group[i];
+          // Scale relative to the original size
+          token.size = originalSize * 0.50;
+          final spot = findSpotById(token.positionId);
+          token.position = Vector2(
+              spot.absolutePosition.x + (i * 5) - ludoBoard.absolutePosition.x,
+              spot.absolutePosition.y - ludoBoard.absolutePosition.y);
+        }
       }
     });
   }
@@ -1998,7 +2027,6 @@ class Token extends PositionComponent with TapCallbacks {
                   ludoBoard: ludoBoard);
               // same delay as opening token duration
               await Future.delayed(Duration(milliseconds: 100));
-              // tokenCollision(world);
               // Do not consume the extra turn yet
             } else if (state == TokenState.onBoard &&
                 gameState.canMoveTokenOnBoard) {
