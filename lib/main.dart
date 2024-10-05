@@ -1174,9 +1174,8 @@ void tokenCollision(world) {
 
   // Step 6: Group duplicateTokens by positionId and apply margin incrementally
   if (duplicateTokens.isNotEmpty) {
-
     print(duplicateTokens);
-    
+
     TokenManager().miniTokens = duplicateTokens;
 
     // Group tokens by positionId
@@ -1873,6 +1872,17 @@ Future<void> _applyEffect(PositionComponent component, Effect effect) {
   return completer.future;
 }
 
+Vector2 tokenOriginalSize(world) {
+  final homeSpot = getHomeSpot(world, 6)
+      .whereType<HomeSpot>()
+      .firstWhere((spot) => spot.uniqueId == 'B1');
+
+  // Step 1: Store original size and position of tokens based on homeSpot
+  final Vector2 originalSize =
+      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+  return originalSize;
+}
+
 Future<void> moveForward({
   required World world,
   required Token token,
@@ -1885,7 +1895,7 @@ Future<void> moveForward({
   // Get the current and final index
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
-  final originalSize = token.size.clone();
+  final originalSize =  tokenOriginalSize(world).clone();
 
   // Loop through the positions from current to final index
   for (int i = currentIndex + 1; i <= finalIndex; i++) {
