@@ -38,3 +38,18 @@ class Spot extends RectangleComponent {
     SpotManager().addSpot(this);
   }
 }
+
+Spot findSpotById(String spotId) {
+  List<Spot> allSpots = SpotManager().getSpots();
+
+  // Find the spot corresponding to the provided ID
+  return allSpots.firstWhere(
+    (spot) => spot.uniqueId == spotId,
+    orElse: () => Spot(
+      uniqueId: 'default', // Default spot if not found
+      position: Vector2.zero(),
+      size: Vector2(10, 10),
+      paint: Paint()..color = Colors.grey, // Grey for default spot
+    ),
+  );
+}
