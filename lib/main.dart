@@ -593,7 +593,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     // Roll the dice and update the dice face
     final Random random = Random(); // Random number generator
-    int rollDice() => random.nextBool() ? 6 : 1;
+    int rollDice() => random.nextInt(6) + 1;
     final int diceNumber = rollDice();
     gameState.diceNumber = diceNumber;
     diceFace.updateDiceValue(diceNumber);
@@ -719,9 +719,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
     player.enableToken = true;
     if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
       gameState.enableMoveFromBoth();
+      addTokenTrail(tokensOnBoard);
     } else if (tokensInBase.isNotEmpty) {
       gameState.enableMoveFromBase();
     } else if (tokensOnBoard.isNotEmpty) {
+      addTokenTrail(tokensOnBoard);
       gameState.enableMoveOnBoard();
     }
     return Future.value();
@@ -1895,7 +1897,7 @@ Future<void> moveForward({
   // Get the current and final index
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
-  final originalSize =  tokenOriginalSize(world).clone();
+  final originalSize = tokenOriginalSize(world).clone();
 
   // Loop through the positions from current to final index
   for (int i = currentIndex + 1; i <= finalIndex; i++) {
@@ -1957,6 +1959,110 @@ Future<void> moveForward({
     }
   }
   tokenCollision(world);
+  clearTokenTrail(token);
+}
+
+void clearTokenTrail(Token token) async {
+  final spots = SpotManager().getSpots();
+
+  for (var spot in spots) {
+    // Check if the spot has any ColorEffect children
+    if (spot.children.whereType<ColorEffect>().isNotEmpty) {
+      final effects = spot.children.whereType<ColorEffect>().toList();
+
+      // Iterate through each ColorEffect and remove it
+      for (var colorEffect in effects) {
+        print("Removing ColorEffect: $colorEffect");
+        spot.remove(colorEffect);
+      }
+
+      // Optionally reset the spot's color after removing effects
+      if (spot.uniqueId == 'B04') {
+        spot.add(ColorEffect(
+          Colors.blue,
+          EffectController(
+            duration: 0.2,
+            reverseDuration: 0.2,
+            infinite: true,
+            alternate: true,
+          ),
+        ));
+      } else if (spot.uniqueId == 'G21') {
+        spot.add(ColorEffect(
+          Colors.green,
+          EffectController(
+            duration: 0.2,
+            reverseDuration: 0.2,
+            infinite: true,
+            alternate: true,
+          ),
+        ));
+      } else if (spot.uniqueId == 'Y42') {
+        spot.add(ColorEffect(
+          Colors.yellowAccent,
+          EffectController(
+            duration: 0.2,
+            reverseDuration: 0.2,
+            infinite: true,
+            alternate: true,
+          ),
+        ));
+      } else if (spot.uniqueId == 'R10') {
+        spot.add(ColorEffect(
+          Colors.red,
+          EffectController(
+            duration: 0.2,
+            reverseDuration: 0.2,
+            infinite: true,
+            alternate: true,
+          ),
+        ));
+      } else {
+        spot.add(ColorEffect(
+          Colors.white,
+          EffectController(
+            duration: 0.2,
+            reverseDuration: 0.2,
+            infinite: true,
+            alternate: true,
+          ),
+        ));
+      }
+    }
+  }
+}
+
+void addTokenTrail(tokensOnBoard) {
+  for (var token in tokensOnBoard) {
+    final spot = findSpotById(token.positionId);
+
+    if (spot == null) {
+      continue;
+    }
+
+    if (token.tokenId.startsWith('B')) {
+      spot.add(ColorEffect(
+        Color(0xFF4FC3F7),
+        EffectController(
+          duration: 0.2,
+          reverseDuration: 0.2,
+          infinite: true,
+          alternate: true,
+        ),
+      ));
+    }
+    if (token.tokenId.startsWith('G')) {
+      spot.add(ColorEffect(
+        Colors.lightGreen,
+        EffectController(
+          duration: 0.2,
+          reverseDuration: 0.2,
+          infinite: true,
+          alternate: true,
+        ),
+      ));
+    }
+  }
 }
 
 // Enum to define token states
@@ -2143,7 +2249,7 @@ class GreenGridComponent extends PositionComponent {
     // Loop to create 3 columns of 6 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
-        var color = Colors.transparent;
+        var color = Colors.white;
         if (row > 0 && col == 1 || row == 1 && col == 2) {
           color = Colors.green;
         }
@@ -2261,7 +2367,7 @@ class BlueGridComponent extends PositionComponent {
     // Loop to create 3 columns of 6 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
-        var color = Colors.transparent;
+        var color = Colors.white;
         if (col == 0 && row == 4 || col == 1 && row < 5) {
           color = Colors.blue;
         }
@@ -2398,7 +2504,7 @@ class RedGridComponent extends PositionComponent {
     // Loop to create 6 columns of 3 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
-        var color = Colors.transparent;
+        var color = Colors.white;
         if (row == 0 && col == 1 || row == 1 && col > 0) {
           color = Colors.red;
         }
@@ -2478,7 +2584,7 @@ class YellowGridComponent extends PositionComponent {
     // Loop to create 6 columns of 3 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
-        var color = Colors.transparent;
+        var color = Colors.white;
         if (row == 1 && col < 5 || row == 2 && col == 4) {
           color = Colors.yellow;
         }
