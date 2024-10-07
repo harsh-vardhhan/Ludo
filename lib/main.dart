@@ -1990,7 +1990,7 @@ class Token extends PositionComponent with TapCallbacks {
   })  : _innerCircleColor = innerCircleColor,
         borderPaint = Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = size.x * 0.05
+          ..strokeWidth = size.x * 0.04
           ..color = borderColor,
         transparentPaint = Paint()
           ..style = PaintingStyle.stroke
