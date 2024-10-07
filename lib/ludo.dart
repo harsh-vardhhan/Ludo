@@ -612,7 +612,7 @@ void clearTokenTrail(Token token) async {
         ));
       } else if (spot.uniqueId == 'Y42') {
         spot.add(ColorEffect(
-          Colors.yellowAccent,
+          Colors.yellow,
           EffectController(
             duration: 0.2,
             reverseDuration: 0.2,
