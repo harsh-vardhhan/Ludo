@@ -2,9 +2,9 @@
 
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'spot.dart'; // Replace with the actual path to your Spot component
-import 'arrow_icon_component.dart'; // Replace with the actual path to ArrowIconComponent
-import 'star_component.dart'; // Replace with the actual path to StarComponent
+import '../ui_components/spot.dart'; // Replace with the actual path to your Spot component
+import '../ui_components/arrow_icon_component.dart'; // Replace with the actual path to ArrowIconComponent
+import '../ui_components/star_component.dart'; // Replace with the actual path to StarComponent
 
 class RedGridComponent extends PositionComponent {
   final bool showId;

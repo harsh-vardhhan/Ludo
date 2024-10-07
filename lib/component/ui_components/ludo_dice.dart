@@ -8,12 +8,12 @@ import 'package:flame/geometry.dart';
 import 'package:flame_audio/flame_audio.dart';
 // user files
 import 'dice_face_component.dart';
-import 'game_state.dart';
-import 'player.dart';
-import 'ludo_board.dart';
+import '../../state/game_state.dart';
+import '../../state/player.dart';
+import '../../ludo_board.dart';
 import 'token.dart';
-import 'token_path.dart';
-import 'ludo.dart';
+import '../../state/token_path.dart';
+import '../../ludo.dart';
 
 
 class LudoDice extends PositionComponent with TapCallbacks {

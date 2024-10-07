@@ -1,11 +1,11 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 // user files
-import 'red_grid_component.dart';
-import 'yellow_grid_component.dart';
-import 'blue_grid_component.dart';
-import 'green_grid_component.dart';
-import 'home.dart';
+import 'component/grid_component/red_grid_component.dart';
+import 'component/grid_component/yellow_grid_component.dart';
+import 'component/grid_component/blue_grid_component.dart';
+import 'component/grid_component/green_grid_component.dart';
+import 'component/home/home.dart';
 
 class LudoBoard extends PositionComponent {
   LudoBoard({

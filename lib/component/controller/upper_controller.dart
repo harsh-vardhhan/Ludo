@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'ludo.dart';
+import '../../ludo.dart';
 
 // user files
 import 'controller_block.dart';

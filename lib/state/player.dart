@@ -1,4 +1,4 @@
-import 'token.dart';
+import '../component/ui_components/token.dart';
 
 class Player {
   String playerId;

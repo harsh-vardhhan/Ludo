@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'player.dart';
-import 'game_state.dart';
-import 'ludo_board.dart';
-import 'token_path.dart';
-import 'ludo.dart';
+import '../../state/player.dart';
+import '../../state/game_state.dart';
+import '../../ludo_board.dart';
+import '../../state/token_path.dart';
+import '../../ludo.dart';
 
 
 // Enum to define token states

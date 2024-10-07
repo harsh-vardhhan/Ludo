@@ -8,18 +8,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flame_audio/flame_audio.dart';
 
-import 'player.dart';
-import 'home.dart';
-import 'token_manager.dart';
-import 'event_bus.dart';
-import 'home_spot.dart';
-import 'game_state.dart';
-import 'upper_controller.dart';
-import 'lower_controller.dart';
+import 'state/player.dart';
+import 'component/home/home.dart';
+import 'state/token_manager.dart';
+import 'state/event_bus.dart';
+import 'component/home/home_spot.dart';
+import 'state/game_state.dart';
+import 'component/controller/upper_controller.dart';
+import 'component/controller/lower_controller.dart';
 import 'ludo_board.dart';
-import 'token.dart';
-import 'spot.dart';
-import 'ludo_dice.dart';
+import 'component/ui_components/token.dart';
+import 'component/ui_components/spot.dart';
+import 'component/ui_components/ludo_dice.dart';
 
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
