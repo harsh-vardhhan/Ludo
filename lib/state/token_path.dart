@@ -55,6 +55,7 @@ const blueTokenPath = [
   'B12',
   'B11',
   'B10',
+  'BF',
 ];
 
 const greenTokenPath = [
@@ -114,6 +115,7 @@ const greenTokenPath = [
   'G13',
   'G14',
   'G15',
+  'GF',
 ];
 
 List<String> getTokenPath(String playerId) {

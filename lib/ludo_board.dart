@@ -6,6 +6,7 @@ import 'component/grid_component/yellow_grid_component.dart';
 import 'component/grid_component/blue_grid_component.dart';
 import 'component/grid_component/green_grid_component.dart';
 import 'component/home/home.dart';
+import 'component/ui_components/spot.dart';
 
 class LudoBoard extends PositionComponent {
   LudoBoard({
@@ -160,41 +161,91 @@ class DiagonalRectangleComponent extends PositionComponent {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    // Yellow Triangle (top-left)
+    // Draw the triangles and borders
     Path redTriangle = Path()
       ..moveTo(topLeft.dx, topLeft.dy)
       ..lineTo(center.dx, center.dy)
       ..lineTo(bottomLeft.dx, bottomLeft.dy)
       ..close();
     canvas.drawPath(redTriangle, redPaint);
-    canvas.drawPath(redTriangle, borderPaint); // Border
+    canvas.drawPath(redTriangle, borderPaint);
 
-    // Red Triangle (bottom-right)
     Path yellowTriangle = Path()
       ..moveTo(bottomRight.dx, bottomRight.dy)
       ..lineTo(center.dx, center.dy)
       ..lineTo(topRight.dx, topRight.dy)
       ..close();
     canvas.drawPath(yellowTriangle, yellowPaint);
-    canvas.drawPath(yellowTriangle, borderPaint); // Border
+    canvas.drawPath(yellowTriangle, borderPaint);
 
-    // Blue Triangle (bottom-left)
     Path blueTriangle = Path()
       ..moveTo(bottomLeft.dx, bottomLeft.dy)
       ..lineTo(center.dx, center.dy)
       ..lineTo(bottomRight.dx, bottomRight.dy)
       ..close();
     canvas.drawPath(blueTriangle, bluePaint);
-    canvas.drawPath(blueTriangle, borderPaint); // Border
+    canvas.drawPath(blueTriangle, borderPaint);
 
-    // Green Triangle (top-right)
     Path greenTriangle = Path()
       ..moveTo(topRight.dx, topRight.dy)
       ..lineTo(center.dx, center.dy)
       ..lineTo(topLeft.dx, topLeft.dy)
       ..close();
     canvas.drawPath(greenTriangle, greenPaint);
-    canvas.drawPath(greenTriangle, borderPaint); // Border
+    canvas.drawPath(greenTriangle, borderPaint);
+
+    // Size of the transparent rectangle
+    double rectWidth = size.x / 6;
+    double rectHeight = size.y / 6;
+
+    // Calculating exact centroids for the rectangles to place
+    Vector2 centerRedTriangle = Vector2(
+        (topLeft.dx + center.dx + bottomLeft.dx) / 3,
+        (topLeft.dy + center.dy + bottomLeft.dy) / 3);
+    Vector2 centerYellowTriangle = Vector2(
+        (bottomRight.dx + center.dx + topRight.dx) / 3,
+        (bottomRight.dy + center.dy + topRight.dy) / 3);
+    Vector2 centerBlueTriangle = Vector2(
+        (bottomLeft.dx + center.dx + bottomRight.dx) / 3,
+        (bottomLeft.dy + center.dy + bottomRight.dy) / 3);
+    Vector2 centerGreenTriangle = Vector2(
+        (topRight.dx + center.dx + topLeft.dx) / 3,
+        (topRight.dy + center.dy + topLeft.dy) / 3);
+
+    // Transparent paint with only a border
+    Paint transparentPaint = Paint()
+      ..color = Colors.transparent
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    // Adding Spot components at each calculated centroid
+    add(Spot(
+      uniqueId: 'RF',
+      position: centerRedTriangle - Vector2(rectWidth / 2, rectHeight / 2),
+      size: Vector2(rectWidth, rectHeight),
+      paint: transparentPaint,
+    ));
+
+    add(Spot(
+      uniqueId: 'YF',
+      position: centerYellowTriangle - Vector2(rectWidth / 2, rectHeight / 2),
+      size: Vector2(rectWidth, rectHeight),
+      paint: transparentPaint,
+    ));
+
+    add(Spot(
+      uniqueId: 'BF',
+      position: centerBlueTriangle - Vector2(rectWidth / 2, rectHeight / 2),
+      size: Vector2(rectWidth, rectHeight),
+      paint: transparentPaint,
+    ));
+
+    add(Spot(
+      uniqueId: 'GF',
+      position: centerGreenTriangle - Vector2(rectWidth / 2, rectHeight / 2),
+      size: Vector2(rectWidth, rectHeight),
+      paint: transparentPaint,
+    ));
   }
 
   @override
