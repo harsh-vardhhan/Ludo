@@ -127,8 +127,6 @@ class _GameAppState extends State<GameApp> {
   }
 }
 
-const showId = false;
-
 class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
   PlayArea() : super(children: [RectangleHitbox()]);
 

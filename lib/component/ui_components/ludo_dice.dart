@@ -15,7 +15,6 @@ import 'token.dart';
 import '../../state/token_path.dart';
 import '../../ludo.dart';
 
-
 class LudoDice extends PositionComponent with TapCallbacks {
   final gameState = GameState();
   final double faceSize; // size of the square
@@ -99,7 +98,13 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     if (_canMoveSingleToken(tokensInBase, tokensOnBoard)) {
       _moveSingleToken(
-          world, ludoBoard, diceNumber, tokensInBase, tokensOnBoard);
+        world,
+        ludoBoard,
+        diceNumber,
+        tokensInBase,
+        tokensOnBoard,
+        getTokenPath(player.playerId),
+      );
     } else {
       _enableManualTokenSelection(tokensInBase, tokensOnBoard);
     }
@@ -119,8 +124,10 @@ class LudoDice extends PositionComponent with TapCallbacks {
         .toList();
 
     if (tokensOnBoard.length == 1) {
-      await _moveForwardSingleToken(
-          world, ludoBoard, diceNumber, tokensOnBoard.first);
+      if (tokensOnBoard.first.spaceToMove()) {
+        await _moveForwardSingleToken(
+            world, ludoBoard, diceNumber, tokensOnBoard.first);
+      }
       gameState.switchToNextPlayer();
     } else if (tokensOnBoard.isNotEmpty) {
       _enableManualTokenSelection(tokensInBase, tokensOnBoard);
@@ -144,7 +151,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
       LudoBoard ludoBoard,
       int diceNumber,
       List<Token> tokensInBase,
-      List<Token> tokensOnBoard) async {
+      List<Token> tokensOnBoard,
+      List<String> tokenPath) async {
     if (tokensInBase.length == 1) {
       moveOutOfBase(
         world: world,
@@ -155,8 +163,10 @@ class LudoDice extends PositionComponent with TapCallbacks {
       gameState.resetTokenMovement();
       player.enableDice = true;
     } else if (tokensOnBoard.length == 1) {
-      await _moveForwardSingleToken(
-          world, ludoBoard, diceNumber, tokensOnBoard.first);
+      if (tokensOnBoard.first.spaceToMove()) {
+        await _moveForwardSingleToken(
+            world, ludoBoard, diceNumber, tokensOnBoard.first);
+      }
       gameState.switchToNextPlayer();
       player.enableDice = true;
     }

@@ -454,7 +454,7 @@ void tokenCollision(world) {
   }
 }
 
-void addTokenTrail(tokensOnBoard) {
+void addTokenTrail(List<Token> tokensOnBoard) {
   for (var token in tokensOnBoard) {
     final spot = findSpotById(token.positionId);
 
@@ -462,27 +462,29 @@ void addTokenTrail(tokensOnBoard) {
       continue;
     }
 
-    if (token.tokenId.startsWith('B')) {
-      spot.add(ColorEffect(
-        Color(0xFF4FC3F7),
-        EffectController(
-          duration: 0.2,
-          reverseDuration: 0.2,
-          infinite: true,
-          alternate: true,
-        ),
-      ));
-    }
-    if (token.tokenId.startsWith('G')) {
-      spot.add(ColorEffect(
-        Colors.lightGreen,
-        EffectController(
-          duration: 0.2,
-          reverseDuration: 0.2,
-          infinite: true,
-          alternate: true,
-        ),
-      ));
+    if (token.spaceToMove()) {
+      if (token.tokenId.startsWith('B')) {
+        spot.add(ColorEffect(
+          Color(0xFF4FC3F7),
+          EffectController(
+            duration: 0.2,
+            reverseDuration: 0.2,
+            infinite: true,
+            alternate: true,
+          ),
+        ));
+      }
+      if (token.tokenId.startsWith('G')) {
+        spot.add(ColorEffect(
+          Colors.lightGreen,
+          EffectController(
+            duration: 0.2,
+            reverseDuration: 0.2,
+            infinite: true,
+            alternate: true,
+          ),
+        ));
+      }
     }
   }
 }
@@ -590,7 +592,12 @@ void clearTokenTrail(Token token) async {
       }
 
       // Optionally reset the spot's color after removing effects
-      if (spot.uniqueId == 'B04') {
+      if (spot.uniqueId == 'B04' ||
+          spot.uniqueId == 'B10' ||
+          spot.uniqueId == 'B11' ||
+          spot.uniqueId == 'B12' ||
+          spot.uniqueId == 'B13' ||
+          spot.uniqueId == 'B14') {
         spot.add(ColorEffect(
           Colors.blue,
           EffectController(
@@ -600,7 +607,12 @@ void clearTokenTrail(Token token) async {
             alternate: true,
           ),
         ));
-      } else if (spot.uniqueId == 'G21') {
+      } else if (spot.uniqueId == 'G21' ||
+          spot.uniqueId == 'G11' ||
+          spot.uniqueId == 'G12' ||
+          spot.uniqueId == 'G13' ||
+          spot.uniqueId == 'G14' ||
+          spot.uniqueId == 'G15') {
         spot.add(ColorEffect(
           Colors.green,
           EffectController(
@@ -650,42 +662,4 @@ Future<void> _applyEffect(PositionComponent component, Effect effect) {
   effect.onComplete = completer.complete;
   component.add(effect);
   return completer.future;
-}
-
-void multiMoveToken({
-  required World world,
-  required List<Token> openTokens,
-  required List<String> tokenPath,
-  required GameState gameState,
-  required LudoBoard ludoBoard,
-}) {
-  final tokens = openTokens.iterator;
-  final pathSize = tokenPath.length;
-  List<Token> movableTokens = [];
-
-  // Iterate through each token and determine if it can move
-  while (tokens.moveNext()) {
-    final token = tokens.current;
-    final index = tokenPath.indexOf(token.positionId);
-    if (index != -1) {
-      final distance = pathSize - index;
-      if (distance > gameState.diceNumber) {
-        movableTokens.add(token); // Add the token to the list if it's movable
-      }
-    }
-  }
-
-  // Check if multiple tokens are movable
-  if (movableTokens.length > 1) {
-    // gameState.enableBlueToken = true; // Enable token movement
-  } else if (movableTokens.length == 1) {
-    final token = movableTokens.first;
-    moveForward(
-      world: world,
-      token: token,
-      tokenPath: tokenPath,
-      diceNumber: gameState.diceNumber,
-      ludoBoard: ludoBoard,
-    );
-  }
 }
