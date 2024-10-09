@@ -1,4 +1,3 @@
-
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'home_plate.dart';
@@ -24,10 +23,7 @@ class Home extends RectangleComponent {
             ),
             HomePlate(
               size: size / 1.5,
-              position: Vector2(
-                size / 2 - (size / 1.5) / 2, // Calculate center x
-                size / 2 - (size / 1.5) / 2, // Calculate center y
-              ),
+              position: Vector2.all(size / 2 - size / 3), // Simplified center calculation
               homeSpotColor: homeSpotColor,
             ),
           ],
@@ -36,6 +32,8 @@ class Home extends RectangleComponent {
   // Updated method to set color with optional paintId
   @override
   void setColor(Color color, {Object? paintId}) {
-    paint.color = color; // Change the paint color of the main rectangle
+    if (paint.color != color) { // Avoid unnecessary updates
+      paint.color = color; // Change the paint color of the main rectangle
+    }
   }
 }

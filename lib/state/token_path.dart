@@ -118,13 +118,11 @@ const greenTokenPath = [
   'GF',
 ];
 
+final Map<String, List<String>> tokenPaths = {
+  'BP': blueTokenPath,
+  'GP': greenTokenPath,
+};
+
 List<String> getTokenPath(String playerId) {
-  switch (playerId) {
-    case 'BP':
-      return blueTokenPath;
-    case 'GP':
-      return greenTokenPath;
-    default:
-      return [];
-  }
+  return tokenPaths[playerId] ?? [];
 }

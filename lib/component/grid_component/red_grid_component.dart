@@ -25,6 +25,21 @@ class RedGridComponent extends PositionComponent {
     int numberOfRows = 3;
     int numberOfColumns = 6;
 
+    // Pre-calculate size-related values to avoid repeated calculations
+    final double sizeX = size.x;
+    final double halfSizeX = sizeX / 2;
+    final double strokeWidth = sizeX * 0.025;
+    final double starInnerRadius = sizeX * 0.24;
+    final double starOuterRadius = sizeX * 0.48;
+    final double arrowSize = sizeX * 0.90;
+    final Vector2 arrowPosition = Vector2(sizeX * 0.05, sizeX * 0.05);
+    final TextPaint textRenderer = TextPaint(
+      style: TextStyle(
+        color: Colors.black,
+        fontSize: sizeX * 0.4,
+      ),
+    );
+
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
         var color = Colors.white;
@@ -36,42 +51,37 @@ class RedGridComponent extends PositionComponent {
 
         var rectangle = Spot(
           uniqueId: uniqueId,
-          position: Vector2(col * (size.x + columnSpacing), row * (size.x + spacing)),
-          size: Vector2.all(size.x),
+          position: Vector2(col * (sizeX + columnSpacing), row * (sizeX + spacing)),
+          size: Vector2.all(sizeX),
           paint: Paint()..color = color,
           children: [
             RectangleComponent(
-              size: Vector2.all(size.x),
+              size: Vector2.all(sizeX),
               paint: Paint()
                 ..color = Colors.transparent
                 ..style = PaintingStyle.stroke
-                ..strokeWidth = size.x * 0.025
+                ..strokeWidth = strokeWidth
                 ..color = Colors.black,
               children: [
                 if (col == 2 && row == 2)
                   StarComponent(
                     size: size,
-                    innerRadius: size.x * 0.24,
-                    outerRadius: size.x * 0.48,
+                    innerRadius: starInnerRadius,
+                    outerRadius: starOuterRadius,
                   ),
                 if (col == 0 && row == 1)
                   ArrowIconComponent(
                     icon: Icons.east,
-                    size: size.x * 0.90,
-                    position: Vector2(size.x * 0.05, size.x * 0.05),
+                    size: arrowSize,
+                    position: arrowPosition,
                     borderColor: Colors.red,
                   ),
                 if (showId)
                   TextComponent(
                     text: uniqueId,
-                    position: Vector2(size.x / 2, size.x / 2),
+                    position: Vector2(halfSizeX, halfSizeX),
                     anchor: Anchor.center,
-                    textRenderer: TextPaint(
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: size.x * 0.4,
-                      ),
-                    ),
+                    textRenderer: textRenderer,
                   ),
               ],
             ),

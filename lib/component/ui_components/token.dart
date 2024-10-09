@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import '../../state/player.dart';
 import '../../state/game_state.dart';
 import '../../ludo_board.dart';
 import '../../state/token_path.dart';
@@ -16,8 +15,9 @@ enum TokenState {
 }
 
 class Token extends PositionComponent with TapCallbacks {
-  late final Player player; // Unique ID for the player
   final String tokenId; // Mandatory unique ID for the token
+  String playerId; // Store only the player ID
+  bool enableToken; // Store the enableToken state directly
   String positionId; // Mandatory position ID for the token
   TokenState state; // Current state of the token
   final gameState = GameState();
@@ -34,6 +34,8 @@ class Token extends PositionComponent with TapCallbacks {
     required Vector2 position, // Initial position of the token
     required Vector2 size, // Size of the token
     required Color innerCircleColor, // Mandatory inner fill color
+    required this.playerId, // Initialize playerId
+    this.enableToken = false, // Initialize enableToken
     Color borderColor = Colors.black, // Default border color
     Color dropletFillColor = Colors.white, // Default droplet fill color
     this.state = TokenState.inBase, // Default state
@@ -69,56 +71,45 @@ class Token extends PositionComponent with TapCallbacks {
 
     final world = parent?.parent;
 
-    if (spaceToMove()) {
-      if (player.enableToken) {
-        player.enableToken = false;
-        if (world is World) {
-          final ludoBoard = world.children.whereType<LudoBoard>().first;
-          final gameState = GameState();
+    if (!spaceToMove() || !enableToken || world is! World) return;
 
-          if (gameState.currentPlayer.playerId == player.playerId) {
-            if (gameState.diceNumber == 6) {
-              // Handle movement logic
-              if (state == TokenState.inBase &&
-                  gameState.canMoveTokenFromBase) {
-                moveOutOfBase(
-                    world: world,
-                    token: this,
-                    tokenPath: getTokenPath(player.playerId),
-                    ludoBoard: ludoBoard);
-                // same delay as opening token duration
-                await Future.delayed(Duration(milliseconds: 100));
-                // Do not consume the extra turn yet
-              } else if (state == TokenState.onBoard &&
-                  gameState.canMoveTokenOnBoard) {
-                await moveForward(
-                    world: world,
-                    token: this,
-                    tokenPath: getTokenPath(player.playerId),
-                    diceNumber: gameState.diceNumber,
-                    ludoBoard: ludoBoard);
-                // Do not consume the extra turn yet
-              }
-              player.enableDice = true;
-              // Allow the player to take another action since they rolled a six
-              return; // Exit early to keep the turn for the player
-            }
+    enableToken = false;
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
 
-            // Non-six logic
-            if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
-              await moveForward(
-                  world: world,
-                  token: this,
-                  tokenPath: getTokenPath(player.playerId),
-                  diceNumber: gameState.diceNumber,
-                  ludoBoard: ludoBoard);
-            }
+    if (gameState.currentPlayer.playerId != playerId) return;
 
-            gameState.switchToNextPlayer();
-          }
-        }
+    if (gameState.diceNumber == 6) {
+      // Handle movement logic
+      if (state == TokenState.inBase && gameState.canMoveTokenFromBase) {
+        moveOutOfBase(
+            world: world,
+            token: this,
+            tokenPath: getTokenPath(playerId),
+            ludoBoard: ludoBoard);
+        await Future.delayed(Duration(milliseconds: 100));
+      } else if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
+        await moveForward(
+            world: world,
+            token: this,
+            tokenPath: getTokenPath(playerId),
+            diceNumber: gameState.diceNumber,
+            ludoBoard: ludoBoard);
       }
+      gameState.currentPlayer.enableDice = true;
+      return;
     }
+
+    // Non-six logic
+    if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
+      await moveForward(
+          world: world,
+          token: this,
+          tokenPath: getTokenPath(playerId),
+          diceNumber: gameState.diceNumber,
+          ludoBoard: ludoBoard);
+    }
+
+    gameState.switchToNextPlayer();
   }
 
   @override
@@ -175,7 +166,7 @@ class Token extends PositionComponent with TapCallbacks {
   }
 
   bool spaceToMove() {
-    final tokenPath = getTokenPath(player.playerId);
+    final tokenPath = getTokenPath(playerId);
     final index = tokenPath.indexOf(positionId);
     final newIndex = index + gameState.diceNumber;
 

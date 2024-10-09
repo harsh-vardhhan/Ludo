@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 
 class HomeSpot extends CircleComponent {
   final String uniqueId;
+  static final Paint borderPaint = Paint()
+    ..color = Colors.transparent // Keep interior transparent
+    ..style = PaintingStyle.stroke // Set to stroke for the border
+    ..strokeWidth = 1.0 // Set border width
+    ..color = Colors.black; // Set border color to black
 
   HomeSpot({
     required double radius,
@@ -17,11 +22,7 @@ class HomeSpot extends CircleComponent {
             // Add a child CircleComponent to draw the border
             CircleComponent(
               radius: radius,
-              paint: Paint()
-                ..color = Colors.transparent // Keep interior transparent
-                ..style = PaintingStyle.stroke // Set to stroke for the border
-                ..strokeWidth = 1.0 // Set border width
-                ..color = Colors.black, // Set border color to black
+              paint: borderPaint, // Reuse static border paint
             ),
           ],
         );

@@ -8,6 +8,8 @@ class DiceFaceComponent extends PositionComponent {
   late final double dotSize; // size of each dot
   late final double spacing; // spacing between dots
 
+  late final Map<int, List<Offset>> precomputedDotOffsets;
+
   DiceFaceComponent({
     required this.faceSize,
     required this.diceValue,
@@ -15,6 +17,41 @@ class DiceFaceComponent extends PositionComponent {
     dotSize = faceSize * 0.1; // Adjust dot size
     spacing = faceSize * 0.3; // Spacing between dots
     size = Vector2.all(faceSize);
+
+    // Precompute dot positions
+    precomputedDotOffsets = {
+      1: [Offset(size.x / 2, size.y / 2)], // Center dot
+      2: [
+        Offset(size.x * 0.3, size.y * 0.3), // Top left
+        Offset(size.x * 0.7, size.y * 0.7), // Bottom right
+      ],
+      3: [
+        Offset(size.x * 0.3, size.y * 0.3), // Top left
+        Offset(size.x / 2, size.y / 2), // Center dot
+        Offset(size.x * 0.7, size.y * 0.7), // Bottom right
+      ],
+      4: [
+        Offset(size.x * 0.3, size.y * 0.3), // Top left
+        Offset(size.x * 0.7, size.y * 0.3), // Top right
+        Offset(size.x * 0.3, size.y * 0.7), // Bottom left
+        Offset(size.x * 0.7, size.y * 0.7), // Bottom right
+      ],
+      5: [
+        Offset(size.x * 0.3, size.y * 0.3), // Top left
+        Offset(size.x * 0.7, size.y * 0.3), // Top right
+        Offset(size.x / 2, size.y / 2), // Center dot
+        Offset(size.x * 0.3, size.y * 0.7), // Bottom left
+        Offset(size.x * 0.7, size.y * 0.7), // Bottom right
+      ],
+      6: [
+        Offset(size.x * 0.3, size.y * 0.2), // Top left
+        Offset(size.x * 0.7, size.y * 0.2), // Top right
+        Offset(size.x * 0.3, size.y * 0.5), // Middle left
+        Offset(size.x * 0.7, size.y * 0.5), // Middle right
+        Offset(size.x * 0.3, size.y * 0.8), // Bottom left
+        Offset(size.x * 0.7, size.y * 0.8), // Bottom right
+      ],
+    };
   }
 
   // Method to update the dice value and re-render
@@ -43,46 +80,6 @@ class DiceFaceComponent extends PositionComponent {
   }
 
   List<Offset> _getDotOffsets() {
-    switch (diceValue) {
-      case 1:
-        return [Offset(size.x / 2, size.y / 2)]; // Center dot
-      case 2:
-        return [
-          Offset(size.x * 0.3, size.y * 0.3), // Top left
-          Offset(size.x * 0.7, size.y * 0.7), // Bottom right
-        ];
-      case 3:
-        return [
-          Offset(size.x * 0.3, size.y * 0.3), // Top left
-          Offset(size.x / 2, size.y / 2), // Center dot
-          Offset(size.x * 0.7, size.y * 0.7), // Bottom right
-        ];
-      case 4:
-        return [
-          Offset(size.x * 0.3, size.y * 0.3), // Top left
-          Offset(size.x * 0.7, size.y * 0.3), // Top right
-          Offset(size.x * 0.3, size.y * 0.7), // Bottom left
-          Offset(size.x * 0.7, size.y * 0.7), // Bottom right
-        ];
-      case 5:
-        return [
-          Offset(size.x * 0.3, size.y * 0.3), // Top left
-          Offset(size.x * 0.7, size.y * 0.3), // Top right
-          Offset(size.x / 2, size.y / 2), // Center dot
-          Offset(size.x * 0.3, size.y * 0.7), // Bottom left
-          Offset(size.x * 0.7, size.y * 0.7), // Bottom right
-        ];
-      case 6:
-        return [
-          Offset(size.x * 0.3, size.y * 0.2), // Top left
-          Offset(size.x * 0.7, size.y * 0.2), // Top right
-          Offset(size.x * 0.3, size.y * 0.5), // Middle left
-          Offset(size.x * 0.7, size.y * 0.5), // Middle right
-          Offset(size.x * 0.3, size.y * 0.8), // Bottom left
-          Offset(size.x * 0.7, size.y * 0.8), // Bottom right
-        ];
-      default:
-        return [];
-    }
+    return precomputedDotOffsets[diceValue] ?? [];
   }
 }

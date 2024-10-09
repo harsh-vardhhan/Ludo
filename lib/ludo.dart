@@ -7,6 +7,7 @@ import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flame_audio/flame_audio.dart';
+import 'package:collection/collection.dart';
 
 import 'state/player.dart';
 import 'component/home/home.dart';
@@ -32,6 +33,11 @@ class Ludo extends FlameGame
   final rand = Random();
   double get width => size.x;
   double get height => size.y;
+
+  ColorEffect? _greenBlinkEffect;
+  ColorEffect? _greenStaticEffect;
+  ColorEffect? _blueBlinkEffect;
+  ColorEffect? _blueStaticEffect;
 
   @override
   FutureOr<void> onLoad() async {
@@ -71,30 +77,29 @@ class Ludo extends FlameGame
     final home = child.children.toList();
     final homePlate = home[0] as Home;
 
-    // Only add the blinking effect if shouldBlink is true
-    if (shouldBlink) {
-      final lightEffectForHome = ColorEffect(
-        Color(0xFF4FC3F7),
-        EffectController(
-          duration: 0.2,
-          reverseDuration: 0.2,
-          infinite: true,
-          alternate: true,
-        ),
-      );
-      homePlate.add(lightEffectForHome);
-    } else {
-      final lightEffectForHome = ColorEffect(
-        Colors.blue,
-        EffectController(
-          duration: 0.2,
-          reverseDuration: 0.2,
-          infinite: true,
-          alternate: true,
-        ),
-      );
-      homePlate.add(lightEffectForHome);
-    }
+    // Initialize effects if they haven't been created yet
+    _blueBlinkEffect ??= ColorEffect(
+      Color(0xFF4FC3F7),
+      EffectController(
+        duration: 0.2,
+        reverseDuration: 0.2,
+        infinite: true,
+        alternate: true,
+      ),
+    );
+
+    _blueStaticEffect ??= ColorEffect(
+      Colors.blue,
+      EffectController(
+        duration: 0.2,
+        reverseDuration: 0.2,
+        infinite: true,
+        alternate: true,
+      ),
+    );
+
+    // Add the appropriate effect based on shouldBlink
+    homePlate.add(shouldBlink ? _blueBlinkEffect! : _blueStaticEffect!);
   }
 
   void blinkGreenBase(bool shouldBlink) {
@@ -104,188 +109,205 @@ class Ludo extends FlameGame
     final home = child.children.toList();
     final homePlate = home[0] as Home;
 
-    // Only add the blinking effect if shouldBlink is true
-    if (shouldBlink) {
-      final lightEffectForHome = ColorEffect(
-        Colors.lightGreen,
-        EffectController(
-          duration: 0.2,
-          reverseDuration: 0.2,
-          infinite: true,
-          alternate: true,
-        ),
-      );
-      homePlate.add(lightEffectForHome);
-    } else {
-      final lightEffectForHome = ColorEffect(
-        Colors.green,
-        EffectController(
-          duration: 0.2,
-          reverseDuration: 0.2,
-          infinite: true,
-          alternate: true,
-        ),
-      );
-      homePlate.add(lightEffectForHome);
-    }
+    // Initialize effects if they haven't been created yet
+    _greenBlinkEffect ??= ColorEffect(
+      Colors.lightGreen,
+      EffectController(
+        duration: 0.2,
+        reverseDuration: 0.2,
+        infinite: true,
+        alternate: true,
+      ),
+    );
+
+    _greenStaticEffect ??= ColorEffect(
+      Colors.green,
+      EffectController(
+        duration: 0.2,
+        reverseDuration: 0.2,
+        infinite: true,
+        alternate: true,
+      ),
+    );
+
+    // Add the appropriate effect based on shouldBlink
+    homePlate.add(shouldBlink ? _greenBlinkEffect! : _greenStaticEffect!);
   }
 
   void startGame() {
-    if (TokenManager().getBlueTokens().isEmpty &&
-        TokenManager().getGreenTokens().isEmpty) {
-      final gameState = GameState();
-      final ludoBoard = world.children.whereType<LudoBoard>().first;
+    final gameState = GameState();
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
 
-      if (TokenManager().getBlueTokens().isEmpty) {
-        final tokenToHome = {
-          'BT1': 'B1',
-          'BT2': 'B2',
-          'BT3': 'B3',
-          'BT4': 'B4',
-        };
-        TokenManager().initializeTokens(tokenToHome);
+    if (TokenManager().getBlueTokens().isEmpty) {
+      final tokenToHome = {
+        'BT1': 'B1',
+        'BT2': 'B2',
+        'BT3': 'B3',
+        'BT4': 'B4',
+      };
+      TokenManager().initializeTokens(tokenToHome);
 
-        for (var token in TokenManager().getBlueTokens()) {
-          final homeSpot = getHomeSpot(world, 6)
-              .whereType<HomeSpot>()
-              .firstWhere((spot) => spot.uniqueId == token.positionId);
-          token.innerCircleColor = Colors.blue;
-          token.position = Vector2(
-            homeSpot.absolutePosition.x +
-                (homeSpot.size.x * 0.10) -
-                ludoBoard.absolutePosition.x,
-            homeSpot.absolutePosition.y -
-                (homeSpot.size.x * 0.50) -
-                ludoBoard.absolutePosition.y,
-          );
-          token.size = Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-          ludoBoard.add(token);
-        }
+      final ludoBoardPosition = ludoBoard.absolutePosition;
+      const homeSpotSizeFactorX = 0.10;
+      const homeSpotSizeFactorY = 0.50;
+      const tokenSizeFactorX = 0.80;
+      const tokenSizeFactorY = 1.05;
 
-        const playerId = 'BP';
-        final tokens = TokenManager().getBlueTokens();
-
-        if (gameState.players.isEmpty) {
-          Player bluePlayer = Player(
-            playerId: playerId,
-            tokens: tokens,
-            isCurrentTurn: true,
-            enableDice: true,
-          );
-          blinkBlueBase(true);
-          gameState.players.add(bluePlayer);
-          for (var token in tokens) {
-            token.player = bluePlayer;
-          }
-        } else {
-          Player bluePlayer = Player(
-            playerId: playerId,
-            tokens: tokens,
-          );
-          gameState.players.add(bluePlayer);
-          for (var token in tokens) {
-            token.player = bluePlayer;
-          }
-        }
-
-        final player = gameState.players
-            .firstWhere((player) => player.playerId == playerId);
-
-        // dice for player blue
-        final lowerController =
-            world.children.whereType<LowerController>().first;
-        final lowerControllerComponents = lowerController.children.toList();
-        final leftDice = lowerControllerComponents[0]
-            .children
-            .whereType<RectangleComponent>()
-            .first;
-        final leftDiceContainer =
-            leftDice.children.whereType<RectangleComponent>().first;
-
-        leftDiceContainer.add(LudoDice(
-          player: player,
-          faceSize: leftDice.size.x * 0.70,
-        ));
+      for (var token in TokenManager().getBlueTokens()) {
+        final homeSpot = getHomeSpot(world, 6)
+            .whereType<HomeSpot>()
+            .firstWhere((spot) => spot.uniqueId == token.positionId);
+        token.innerCircleColor = Colors.blue;
+        token.position = Vector2(
+          homeSpot.absolutePosition.x +
+              (homeSpot.size.x * homeSpotSizeFactorX) -
+              ludoBoardPosition.x,
+          homeSpot.absolutePosition.y -
+              (homeSpot.size.x * homeSpotSizeFactorY) -
+              ludoBoardPosition.y,
+        );
+        token.size = Vector2(
+          homeSpot.size.x * tokenSizeFactorX,
+          homeSpot.size.x * tokenSizeFactorY,
+        );
+        ludoBoard.add(token);
       }
 
-      if (TokenManager().getGreenTokens().isEmpty) {
-        final tokenToHome = {
-          'GT1': 'G1',
-          'GT2': 'G2',
-          'GT3': 'G3',
-          'GT4': 'G4',
-        };
-        TokenManager().initializeTokens(tokenToHome);
+      const playerId = 'BP';
+      final tokens = TokenManager().getBlueTokens();
 
-        for (var token in TokenManager().getGreenTokens()) {
-          final homeSpot = getHomeSpot(world, 2)
-              .whereType<HomeSpot>()
-              .firstWhere((spot) => spot.uniqueId == token.positionId);
-          token.innerCircleColor = Colors.green;
-          token.position = Vector2(
-            homeSpot.absolutePosition.x +
-                (homeSpot.size.x * 0.10) -
-                ludoBoard.absolutePosition.x,
-            homeSpot.absolutePosition.y -
-                (homeSpot.size.x * 0.50) -
-                ludoBoard.absolutePosition.y,
-          );
-          token.size = Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-          ludoBoard.add(token);
+      if (gameState.players.isEmpty) {
+        blinkBlueBase(true);
+        Player bluePlayer = Player(
+          playerId: playerId,
+          tokens: tokens,
+          isCurrentTurn: true,
+          enableDice: true,
+        );
+        gameState.players.add(bluePlayer);
+        for (var token in tokens) {
+          token.playerId = bluePlayer.playerId;
+          token.enableToken = true;
         }
-
-        const playerId = 'GP';
-        final tokens = TokenManager().getGreenTokens();
-
-        if (gameState.players.isEmpty) {
-          Player greenPlayer = Player(
-            playerId: playerId,
-            tokens: tokens,
-            isCurrentTurn: true,
-            enableDice: true,
-          );
-          blinkGreenBase(true);
-          gameState.players.add(greenPlayer);
-          for (var token in tokens) {
-            token.player = greenPlayer;
-          }
-        } else {
-          Player greenPlayer = Player(
-            playerId: playerId,
-            tokens: tokens,
-          );
-          gameState.players.add(greenPlayer);
-          for (var token in tokens) {
-            token.player = greenPlayer;
-          }
+      } else {
+        Player bluePlayer = Player(
+          playerId: playerId,
+          tokens: tokens,
+        );
+        gameState.players.add(bluePlayer);
+        for (var token in tokens) {
+          token.playerId = bluePlayer.playerId;
         }
-
-        final player = gameState.players
-            .firstWhere((player) => player.playerId == playerId);
-
-        // dice for player green
-        final upperController =
-            world.children.whereType<UpperController>().first;
-        final upperControllerComponents = upperController.children.toList();
-        final rightDice = upperControllerComponents[2]
-            .children
-            .whereType<RectangleComponent>()
-            .first;
-        final rightDiceContainer =
-            rightDice.children.whereType<RectangleComponent>().first;
-
-        rightDiceContainer.add(LudoDice(
-          player: player,
-          faceSize: rightDice.size.x * 0.70,
-        ));
       }
+
+      final player =
+          gameState.players.firstWhere((player) => player.playerId == playerId);
+
+      // dice for player blue
+      final lowerController = world.children.whereType<LowerController>().first;
+      final lowerControllerComponents = lowerController.children.toList();
+      final leftDice = lowerControllerComponents[0]
+          .children
+          .whereType<RectangleComponent>()
+          .first;
+      final leftDiceContainer =
+          leftDice.children.whereType<RectangleComponent>().first;
+
+      leftDiceContainer.add(LudoDice(
+        player: player,
+        faceSize: leftDice.size.x * 0.70,
+      ));
+    }
+
+    if (TokenManager().getGreenTokens().isEmpty) {
+      final tokenToHome = {
+        'GT1': 'G1',
+        'GT2': 'G2',
+        'GT3': 'G3',
+        'GT4': 'G4',
+      };
+      TokenManager().initializeTokens(tokenToHome);
+
+      final ludoBoardPosition = ludoBoard.absolutePosition;
+      const homeSpotSizeFactorX = 0.10;
+      const homeSpotSizeFactorY = 0.50;
+      const tokenSizeFactorX = 0.80;
+      const tokenSizeFactorY = 1.05;
+
+      for (var token in TokenManager().getGreenTokens()) {
+        final homeSpot = getHomeSpot(world, 2)
+            .whereType<HomeSpot>()
+            .firstWhere((spot) => spot.uniqueId == token.positionId);
+        token.innerCircleColor = Colors.green;
+        token.position = Vector2(
+          homeSpot.absolutePosition.x +
+              (homeSpot.size.x * homeSpotSizeFactorX) -
+              ludoBoardPosition.x,
+          homeSpot.absolutePosition.y -
+              (homeSpot.size.x * homeSpotSizeFactorY) -
+              ludoBoardPosition.y,
+        );
+        token.size = Vector2(
+          homeSpot.size.x * tokenSizeFactorX,
+          homeSpot.size.x * tokenSizeFactorY,
+        );
+        ludoBoard.add(token);
+      }
+
+      const playerId = 'GP';
+      final tokens = TokenManager().getGreenTokens();
+
+      if (gameState.players.isEmpty) {
+        blinkGreenBase(true);
+        Player greenPlayer = Player(
+          playerId: playerId,
+          tokens: tokens,
+          isCurrentTurn: true,
+          enableDice: true,
+        );
+        gameState.players.add(greenPlayer);
+        for (var token in tokens) {
+          token.playerId = greenPlayer.playerId;
+          token.enableToken = true;
+        }
+      } else {
+        Player greenPlayer = Player(
+          playerId: playerId,
+          tokens: tokens,
+        );
+        gameState.players.add(greenPlayer);
+        for (var token in tokens) {
+          token.playerId = greenPlayer.playerId;
+          token.enableToken = false;
+        }
+      }
+
+      final player =
+          gameState.players.firstWhere((player) => player.playerId == playerId);
+
+      // dice for player green
+      final upperController = world.children.whereType<UpperController>().first;
+      final upperControllerComponents = upperController.children.toList();
+      final rightDice = upperControllerComponents[2]
+          .children
+          .whereType<RectangleComponent>()
+          .first;
+      final rightDiceContainer =
+          rightDice.children.whereType<RectangleComponent>().first;
+
+      rightDiceContainer.add(LudoDice(
+        player: player,
+        faceSize: rightDice.size.x * 0.70,
+      ));
     }
   }
 
   @override
   void onTap() {
-    super.onTap();
-    startGame();
+    if (TokenManager().getBlueTokens().isEmpty &&
+        TokenManager().getGreenTokens().isEmpty) {
+      startGame();
+    }
   }
 
   @override
@@ -372,54 +394,52 @@ void tokenCollision(world) {
       Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
 
   // Step 2: Count occurrences of each positionId
-  final Map<String, int> positionIdCount = {};
-  for (var token in tokens) {
-    positionIdCount[token.positionId] =
-        (positionIdCount[token.positionId] ?? 0) + 1;
-  }
+  final positionIdCount = groupBy(tokens, (token) => token.positionId)
+      .map((key, value) => MapEntry(key, value.length));
 
-  // Step 3: Filter out tokens that have duplicate positionIds (more than one occurrence)
+  // Step 3: Use a set to store duplicate positionIds for faster lookup
+  final duplicatePositionIds = positionIdCount.entries
+      .where((entry) => entry.value > 1)
+      .map((entry) => entry.key)
+      .toSet();
+
+  // Step 4: Filter tokens directly using the set of duplicate positionIds
   final duplicateTokens = tokens.where((token) {
-    return positionIdCount[token.positionId]! > 1;
+    return duplicatePositionIds.contains(token.positionId);
   }).toList();
 
-  final currentMiniTokens =
-      TokenManager().miniTokens; // Get the current miniTokens
-  Set<String> duplicateTokenIds = duplicateTokens
-      .map((token) => token.tokenId)
-      .toSet(); // Create a set of tokenIds from duplicateTokens
+  final currentMiniTokens = TokenManager().miniTokens;
+  final duplicateTokenIds =
+      duplicateTokens.map((token) => token.tokenId).toSet();
 
-  // Step 4: Filter miniTokens to find tokens that are not in duplicateTokens
+  // Step 5: Filter miniTokens to find tokens that are not in duplicateTokens
   final tokensNotInDuplicateTokens = currentMiniTokens
       .where((token) => !duplicateTokenIds.contains(token.tokenId))
       .toList();
 
-  // Step 5: Adjust size and position for tokens not in duplicateTokens
+  // Step 6: Adjust size and position for tokens not in duplicateTokens
   if (tokensNotInDuplicateTokens.isNotEmpty) {
-    for (var i = 0; i < tokensNotInDuplicateTokens.length; i++) {
-      var token = tokensNotInDuplicateTokens[i];
+    final ludoBoardGlobalPosition =
+        ludoBoard.absolutePositionOf(Vector2.zero());
+
+    for (var token in tokensNotInDuplicateTokens) {
       // Restore the original size
       token.size = originalSize;
       final spot = findSpotById(token.positionId);
       final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
-      final ludoBoardGlobalPosition =
-          ludoBoard.absolutePositionOf(Vector2.zero());
+
+      // Calculate the position once and reuse it
+      final adjustedPosition = spotGlobalPosition - ludoBoardGlobalPosition;
 
       token.position = Vector2(
-        spotGlobalPosition.x +
-            (token.size.x * 0.10) -
-            ludoBoardGlobalPosition.x,
-        spotGlobalPosition.y -
-            (token.size.x * 0.50) -
-            ludoBoardGlobalPosition.y,
+        adjustedPosition.x + (token.size.x * 0.10),
+        adjustedPosition.y - (token.size.x * 0.50),
       );
     }
   }
 
-  // Step 6: Group duplicateTokens by positionId and apply margin incrementally
+  // Step 7: Group duplicateTokens by positionId and apply margin incrementally
   if (duplicateTokens.isNotEmpty) {
-    print(duplicateTokens);
-
     TokenManager().miniTokens = duplicateTokens;
 
     // Group tokens by positionId
@@ -433,27 +453,22 @@ void tokenCollision(world) {
 
     // Apply size adjustment and incremental margin within each group
     groupedTokens.forEach((positionId, group) {
-      if (group.length == 2) {
-        for (var i = 0; i < group.length; i++) {
-          var token = group[i];
-          // Scale relative to the original size
-          token.size = originalSize * 0.70;
-          final spot = findSpotById(token.positionId);
-          token.position = Vector2(
-              spot.absolutePosition.x + (i * 10) - ludoBoard.absolutePosition.x,
-              spot.absolutePosition.y - ludoBoard.absolutePosition.y);
-        }
-      }
-      if (group.length >= 3) {
-        for (var i = 0; i < group.length; i++) {
-          var token = group[i];
-          // Scale relative to the original size
-          token.size = originalSize * 0.50;
-          final spot = findSpotById(token.positionId);
-          token.position = Vector2(
-              spot.absolutePosition.x + (i * 5) - ludoBoard.absolutePosition.x,
-              spot.absolutePosition.y - ludoBoard.absolutePosition.y);
-        }
+      final sizeFactor = group.length == 2 ? 0.70 : 0.50;
+      final positionIncrement = group.length == 2 ? 10 : 5;
+
+      for (var i = 0; i < group.length; i++) {
+        var token = group[i];
+        // Scale relative to the original size
+        token.size = originalSize * sizeFactor;
+        final spot = findSpotById(token.positionId);
+        final spotGlobalPosition = spot.absolutePosition;
+        final ludoBoardGlobalPosition = ludoBoard.absolutePosition;
+
+        token.position = Vector2(
+            spotGlobalPosition.x +
+                (i * positionIncrement) -
+                ludoBoardGlobalPosition.x,
+            spotGlobalPosition.y - ludoBoardGlobalPosition.y);
       }
     });
   }
@@ -463,33 +478,21 @@ void addTokenTrail(List<Token> tokensOnBoard) {
   for (var token in tokensOnBoard) {
     final spot = findSpotById(token.positionId);
 
-    if (spot == null) {
+    if (spot == null || !token.spaceToMove()) {
       continue;
     }
 
-    if (token.spaceToMove()) {
-      if (token.tokenId.startsWith('B')) {
-        spot.add(ColorEffect(
-          Color(0xFF4FC3F7),
-          EffectController(
-            duration: 0.2,
-            reverseDuration: 0.2,
-            infinite: true,
-            alternate: true,
-          ),
-        ));
-      }
-      if (token.tokenId.startsWith('G')) {
-        spot.add(ColorEffect(
-          Colors.lightGreen,
-          EffectController(
-            duration: 0.2,
-            reverseDuration: 0.2,
-            infinite: true,
-            alternate: true,
-          ),
-        ));
-      }
+    // Determine the color based on the tokenId prefix
+    Color? color;
+    if (token.tokenId.startsWith('B')) {
+      color = Color(0xFF4FC3F7); // Blue color
+    } else if (token.tokenId.startsWith('G')) {
+      color = Colors.lightGreen; // Green color
+    }
+
+    // Set the color if it's determined
+    if (color != null) {
+      spot.paint.color = color; // Assuming 'spot' has a 'paint' property
     }
   }
 }
@@ -508,65 +511,57 @@ Future<void> moveForward({
   final finalIndex = currentIndex + diceNumber;
   final originalSize = tokenOriginalSize(world).clone();
 
-  // Loop through the positions from current to final index
-  for (int i = currentIndex + 1; i <= finalIndex; i++) {
-    if (i < tokenPath.length) {
-      String positionId = tokenPath[i];
-      token.positionId = positionId;
+  // Pre-calculate the ludo board global position
+  final ludoBoardGlobalPosition = ludoBoard.absolutePositionOf(Vector2.zero());
 
-      // Find the corresponding spot using positionId
-      final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
+  for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
+    String positionId = tokenPath[i];
+    token.positionId = positionId;
 
-      // Calculate target position for the token based on the spot's absolute position
-      final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
-      final ludoBoardGlobalPosition =
-          ludoBoard.absolutePositionOf(Vector2.zero());
+    // Find the corresponding spot using positionId
+    final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
 
-      final targetPosition = Vector2(
-        spotGlobalPosition.x +
-            (token.size.x * 0.10) -
-            ludoBoardGlobalPosition.x,
-        spotGlobalPosition.y -
-            (token.size.x * 0.50) -
-            ludoBoardGlobalPosition.y,
-      );
+    // Calculate target position for the token based on the spot's absolute position
+    final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
 
-      FlameAudio.play('move.mp3');
+    final targetPosition = Vector2(
+      spotGlobalPosition.x + (token.size.x * 0.10) - ludoBoardGlobalPosition.x,
+      spotGlobalPosition.y - (token.size.x * 0.50) - ludoBoardGlobalPosition.y,
+    );
 
-      // Apply size increase effect
-      await _applyEffect(
+    FlameAudio.play('move.mp3');
+
+    // Apply size increase and move effects in parallel
+    await Future.wait([
+      _applyEffect(
         token,
         SizeEffect.to(
-          Vector2(
-            originalSize.x * 1.30,
-            originalSize.y * 1.30,
-          ), // Increase by 10% of original size
+          Vector2(originalSize.x * 1.30, originalSize.y * 1.30),
           EffectController(duration: 0.05),
         ),
-      );
-
-      // Move the token to the target position
-      await _applyEffect(
+      ),
+      _applyEffect(
         token,
         MoveToEffect(
           targetPosition,
           EffectController(duration: 0.05, curve: Curves.easeInOut),
         ),
-      );
+      ),
+    ]);
 
-      // Restore token to original size
-      await _applyEffect(
-        token,
-        SizeEffect.to(
-          originalSize, // Restore to original size
-          EffectController(duration: 0.05),
-        ),
-      );
+    // Restore token to original size
+    await _applyEffect(
+      token,
+      SizeEffect.to(
+        originalSize,
+        EffectController(duration: 0.05),
+      ),
+    );
 
-      // Add a delay between each move (optional)
-      await Future.delayed(Duration(milliseconds: 300));
-    }
+    // Reduce delay if possible
+    await Future.delayed(Duration(milliseconds: 100));
   }
+
   tokenCollision(world);
   clearTokenTrail(token);
 }
@@ -582,83 +577,51 @@ Vector2 tokenOriginalSize(world) {
   return originalSize;
 }
 
-void clearTokenTrail(Token token) async {
+void clearTokenTrail(Token token) {
   final spots = SpotManager().getSpots();
 
   for (var spot in spots) {
-    // Check if the spot has any ColorEffect children
-    if (spot.children.whereType<ColorEffect>().isNotEmpty) {
-      final effects = spot.children.whereType<ColorEffect>().toList();
-
-      // Iterate through each ColorEffect and remove it
-      for (var colorEffect in effects) {
-        print("Removing ColorEffect: $colorEffect");
-        spot.remove(colorEffect);
-      }
-
-      // Optionally reset the spot's color after removing effects
-      if (spot.uniqueId == 'B04' ||
-          spot.uniqueId == 'B10' ||
-          spot.uniqueId == 'B11' ||
-          spot.uniqueId == 'B12' ||
-          spot.uniqueId == 'B13' ||
-          spot.uniqueId == 'B14') {
-        spot.add(ColorEffect(
-          Colors.blue,
-          EffectController(
-            duration: 0.2,
-            reverseDuration: 0.2,
-            infinite: true,
-            alternate: true,
-          ),
-        ));
-      } else if (spot.uniqueId == 'G21' ||
-          spot.uniqueId == 'G11' ||
-          spot.uniqueId == 'G12' ||
-          spot.uniqueId == 'G13' ||
-          spot.uniqueId == 'G14' ||
-          spot.uniqueId == 'G15') {
-        spot.add(ColorEffect(
-          Colors.green,
-          EffectController(
-            duration: 0.2,
-            reverseDuration: 0.2,
-            infinite: true,
-            alternate: true,
-          ),
-        ));
-      } else if (spot.uniqueId == 'Y42') {
-        spot.add(ColorEffect(
-          Colors.yellow,
-          EffectController(
-            duration: 0.2,
-            reverseDuration: 0.2,
-            infinite: true,
-            alternate: true,
-          ),
-        ));
-      } else if (spot.uniqueId == 'R10') {
-        spot.add(ColorEffect(
-          Colors.red,
-          EffectController(
-            duration: 0.2,
-            reverseDuration: 0.2,
-            infinite: true,
-            alternate: true,
-          ),
-        ));
-      } else {
-        spot.add(ColorEffect(
-          Colors.white,
-          EffectController(
-            duration: 0.2,
-            reverseDuration: 0.2,
-            infinite: true,
-            alternate: true,
-          ),
-        ));
-      }
+    // Determine the color to reset based on uniqueId
+    Color resetColor;
+    switch (spot.uniqueId) {
+      case 'B04':
+      case 'B10':
+      case 'B11':
+      case 'B12':
+      case 'B13':
+      case 'B14':
+        resetColor = Colors.blue;
+        break;
+      case 'G21':
+      case 'G11':
+      case 'G12':
+      case 'G13':
+      case 'G14':
+      case 'G15':
+        resetColor = Colors.green;
+        break;
+      case 'Y42':
+      case 'Y41':
+      case 'Y31':
+      case 'Y21':
+      case 'Y11':
+      case 'Y01':
+        resetColor = Colors.yellow;
+        break;
+      case 'R10':
+      case 'R11':
+      case 'R21':
+      case 'R31':
+      case 'R41':
+      case 'R51':
+        resetColor = Colors.red;
+        break;
+      default:
+        resetColor = Colors.white;
     }
+
+    // Set the color directly
+    spot.paint.color = resetColor; // Assuming 'spot' has a 'paint' property
   }
 }
 

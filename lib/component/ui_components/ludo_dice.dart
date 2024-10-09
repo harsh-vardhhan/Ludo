@@ -16,6 +16,9 @@ import '../../state/token_path.dart';
 import '../../ludo.dart';
 
 class LudoDice extends PositionComponent with TapCallbacks {
+  static const double borderRadiusFactor = 0.2; // Precomputed factor for border radius
+  static const double innerSizeFactor = 0.9; // Precomputed factor for inner size
+
   final gameState = GameState();
   final double faceSize; // size of the square
   late final double borderRadius; // radius of the curved edges
@@ -29,11 +32,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
-    final gameState = GameState();
-
-    if (!player.enableDice ||
-        !player.isCurrentTurn ||
-        player != gameState.currentPlayer) {
+    if (!player.enableDice || !player.isCurrentTurn || player != gameState.currentPlayer) {
       return; // Exit if the player cannot roll the dice
     }
 
@@ -41,9 +40,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     player.enableDice = false;
 
     // Roll the dice and update the dice face
-    final Random random = Random(); // Random number generator
-    int rollDice() => random.nextInt(6) + 1;
-    final int diceNumber = rollDice();
+    final int diceNumber = Random().nextInt(6) + 1;
     gameState.diceNumber = diceNumber;
     diceFace.updateDiceValue(diceNumber);
 
@@ -58,11 +55,9 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     final ludoBoard = world.children.whereType<LudoBoard>().first;
 
-    if (diceNumber == 6) {
-      await _handleSixRoll(world, ludoBoard, diceNumber);
-    } else {
-      await _handleNonSixRoll(world, ludoBoard, diceNumber);
-    }
+    // Handle dice roll based on the number
+    final handleRoll = diceNumber == 6 ? _handleSixRoll : _handleNonSixRoll;
+    await handleRoll(world, ludoBoard, diceNumber);
   }
 
   // Apply a 360-degree rotation effect to the dice
@@ -89,6 +84,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
       return;
     }
 
+    // Filter tokens once and reuse the lists
     final tokensInBase = player.tokens
         .where((token) => token.state == TokenState.inBase)
         .toList();
@@ -97,7 +93,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
         .toList();
 
     if (_canMoveSingleToken(tokensInBase, tokensOnBoard)) {
-      _moveSingleToken(
+      await _moveSingleToken(
         world,
         ludoBoard,
         diceNumber,
@@ -106,10 +102,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
         getTokenPath(player.playerId),
       );
     } else {
-      _enableManualTokenSelection(tokensInBase, tokensOnBoard);
+      await _enableManualTokenSelection(tokensInBase, tokensOnBoard);
     }
-
-    return Future.value();
   }
 
   // Handle logic for non-six dice rolls
@@ -119,23 +113,24 @@ class LudoDice extends PositionComponent with TapCallbacks {
         .where((token) => token.state == TokenState.onBoard)
         .toList();
 
+    if (tokensOnBoard.isEmpty) {
+      print('No tokens available to move for player ${player.playerId}.');
+      gameState.switchToNextPlayer();
+      return;
+    }
+
+    if (tokensOnBoard.length == 1 && tokensOnBoard.first.spaceToMove()) {
+      await _moveForwardSingleToken(
+          world, ludoBoard, diceNumber, tokensOnBoard.first);
+      gameState.switchToNextPlayer();
+      return;
+    }
+
     final tokensInBase = player.tokens
         .where((token) => token.state == TokenState.inBase)
         .toList();
 
-    if (tokensOnBoard.length == 1) {
-      if (tokensOnBoard.first.spaceToMove()) {
-        await _moveForwardSingleToken(
-            world, ludoBoard, diceNumber, tokensOnBoard.first);
-      }
-      gameState.switchToNextPlayer();
-    } else if (tokensOnBoard.isNotEmpty) {
-      _enableManualTokenSelection(tokensInBase, tokensOnBoard);
-    } else {
-      print('No tokens available to move for player ${player.playerId}.');
-      gameState.switchToNextPlayer();
-    }
-    return Future.value();
+    _enableManualTokenSelection(tokensInBase, tokensOnBoard);
   }
 
   // Check if the player can move a single token (either from base or on the board)
@@ -157,20 +152,16 @@ class LudoDice extends PositionComponent with TapCallbacks {
       moveOutOfBase(
         world: world,
         token: tokensInBase.first,
-        tokenPath: getTokenPath(player.playerId),
+        tokenPath: tokenPath, // Use the provided tokenPath directly
         ludoBoard: ludoBoard,
       );
       gameState.resetTokenMovement();
-      player.enableDice = true;
-    } else if (tokensOnBoard.length == 1) {
-      if (tokensOnBoard.first.spaceToMove()) {
-        await _moveForwardSingleToken(
-            world, ludoBoard, diceNumber, tokensOnBoard.first);
-      }
-      gameState.switchToNextPlayer();
-      player.enableDice = true;
+    } else if (tokensOnBoard.length == 1 && tokensOnBoard.first.spaceToMove()) {
+      await _moveForwardSingleToken(
+          world, ludoBoard, diceNumber, tokensOnBoard.first);
     }
-    return Future.value();
+    gameState.switchToNextPlayer();
+    player.enableDice = true;
   }
 
   // Enable manual selection if multiple tokens can move
@@ -205,10 +196,20 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   LudoDice({required this.faceSize, required this.player}) {
-    // Calculate properties based on faceSize
-    borderRadius = faceSize / 5;
-    innerRectangleWidth = faceSize * 0.9;
-    innerRectangleHeight = faceSize * 0.9;
+    // Pre-calculate values to avoid repeated calculations
+    final double borderRadiusValue = faceSize * borderRadiusFactor;
+    final double innerWidth = faceSize * innerSizeFactor;
+    final double innerHeight = faceSize * innerSizeFactor;
+    final Vector2 innerSize = Vector2(innerWidth, innerHeight);
+    final Vector2 innerPosition = Vector2(
+      (faceSize - innerWidth) / 2, // Center horizontally
+      (faceSize - innerHeight) / 2 // Center vertically
+    );
+
+    // Assign pre-calculated values
+    borderRadius = borderRadiusValue;
+    innerRectangleWidth = innerWidth;
+    innerRectangleHeight = innerHeight;
 
     // Initialize the size of the component
     size = Vector2.all(faceSize);
@@ -217,15 +218,12 @@ class LudoDice extends PositionComponent with TapCallbacks {
     anchor = Anchor.center;
 
     // Initialize the dice face component
-    diceFace = DiceFaceComponent(faceSize: innerRectangleWidth, diceValue: 6);
+    diceFace = DiceFaceComponent(faceSize: innerWidth, diceValue: 6);
 
     // Initialize the inner rectangle component
     innerRectangle = RectangleComponent(
-      size: Vector2(innerRectangleWidth, innerRectangleHeight),
-      position: Vector2(
-          (faceSize - innerRectangleWidth) / 2, // Center horizontally
-          (faceSize - innerRectangleHeight) / 2 // Center vertically
-          ),
+      size: innerSize,
+      position: innerPosition,
       paint: Paint()..color = Colors.white,
       children: [diceFace],
     );

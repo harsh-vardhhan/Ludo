@@ -33,7 +33,8 @@ class Player {
 
   // Helper method to get the tokens that are on the board
   List<Token> getTokensOnBoard() {
-    return tokens.where((token) => token.isOnBoard()).toList();
+    _cachedTokensOnBoard ??= tokens.where((token) => token.isOnBoard()).toList();
+    return _cachedTokensOnBoard!;
   }
 
   // Helper method to check if only one token is on the board
@@ -49,6 +50,7 @@ class Player {
   // Method to reset extra turns (including after three consecutive sixes)
   void resetExtraTurns() {
     extraTurns = 0;
+    _cachedTokensOnBoard = null; // Invalidate cache if tokens state changes
   }
 
   // Method to grant another turn (includes handling six rolls)
@@ -60,4 +62,6 @@ class Player {
   bool hasRolledThreeConsecutiveSixes() {
     return extraTurns == 3; // Three consecutive turns would mean 3 sixes
   }
+
+  List<Token>? _cachedTokensOnBoard; // Define the variable
 }

@@ -25,6 +25,23 @@ class YellowGridComponent extends PositionComponent {
     int numberOfRows = 3;
     int numberOfColumns = 6;
 
+    // Pre-calculate values used in the loop
+    double sizeX = size.x;
+    double sizeY = size.y;
+    double halfSizeX = sizeX / 2;
+    double halfSizeY = sizeY / 2;
+    double strokeWidth = sizeX * 0.025;
+    double starInnerRadius = sizeX * 0.24;
+    double starOuterRadius = sizeX * 0.48;
+    double arrowSize = sizeX * 0.90;
+    Vector2 arrowPosition = Vector2(sizeX * 0.05, sizeX * 0.05);
+    TextPaint textPaint = TextPaint(
+      style: TextStyle(
+        color: Colors.black,
+        fontSize: sizeX * 0.4, // Adjust font size as needed
+      ),
+    );
+
     // Loop to create 6 columns of 3 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
@@ -38,8 +55,7 @@ class YellowGridComponent extends PositionComponent {
 
         var rectangle = Spot(
           uniqueId: uniqueId,
-          position:
-              Vector2(col * (size.x + columnSpacing), row * (size.y + spacing)),
+          position: Vector2(col * (sizeX + columnSpacing), row * (sizeY + spacing)),
           size: size,
           paint: Paint()..color = color,
           children: [
@@ -49,34 +65,29 @@ class YellowGridComponent extends PositionComponent {
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = size.x * 0.025 // Set border width
+                ..strokeWidth = strokeWidth // Set border width
                 ..color = Colors.black, // Set border color to black
               children: [
                 if (row == 0 && col == 3)
                   StarComponent(
                     size: size,
-                    innerRadius: size.x * 0.24,
-                    outerRadius: size.x * 0.48,
+                    innerRadius: starInnerRadius,
+                    outerRadius: starOuterRadius,
                   ),
                 if (col == 5 && row == 1)
                   ArrowIconComponent(
                     icon: Icons.west,
-                    size: size.x * 0.90,
-                    position: Vector2(size.x * 0.05, size.x * 0.05),
+                    size: arrowSize,
+                    position: arrowPosition,
                     borderColor: Colors.yellow,
                   ),
                 // Add the unique ID as a text label at the center
                 if (showId)
                   TextComponent(
                     text: uniqueId,
-                    position: Vector2(size.x / 2, size.y / 2),
+                    position: Vector2(halfSizeX, halfSizeY),
                     anchor: Anchor.center,
-                    textRenderer: TextPaint(
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: size.x * 0.4, // Adjust font size as needed
-                      ),
-                    ),
+                    textRenderer: textPaint,
                   ),
               ],
             ),

@@ -25,6 +25,16 @@ class GreenGridComponent extends PositionComponent {
     int numberOfRows = 6;
     int numberOfColumns = 3;
 
+    // Pre-calculate size-related values
+    double sizeX = size.x;
+    double halfSizeX = sizeX / 2;
+    double textFontSize = sizeX * 0.4;
+    double strokeWidth = sizeX * 0.025;
+    double arrowSize = sizeX * 0.90;
+    double arrowPositionOffset = sizeX * 0.05;
+    double starInnerRadius = sizeX * 0.24;
+    double starOuterRadius = sizeX * 0.48;
+
     // Loop to create 3 columns of 6 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       for (int row = 0; row < numberOfRows; row++) {
@@ -38,8 +48,7 @@ class GreenGridComponent extends PositionComponent {
 
         var rectangle = Spot(
           uniqueId: uniqueId,
-          position:
-              Vector2(col * (size.x + columnSpacing), row * (size.x + spacing)),
+          position: Vector2(col * (sizeX + columnSpacing), row * (sizeX + spacing)),
           size: size,
           paint: Paint()..color = color,
           children: [
@@ -49,32 +58,32 @@ class GreenGridComponent extends PositionComponent {
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = size.x * 0.025 // Set border width
+                ..strokeWidth = strokeWidth // Set border width
                 ..color = Colors.black, // Set border color to black
               children: [
                 if (col == 0 && row == 2)
                   StarComponent(
                     size: size,
-                    innerRadius: size.x * 0.24,
-                    outerRadius: size.x * 0.48,
+                    innerRadius: starInnerRadius,
+                    outerRadius: starOuterRadius,
                   ),
                 if (col == 1 && row == 0)
                   ArrowIconComponent(
                     icon: Icons.south,
-                    size: size.x * 0.90,
-                    position: Vector2(size.x * 0.05, size.x * 0.05),
+                    size: arrowSize,
+                    position: Vector2(arrowPositionOffset, arrowPositionOffset),
                     borderColor: Colors.green,
                   ),
                 // Add the unique ID as a text label at the center
                 if (showId)
                   TextComponent(
                     text: uniqueId,
-                    position: Vector2(size.x / 2, size.y / 2),
+                    position: Vector2(halfSizeX, halfSizeX),
                     anchor: Anchor.center,
                     textRenderer: TextPaint(
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: size.x * 0.4, // Adjust font size as needed
+                        fontSize: textFontSize, // Adjust font size as needed
                       ),
                     ),
                   ),

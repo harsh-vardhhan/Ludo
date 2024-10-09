@@ -15,9 +15,14 @@ class TokenManager {
   List<Token> allTokens = [];
   List<Token> miniTokens = [];
 
+  // Cache for player-specific tokens
+  final Map<String, List<Token>> _playerTokensCache = {};
+
   void initializeTokens(Map<String, String> tokenToHomeSpotMap) {
     for (var entry in tokenToHomeSpotMap.entries) {
       final token = Token(
+          playerId: 'ID',
+          enableToken: false,
           tokenId: entry.key,
           positionId: entry.value,
           position: Vector2(100, 100), // Adjust position
@@ -25,29 +30,34 @@ class TokenManager {
           innerCircleColor: Colors.transparent);
       allTokens.add(token);
     }
+    _cachePlayerTokens();
   }
 
-  List<Token> getAllTokens(player) {
-    return allTokens
-        .where((token) => token.tokenId.startsWith(player))
+  void _cachePlayerTokens() {
+    _playerTokensCache.clear();
+    for (var token in allTokens) {
+      final player = token.tokenId[0];
+      _playerTokensCache.putIfAbsent(player, () => []).add(token);
+    }
+  }
+
+  List<Token> getAllTokens(String player) {
+    return _playerTokensCache[player] ?? [];
+  }
+
+  List<Token> getOpenTokens(String player) {
+    return getAllTokens(player)
+        .where((token) => token.positionId.length == 3)
         .toList();
   }
 
-  List<Token> getOpenTokens(player) {
-    return allTokens
-        .where((token) =>
-            token.tokenId.startsWith(player) && token.positionId.length == 3)
+  List<Token> getCloseTokens(String player) {
+    return getAllTokens(player)
+        .where((token) => token.positionId.length == 2)
         .toList();
   }
 
-  List<Token> getCloseTokens(player) {
-    return allTokens
-        .where((token) =>
-            token.tokenId.startsWith(player) && token.positionId.length == 2)
-        .toList();
-  }
-
-  List<String> getTokenPath(player) {
+  List<String> getTokenPath(String player) {
     if (player == 'B') {
       return blueTokenPath;
     } else if (player == 'G') {
@@ -57,13 +67,11 @@ class TokenManager {
     }
   }
 
-  // Get all tokens whose uniqueId starts with 'B'
   List<Token> getBlueTokens() {
-    return allTokens.where((token) => token.tokenId.startsWith('B')).toList();
+    return getAllTokens('B');
   }
 
-  // Get all tokens whose uniqueId starts with 'B'
   List<Token> getGreenTokens() {
-    return allTokens.where((token) => token.tokenId.startsWith('G')).toList();
+    return getAllTokens('G');
   }
 }

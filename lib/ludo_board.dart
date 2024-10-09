@@ -9,23 +9,26 @@ import 'component/home/home.dart';
 import 'component/ui_components/spot.dart';
 
 class LudoBoard extends PositionComponent {
+  // Pre-computed constants
+  static const double longWidth = 0.398;
+  static const double shortWidth = 0.199;
+  static const double horizontalSpacing = 0.0;
+
   LudoBoard({
     required double width,
     required double height,
-    Vector2? position, // Add position parameter
+    Vector2? position,
   }) {
-    // Define the percentage widths for the components in each row
-    final double firstComponentWidth = width * 0.398;
-    final double secondComponentWidth = width * 0.199;
-    final double thirdComponentWidth = width * 0.398;
+    // Use pre-computed factors to calculate dimensions
+    final double firstComponentWidth = width * longWidth;
+    final double secondComponentWidth = width * shortWidth;
+    final double thirdComponentWidth = width * longWidth;
 
-    final double firstRowHeight = width * 0.398;
-    final double secondRowHeight = width * 0.199;
-
-    // Spacing between components
-    const double horizontalSpacing = 0.0;
+    final double firstRowHeight = width * longWidth;
+    final double secondRowHeight = width * shortWidth;
 
     const rowOne = 0;
+    const rowTwo = 1;
 
     final firstComponent = RectangleComponent(
         size: Vector2(firstComponentWidth, firstRowHeight),
@@ -56,8 +59,6 @@ class LudoBoard extends PositionComponent {
             homeSpotColor: Paint()..color = Colors.green,
           )
         ]);
-
-    const rowTwo = 1;
 
     final fourthComponent = RectangleComponent(
         size: Vector2(firstComponentWidth, secondRowHeight),
@@ -121,8 +122,7 @@ class LudoBoard extends PositionComponent {
     add(ninthComponent);
 
     // Set the position of the LudoBoard
-    this.position = position ??
-        Vector2.zero(); // Default to (0, 0) if no position is provided
+    this.position = position ?? Vector2.zero();
   }
 }
 
@@ -246,10 +246,5 @@ class DiagonalRectangleComponent extends PositionComponent {
       size: Vector2(rectWidth, rectHeight),
       paint: transparentPaint,
     ));
-  }
-
-  @override
-  void update(double dt) {
-    // No update logic required for this static component
   }
 }

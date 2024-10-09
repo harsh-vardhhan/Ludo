@@ -44,20 +44,32 @@ class GameState {
   }
 
   void switchToNextPlayer() {
-    currentPlayer.isCurrentTurn = false;
-    currentPlayer.enableDice = false;
-    currentPlayer.enableToken = false;
+    var current = currentPlayer;
+    current.isCurrentTurn = false;
+    current.enableDice = false;
+    current.enableToken = false;
+    current.resetExtraTurns();
 
-    currentPlayer.resetExtraTurns(); // Reset extra turns when switching turns
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    var nextPlayer = players[currentPlayerIndex];
+    nextPlayer.isCurrentTurn = true;
+    nextPlayer.enableDice = true;
 
-    players[currentPlayerIndex].isCurrentTurn = true;
-    players[currentPlayerIndex].enableDice = true;
+    for (var token in currentPlayer.tokens) {
+      token.enableToken = false;
+    }
 
-    if (players[currentPlayerIndex].playerId == 'GP') {
-      EventBus().emit(BlinkGreenBaseEvent());
-    } else if (players[currentPlayerIndex].playerId == 'BP') {
-      EventBus().emit(BlinkBlueBaseEvent());
+    for (var token in nextPlayer.tokens) {
+      token.enableToken = true;
+    }
+
+    switch (nextPlayer.playerId) {
+      case 'GP':
+        EventBus().emit(BlinkGreenBaseEvent());
+        break;
+      case 'BP':
+        EventBus().emit(BlinkBlueBaseEvent());
+        break;
     }
   }
 
