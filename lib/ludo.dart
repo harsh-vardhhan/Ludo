@@ -590,6 +590,7 @@ void clearTokenTrail(Token token) {
       case 'B12':
       case 'B13':
       case 'B14':
+      case 'BF':
         resetColor = Colors.blue;
         break;
       case 'G21':
@@ -598,6 +599,7 @@ void clearTokenTrail(Token token) {
       case 'G13':
       case 'G14':
       case 'G15':
+      case 'GF':
         resetColor = Colors.green;
         break;
       case 'Y42':
@@ -606,6 +608,7 @@ void clearTokenTrail(Token token) {
       case 'Y21':
       case 'Y11':
       case 'Y01':
+      case 'YF':
         resetColor = Colors.yellow;
         break;
       case 'R10':
@@ -614,6 +617,7 @@ void clearTokenTrail(Token token) {
       case 'R31':
       case 'R41':
       case 'R51':
+      case 'RF':
         resetColor = Colors.red;
         break;
       default:

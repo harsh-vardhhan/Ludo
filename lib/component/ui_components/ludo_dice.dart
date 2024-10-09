@@ -16,8 +16,10 @@ import '../../state/token_path.dart';
 import '../../ludo.dart';
 
 class LudoDice extends PositionComponent with TapCallbacks {
-  static const double borderRadiusFactor = 0.2; // Precomputed factor for border radius
-  static const double innerSizeFactor = 0.9; // Precomputed factor for inner size
+  static const double borderRadiusFactor =
+      0.2; // Precomputed factor for border radius
+  static const double innerSizeFactor =
+      0.9; // Precomputed factor for inner size
 
   final gameState = GameState();
   final double faceSize; // size of the square
@@ -32,7 +34,9 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
-    if (!player.enableDice || !player.isCurrentTurn || player != gameState.currentPlayer) {
+    if (!player.enableDice ||
+        !player.isCurrentTurn ||
+        player != gameState.currentPlayer) {
       return; // Exit if the player cannot roll the dice
     }
 
@@ -168,6 +172,9 @@ class LudoDice extends PositionComponent with TapCallbacks {
   Future<void> _enableManualTokenSelection(
       List<Token> tokensInBase, List<Token> tokensOnBoard) {
     player.enableToken = true;
+    for (var token in player.tokens) {
+      token.enableToken = true;
+    }
     if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
       gameState.enableMoveFromBoth();
       addTokenTrail(tokensOnBoard);
@@ -202,9 +209,9 @@ class LudoDice extends PositionComponent with TapCallbacks {
     final double innerHeight = faceSize * innerSizeFactor;
     final Vector2 innerSize = Vector2(innerWidth, innerHeight);
     final Vector2 innerPosition = Vector2(
-      (faceSize - innerWidth) / 2, // Center horizontally
-      (faceSize - innerHeight) / 2 // Center vertically
-    );
+        (faceSize - innerWidth) / 2, // Center horizontally
+        (faceSize - innerHeight) / 2 // Center vertically
+        );
 
     // Assign pre-calculated values
     borderRadius = borderRadiusValue;
