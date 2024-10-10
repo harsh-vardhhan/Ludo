@@ -507,26 +507,21 @@ Future<void> moveForward({
   required Token token,
   required List<String> tokenPath,
   required int diceNumber,
-  required PositionComponent
-      ludoBoard, // Ensure ludoBoard is a PositionComponent
+  required PositionComponent ludoBoard,
 }) async {
   List<Spot> allSpots = SpotManager().getSpots();
-  // Get the current and final index
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
-  final originalSize = tokenOriginalSize(world).clone();
-
-  // Pre-calculate the ludo board global position
   final ludoBoardGlobalPosition = ludoBoard.absolutePositionOf(Vector2.zero());
+
+  // Preload audio to avoid delays during playback
+  FlameAudio.audioCache.load('move.mp3');
 
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     String positionId = tokenPath[i];
     token.positionId = positionId;
 
-    // Find the corresponding spot using positionId
     final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
-
-    // Calculate target position for the token based on the spot's absolute position
     final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
 
     final targetPosition = Vector2(
@@ -534,37 +529,22 @@ Future<void> moveForward({
       spotGlobalPosition.y - (token.size.x * 0.05) - ludoBoardGlobalPosition.y,
     );
 
-    FlameAudio.play('move.mp3');
+    // Play audio only once per move
+    if (i == currentIndex + 1) {
+      FlameAudio.play('move.mp3');
+    }
 
-    // Apply size increase and move effects in parallel
-    await Future.wait([
-      _applyEffect(
-        token,
-        SizeEffect.to(
-          Vector2(originalSize.x * 1.30, originalSize.y * 1.30),
-          EffectController(duration: 0.05),
-        ),
-      ),
-      _applyEffect(
-        token,
-        MoveToEffect(
-          targetPosition,
-          EffectController(duration: 0.05, curve: Curves.easeInOut),
-        ),
-      ),
-    ]);
-
-    // Restore token to original size
+    // Apply move effect only, remove size effect to reduce load
     await _applyEffect(
       token,
-      SizeEffect.to(
-        originalSize,
-        EffectController(duration: 0.05),
+      MoveToEffect(
+        targetPosition,
+        EffectController(duration: 0.05, curve: Curves.easeInOut),
       ),
     );
 
-    // Reduce delay if possible
-    await Future.delayed(Duration(milliseconds: 100));
+    // Reduce delay to improve performance
+    await Future.delayed(Duration(milliseconds: 50));
   }
 
   tokenCollision(world);
