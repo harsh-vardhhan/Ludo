@@ -171,32 +171,31 @@ class DiagonalRectangleComponent extends PositionComponent {
     // Size of the transparent rectangle
     double rectWidth = size.x / 6;
     double rectHeight = size.y / 6;
-    final transparentPaint = Paint()..color = Colors.black.withOpacity(0.0);
 
     // Initialize Spot instances
     redSpot = Spot(
       uniqueId: 'RF',
       position: centerRedTriangle - Vector2(rectWidth / 2, rectHeight / 2),
       size: Vector2(rectWidth, rectHeight),
-      paint: transparentPaint,
+      paint: Paint()..color = Colors.red,
     );
     yellowSpot = Spot(
       uniqueId: 'YF',
       position: centerYellowTriangle - Vector2(rectWidth / 2, rectHeight / 2),
       size: Vector2(rectWidth, rectHeight),
-      paint: transparentPaint,
+      paint: Paint()..color = Colors.yellow,
     );
     blueSpot = Spot(
       uniqueId: 'BF',
       position: centerBlueTriangle - Vector2(rectWidth / 2, rectHeight / 2),
       size: Vector2(rectWidth, rectHeight),
-      paint: transparentPaint,
+      paint: Paint()..color = Colors.blue,
     );
     greenSpot = Spot(
       uniqueId: 'GF',
       position: centerGreenTriangle - Vector2(rectWidth / 2, rectHeight / 2),
       size: Vector2(rectWidth, rectHeight),
-      paint: transparentPaint,
+      paint: Paint()..color = Colors.green,
     );
 
     // Add all Spot instances at once

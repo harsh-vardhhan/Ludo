@@ -59,6 +59,11 @@ class Ludo extends FlameGame
         width: width,
         height: width * 0.20));
 
+    add(FpsTextComponent(
+      position: Vector2(10, 10), // Adjust position as needed
+      anchor: Anchor.topLeft, // Set anchor to align top-left
+    ));
+
     EventBus().on<BlinkGreenBaseEvent>((event) {
       blinkGreenBase(true);
       blinkBlueBase(false); // Call your blinkGreenBase method
@@ -149,7 +154,7 @@ class Ludo extends FlameGame
 
       final ludoBoardPosition = ludoBoard.absolutePosition;
       const homeSpotSizeFactorX = 0.10;
-      const homeSpotSizeFactorY = 0.50;
+      const homeSpotSizeFactorY = 0.05;
       const tokenSizeFactorX = 0.80;
       const tokenSizeFactorY = 1.05;
 
@@ -230,7 +235,7 @@ class Ludo extends FlameGame
 
       final ludoBoardPosition = ludoBoard.absolutePosition;
       const homeSpotSizeFactorX = 0.10;
-      const homeSpotSizeFactorY = 0.50;
+      const homeSpotSizeFactorY = 0.05;
       const tokenSizeFactorX = 0.80;
       const tokenSizeFactorY = 1.05;
 
@@ -377,7 +382,7 @@ Vector2 calculateTargetPosition(Token token, Spot spot, LudoBoard ludoBoard) {
 
   return Vector2(
     spotGlobalPosition.x + (token.size.x * 0.10) - ludoBoardGlobalPosition.x,
-    spotGlobalPosition.y - (token.size.x * 0.50) - ludoBoardGlobalPosition.y,
+    spotGlobalPosition.y - (token.size.x * 0.05) - ludoBoardGlobalPosition.y,
   );
 }
 
@@ -433,7 +438,7 @@ void tokenCollision(world) {
 
       token.position = Vector2(
         adjustedPosition.x + (token.size.x * 0.10),
-        adjustedPosition.y - (token.size.x * 0.50),
+        adjustedPosition.y - (token.size.x * 0.05),
       );
     }
   }
@@ -526,7 +531,7 @@ Future<void> moveForward({
 
     final targetPosition = Vector2(
       spotGlobalPosition.x + (token.size.x * 0.10) - ludoBoardGlobalPosition.x,
-      spotGlobalPosition.y - (token.size.x * 0.50) - ludoBoardGlobalPosition.y,
+      spotGlobalPosition.y - (token.size.x * 0.05) - ludoBoardGlobalPosition.y,
     );
 
     FlameAudio.play('move.mp3');
