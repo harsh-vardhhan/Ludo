@@ -23,9 +23,7 @@ class Token extends PositionComponent with TapCallbacks {
   final gameState = GameState();
 
   final Paint borderPaint; // Paint for the token's border
-  final Paint transparentPaint; // Paint for transparent areas
   final Paint fillPaint; // Paint for filling the token
-  final Paint dropletFillPaint; // Paint for filling the inside of the droplet
 
   Token({
     required this.tokenId, // Mandatory unique ID for the token
@@ -42,16 +40,9 @@ class Token extends PositionComponent with TapCallbacks {
           ..style = PaintingStyle.stroke
           ..strokeWidth = size.x * 0.04
           ..color = borderColor,
-        transparentPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0
-          ..color = Colors.transparent, // Transparent line
         fillPaint = Paint()
           ..style = PaintingStyle.fill
           ..color = innerCircleColor, // Use the passed innerCircleColor
-        dropletFillPaint = Paint()
-          ..style = PaintingStyle.fill
-          ..color = dropletFillColor, // Paint for filling droplet
         super(position: position, size: size);
 
   bool isInBase() => state == TokenState.inBase;
@@ -67,9 +58,6 @@ class Token extends PositionComponent with TapCallbacks {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Save the canvas state before transformation
-    canvas.save();
-
     // Define the radius of the outer circle
     final outerRadius = size.x / 2;
     // Define the radius of the smaller inner circle
@@ -79,19 +67,13 @@ class Token extends PositionComponent with TapCallbacks {
     // Define the center of the circles
     final center = Offset(size.x / 2, size.y / 2);
 
-    // Paint for the outer circle with white fill
-    final outerFillPaint = Paint()..color = Colors.white;
-
-    // Draw the outer circle
-    canvas.drawCircle(center, outerRadius, outerFillPaint);
-    canvas.drawCircle(
-        center, outerRadius, borderPaint); // Draw the black border
+    // Draw the outer circle with white fill
+    canvas.drawCircle(center, outerRadius,
+        Paint()..color = Colors.white); // Draw outer circle
+    canvas.drawCircle(center, outerRadius, borderPaint); // Draw border
 
     // Draw the smaller inner circle with the specified innerCircleColor
     canvas.drawCircle(center, smallerCircleRadius, fillPaint);
-
-    // Restore the canvas state
-    canvas.restore();
   }
 
   @override
@@ -115,6 +97,7 @@ class Token extends PositionComponent with TapCallbacks {
             token: this,
             tokenPath: getTokenPath(playerId),
             ludoBoard: ludoBoard);
+        // Consider reducing delay or making it conditional
         await Future.delayed(Duration(milliseconds: 100));
       } else if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
         await moveForward(
@@ -146,10 +129,6 @@ class Token extends PositionComponent with TapCallbacks {
     final index = tokenPath.indexOf(positionId);
     final newIndex = index + gameState.diceNumber;
 
-    if (newIndex < tokenPath.length) {
-      return true;
-    } else {
-      return false;
-    }
+    return newIndex < tokenPath.length;
   }
 }

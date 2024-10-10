@@ -35,6 +35,20 @@ class SpotManager {
     }
     return _cachedSpots!;
   }
+
+  static final Spot _defaultSpot = Spot(
+    uniqueId: 'default',
+    position: Vector2.zero(),
+    size: Vector2(10, 10),
+    paint: Paint()..color = Colors.grey,
+  );
+
+  Spot findSpotById(String spotId) {
+    Spot? spot = getSpotById(spotId);
+
+    // Return the found spot or the static default spot if not found
+    return spot ?? _defaultSpot;
+  }
 }
 
 class Spot extends RectangleComponent {
@@ -54,17 +68,4 @@ class Spot extends RectangleComponent {
         ) {
     SpotManager().addSpot(this);
   }
-}
-
-Spot findSpotById(String spotId) {
-  SpotManager spotManager = SpotManager();
-  Spot? spot = spotManager.getSpotById(spotId);
-
-  // Return the found spot or a default spot if not found
-  return spot ?? Spot(
-    uniqueId: 'default', // Default spot if not found
-    position: Vector2.zero(),
-    size: Vector2(10, 10),
-    paint: Paint()..color = Colors.grey, // Grey for default spot
-  );
 }
