@@ -70,8 +70,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
       RotateEffect.by(
         tau, // Full 360-degree rotation (2π radians)
         EffectController(
-          duration: 0.5,
-          curve: Curves.easeInOut,
+          duration: 0.3, // Reduced duration
+          curve: Curves.linear, // Simpler curve
         ),
       ),
     );

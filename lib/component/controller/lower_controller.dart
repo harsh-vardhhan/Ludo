@@ -85,11 +85,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
               children: []),
         ]);
 
-    add(leftDice);
-    add(leftToken);
-
-    add(rightDice);
-    add(rightToken);
+    addAll([leftDice, leftToken, rightDice, rightToken]);
 
     // Set the position of the UpperController
     this.position = position ??

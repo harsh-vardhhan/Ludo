@@ -14,97 +14,96 @@ class LudoBoard extends PositionComponent {
   static const double shortWidth = 0.199;
   static const double horizontalSpacing = 0.0;
 
+  // Pre-computed row indices
+  static const int rowOne = 0;
+  static const int rowTwo = 1;
+
+  // Constructor
   LudoBoard({
     required double width,
     required double height,
     Vector2? position,
   }) {
-    // Use pre-computed factors to calculate dimensions
-    final double firstComponentWidth = width * longWidth;
-    final double secondComponentWidth = width * shortWidth;
-    final double thirdComponentWidth = width * longWidth;
+    // Pre-compute dimensions based on width
+    final double longDimension = width * longWidth;
+    final double shortDimension = width * shortWidth;
 
-    final double firstRowHeight = width * longWidth;
-    final double secondRowHeight = width * shortWidth;
-
-    const rowOne = 0;
-    const rowTwo = 1;
-
+    // Use longDimension and shortDimension wherever applicable
     final firstComponent = RectangleComponent(
-        size: Vector2(firstComponentWidth, firstRowHeight),
-        position: Vector2(0, rowOne * firstRowHeight),
+        size: Vector2(longDimension, longDimension),
+        position: Vector2(0, rowOne * longDimension),
         children: [
           Home(
-            size: firstComponentWidth,
+            size: longDimension,
             paint: Paint()..color = Colors.red,
             homeSpotColor: Paint()..color = Colors.red,
           )
         ]);
 
     final secondComponent = RectangleComponent(
-        size: Vector2(secondComponentWidth, firstRowHeight),
+        size: Vector2(shortDimension, longDimension),
         position: Vector2(
-            firstComponentWidth + horizontalSpacing, rowOne * firstRowHeight),
-        children: [GreenGridComponent(size: secondComponentWidth * 0.3333)]);
+            longDimension + horizontalSpacing, rowOne * longDimension),
+        children: [GreenGridComponent(size: shortDimension * 0.3333)]);
 
     final thirdComponent = RectangleComponent(
-        size: Vector2(thirdComponentWidth, firstRowHeight),
+        size: Vector2(longDimension, longDimension),
         position: Vector2(
-            firstComponentWidth + secondComponentWidth + 2 * horizontalSpacing,
-            rowOne * firstRowHeight),
+            longDimension + shortDimension + 2 * horizontalSpacing,
+            rowOne * longDimension),
         children: [
           Home(
-            size: firstComponentWidth,
+            size: longDimension,
             paint: Paint()..color = Colors.green,
             homeSpotColor: Paint()..color = Colors.green,
           )
         ]);
 
     final fourthComponent = RectangleComponent(
-        size: Vector2(firstComponentWidth, secondRowHeight),
-        position: Vector2(0, rowTwo * firstRowHeight),
-        children: [RedGridComponent(size: firstComponentWidth * 0.1666)]);
+        size: Vector2(longDimension, shortDimension),
+        position: Vector2(0, rowTwo * longDimension),
+        children: [RedGridComponent(size: longDimension * 0.1666)]);
 
     final fifthComponent = RectangleComponent(
-        size: Vector2(secondComponentWidth, secondRowHeight),
+        size: Vector2(shortDimension, shortDimension),
         position: Vector2(
-            firstComponentWidth + horizontalSpacing, rowTwo * firstRowHeight),
+            longDimension + horizontalSpacing, rowTwo * longDimension),
         children: [
-          DiagonalRectangleComponent(size: Vector2.all(secondComponentWidth))
+          DiagonalRectangleComponent(size: Vector2.all(shortDimension))
         ]);
 
     final sixthComponent = RectangleComponent(
-        size: Vector2(thirdComponentWidth, secondRowHeight),
+        size: Vector2(longDimension, shortDimension),
         position: Vector2(
-            firstComponentWidth + secondComponentWidth + 2 * horizontalSpacing,
-            rowTwo * firstRowHeight),
-        children: [YellowGridComponent(size: firstComponentWidth * 0.1666)]);
+            longDimension + shortDimension + 2 * horizontalSpacing,
+            rowTwo * longDimension),
+        children: [YellowGridComponent(size: longDimension * 0.1666)]);
 
     final seventhComponent = RectangleComponent(
-        size: Vector2(firstComponentWidth, firstRowHeight),
-        position: Vector2(0, firstRowHeight + secondRowHeight),
+        size: Vector2(longDimension, longDimension),
+        position: Vector2(0, longDimension + shortDimension),
         children: [
           Home(
-            size: firstComponentWidth,
+            size: longDimension,
             paint: Paint()..color = Colors.blue,
             homeSpotColor: Paint()..color = Colors.blue,
           )
         ]);
 
     final eigthComponent = RectangleComponent(
-        size: Vector2(secondComponentWidth, firstRowHeight),
-        position: Vector2(firstComponentWidth + horizontalSpacing,
-            firstRowHeight + secondRowHeight),
-        children: [BlueGridComponent(size: secondComponentWidth * 0.3333)]);
+        size: Vector2(shortDimension, longDimension),
+        position: Vector2(longDimension + horizontalSpacing,
+            longDimension + shortDimension),
+        children: [BlueGridComponent(size: shortDimension * 0.3333)]);
 
     final ninthComponent = RectangleComponent(
-        size: Vector2(thirdComponentWidth, firstRowHeight),
+        size: Vector2(longDimension, longDimension),
         position: Vector2(
-            firstComponentWidth + secondComponentWidth + 2 * horizontalSpacing,
-            firstRowHeight + secondRowHeight),
+            longDimension + shortDimension + 2 * horizontalSpacing,
+            longDimension + shortDimension),
         children: [
           Home(
-            size: firstComponentWidth,
+            size: longDimension,
             paint: Paint()..color = Colors.primaries[12],
             homeSpotColor: Paint()..color = Colors.primaries[12],
           )
@@ -127,17 +126,87 @@ class LudoBoard extends PositionComponent {
 }
 
 class DiagonalRectangleComponent extends PositionComponent {
+  // Precomputed centers of triangles
+  late final Vector2 centerRedTriangle;
+  late final Vector2 centerYellowTriangle;
+  late final Vector2 centerBlueTriangle;
+  late final Vector2 centerGreenTriangle;
+
+  // Define Spot instances
+  late final Spot redSpot;
+  late final Spot yellowSpot;
+  late final Spot blueSpot;
+  late final Spot greenSpot;
+
   DiagonalRectangleComponent({required Vector2 size}) {
     this.size = size;
+
+    // Precompute the centers of the triangles
+    final rect = Rect.fromLTWH(0, 0, size.x, size.y);
+    final topLeft = rect.topLeft;
+    final topRight = rect.topRight;
+    final bottomLeft = rect.bottomLeft;
+    final bottomRight = rect.bottomRight;
+    final center = Offset(
+        (topLeft.dx + bottomRight.dx) / 2, (topLeft.dy + bottomRight.dy) / 2);
+
+    centerRedTriangle = Vector2(
+        (topLeft.dx + center.dx + bottomLeft.dx) / 3,
+        (topLeft.dy + center.dy + bottomLeft.dy) / 3);
+    centerYellowTriangle = Vector2(
+        (bottomRight.dx + center.dx + topRight.dx) / 3,
+        (bottomRight.dy + center.dy + topRight.dy) / 3);
+    centerBlueTriangle = Vector2(
+        (bottomLeft.dx + center.dx + bottomRight.dx) / 3,
+        (bottomLeft.dy + center.dy + bottomRight.dy) / 3);
+    centerGreenTriangle = Vector2(
+        (topRight.dx + center.dx + topLeft.dx) / 3,
+        (topRight.dy + center.dy + topLeft.dy) / 3);
   }
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
+
+    // Size of the transparent rectangle
+    double rectWidth = size.x / 6;
+    double rectHeight = size.y / 6;
+    final transparentPaint = Paint()..color = Colors.black.withOpacity(0.0);
+
+    // Initialize Spot instances
+    redSpot = Spot(
+      uniqueId: 'RF',
+      position: centerRedTriangle - Vector2(rectWidth / 2, rectHeight / 2),
+      size: Vector2(rectWidth, rectHeight),
+      paint: transparentPaint,
+    );
+    yellowSpot = Spot(
+      uniqueId: 'YF',
+      position: centerYellowTriangle - Vector2(rectWidth / 2, rectHeight / 2),
+      size: Vector2(rectWidth, rectHeight),
+      paint: transparentPaint,
+    );
+    blueSpot = Spot(
+      uniqueId: 'BF',
+      position: centerBlueTriangle - Vector2(rectWidth / 2, rectHeight / 2),
+      size: Vector2(rectWidth, rectHeight),
+      paint: transparentPaint,
+    );
+    greenSpot = Spot(
+      uniqueId: 'GF',
+      position: centerGreenTriangle - Vector2(rectWidth / 2, rectHeight / 2),
+      size: Vector2(rectWidth, rectHeight),
+      paint: transparentPaint,
+    );
+
+    // Add all Spot instances at once
+    addAll([redSpot, yellowSpot, blueSpot, greenSpot]);
   }
 
   @override
   void render(Canvas canvas) {
+    super.render(canvas);
+
     // Define the rectangle area with its top-left corner at (0, 0)
     final rect = Rect.fromLTWH(0, 0, size.x, size.y);
 
@@ -162,89 +231,23 @@ class DiagonalRectangleComponent extends PositionComponent {
       ..strokeWidth = 1.0;
 
     // Draw the triangles and borders
-    Path redTriangle = Path()
-      ..moveTo(topLeft.dx, topLeft.dy)
-      ..lineTo(center.dx, center.dy)
-      ..lineTo(bottomLeft.dx, bottomLeft.dy)
+    _drawTriangle(canvas, redPaint, borderPaint, topLeft, center, bottomLeft);
+    _drawTriangle(canvas, yellowPaint, borderPaint, bottomRight, center, topRight);
+    _drawTriangle(canvas, bluePaint, borderPaint, bottomLeft, center, bottomRight);
+    _drawTriangle(canvas, greenPaint, borderPaint, topRight, center, topLeft);
+  }
+
+  void _drawTriangle(Canvas canvas, Paint fillPaint, Paint borderPaint, Offset p1, Offset p2, Offset p3) {
+    Path triangle = Path()
+      ..moveTo(p1.dx, p1.dy)
+      ..lineTo(p2.dx, p2.dy)
+      ..lineTo(p3.dx, p3.dy)
       ..close();
-    canvas.drawPath(redTriangle, redPaint);
-    canvas.drawPath(redTriangle, borderPaint);
-
-    Path yellowTriangle = Path()
-      ..moveTo(bottomRight.dx, bottomRight.dy)
-      ..lineTo(center.dx, center.dy)
-      ..lineTo(topRight.dx, topRight.dy)
-      ..close();
-    canvas.drawPath(yellowTriangle, yellowPaint);
-    canvas.drawPath(yellowTriangle, borderPaint);
-
-    Path blueTriangle = Path()
-      ..moveTo(bottomLeft.dx, bottomLeft.dy)
-      ..lineTo(center.dx, center.dy)
-      ..lineTo(bottomRight.dx, bottomRight.dy)
-      ..close();
-    canvas.drawPath(blueTriangle, bluePaint);
-    canvas.drawPath(blueTriangle, borderPaint);
-
-    Path greenTriangle = Path()
-      ..moveTo(topRight.dx, topRight.dy)
-      ..lineTo(center.dx, center.dy)
-      ..lineTo(topLeft.dx, topLeft.dy)
-      ..close();
-    canvas.drawPath(greenTriangle, greenPaint);
-    canvas.drawPath(greenTriangle, borderPaint);
-
-    // Size of the transparent rectangle
-    double rectWidth = size.x / 6;
-    double rectHeight = size.y / 6;
-
-    // Calculating exact centroids for the rectangles to place
-    Vector2 centerRedTriangle = Vector2(
-        (topLeft.dx + center.dx + bottomLeft.dx) / 3,
-        (topLeft.dy + center.dy + bottomLeft.dy) / 3);
-    Vector2 centerYellowTriangle = Vector2(
-        (bottomRight.dx + center.dx + topRight.dx) / 3,
-        (bottomRight.dy + center.dy + topRight.dy) / 3);
-    Vector2 centerBlueTriangle = Vector2(
-        (bottomLeft.dx + center.dx + bottomRight.dx) / 3,
-        (bottomLeft.dy + center.dy + bottomRight.dy) / 3);
-    Vector2 centerGreenTriangle = Vector2(
-        (topRight.dx + center.dx + topLeft.dx) / 3,
-        (topRight.dy + center.dy + topLeft.dy) / 3);
-
-    // Transparent paint with only a border
-    Paint transparentPaint = Paint()
-      ..color = Colors.transparent
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-
-    // Adding Spot components at each calculated centroid
-    add(Spot(
-      uniqueId: 'RF',
-      position: centerRedTriangle - Vector2(rectWidth / 2, rectHeight / 2),
-      size: Vector2(rectWidth, rectHeight),
-      paint: transparentPaint,
-    ));
-
-    add(Spot(
-      uniqueId: 'YF',
-      position: centerYellowTriangle - Vector2(rectWidth / 2, rectHeight / 2),
-      size: Vector2(rectWidth, rectHeight),
-      paint: transparentPaint,
-    ));
-
-    add(Spot(
-      uniqueId: 'BF',
-      position: centerBlueTriangle - Vector2(rectWidth / 2, rectHeight / 2),
-      size: Vector2(rectWidth, rectHeight),
-      paint: transparentPaint,
-    ));
-
-    add(Spot(
-      uniqueId: 'GF',
-      position: centerGreenTriangle - Vector2(rectWidth / 2, rectHeight / 2),
-      size: Vector2(rectWidth, rectHeight),
-      paint: transparentPaint,
-    ));
+    canvas.drawPath(triangle, fillPaint);
+    canvas.drawPath(triangle, borderPaint);
   }
 }
+
+
+// Define transparentPaint
+final Paint transparentPaint = Paint()..color = Color(0x00000000);
