@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../component/ui_components/token.dart';
-import 'token_path.dart';
 
 class TokenManager {
   static final TokenManager _instance = TokenManager._internal();

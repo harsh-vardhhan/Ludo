@@ -382,142 +382,90 @@ Vector2 calculateTargetPosition(Token token, Spot spot, LudoBoard ludoBoard) {
   );
 }
 
-void tokenCollision(World world, Token attackerToken) {
-  final tokens = TokenManager().allTokens; // Source data
+void tokenCollision(World world, Token attackerToken) async {
   final ludoBoard = world.children.whereType<LudoBoard>().first;
+  final spotId = attackerToken.positionId;
+  final tokens = TokenManager().allTokens;
+  final tokensOnSpot =
+      tokens.where((token) => token.positionId == spotId).toList();
 
-  final homeSpot = getHomeSpot(world, 6)
-      .whereType<HomeSpot>()
-      .firstWhere((spot) => spot.uniqueId == 'B1');
-
-  // Store original size and position of tokens based on homeSpot
-  final Vector2 originalSize =
-      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-
-  // Count occurrences of each positionId
-  final positionIdCount = groupBy(tokens, (token) => token.positionId)
-      .map((key, value) => MapEntry(key, value.length));
-
-  // Use a set to store duplicate positionIds for faster lookup
-  final duplicatePositionIds = positionIdCount.entries
-      .where((entry) => entry.value > 1)
-      .map((entry) => entry.key)
-      .toSet();
-
-  // Filter tokens directly using the set of duplicate positionIds
-  final duplicateTokens = tokens.where((token) {
-    return duplicatePositionIds.contains(token.positionId);
-  }).toList();
-  final currentMiniTokens = TokenManager().miniTokens;
-
-  final duplicateTokenIds =
-      duplicateTokens.map((token) => token.tokenId).toSet();
-
-  // Track token ID from different players on collision
-  for (var otherTokenId in duplicateTokenIds) {
-    if (otherTokenId != attackerToken.tokenId) {
-      final otherToken =
-          tokens.firstWhere((token) => token.tokenId == otherTokenId);
-
-      if (otherToken.positionId == attackerToken.positionId) {
-        // Check if the token is from a different player
-        if (attackerToken.tokenId[0] != otherTokenId[0]) {
-          final knockedOutToken = TokenManager()
-              .allTokens
-              .firstWhere((t) => t.tokenId == otherTokenId);
-          moveBackward(
-            world: world,
-            token: knockedOutToken,
-            tokenPath: getTokenPath(knockedOutToken.playerId),
-            ludoBoard: ludoBoard,
-          );
+  // only attacker token on spot, return
+  if (tokensOnSpot.length > 1) {
+    // if attacker token is in safe zone, return
+    final safeZones = ['B04', 'B23', 'R22', 'R10', 'G02', 'G21', 'Y30', 'Y42'];
+    if (!safeZones.contains(spotId)) {
+      // attacker token is not in safe zone, check for collision
+      for (var token in tokensOnSpot) {
+        if (token.playerId != attackerToken.playerId) {
+          // if token is from different player, move backward
+          await moveBackward(
+              world: world,
+              token: token,
+              tokenPath: getTokenPath(token.playerId),
+              ludoBoard: ludoBoard);
         }
       }
     }
   }
 
-  // Group duplicateTokens by positionId and apply margin incrementally
-  if (duplicateTokenIds.isNotEmpty) {
-    TokenManager().miniTokens = tokens
-        .where((token) => duplicateTokenIds.contains(token.tokenId))
-        .toList();
-
-    // Group tokens by positionId using duplicateTokenIds, considering the attackedToken
-    final Map<String, List<Token>> groupedTokens = {};
-    for (var token in tokens) {
-      // Check if the token is in duplicateTokenIds
-      if (duplicateTokenIds.contains(token.tokenId)) {
-        // If attackedToken's tokenId matches, only add tokens with the same playerId
-        if (token.tokenId == attackerToken.tokenId) {
-          if (!groupedTokens.containsKey(token.positionId)) {
-            groupedTokens[token.positionId] = [];
-          }
-          groupedTokens[token.positionId]!.add(token);
-        } else if (token.playerId == attackerToken.playerId) {
-          // If it's a different token, add it only if it belongs to the same player
-          if (!groupedTokens.containsKey(token.positionId)) {
-            groupedTokens[token.positionId] = [];
-          }
-          groupedTokens[token.positionId]!.add(token);
-        }
-      }
+  //set size and position of tokens on spot
+  final Map<String, List<Token>> tokensByPositionId = {};
+  for (var token in tokens) {
+    if (!tokensByPositionId.containsKey(token.positionId)) {
+      tokensByPositionId[token.positionId] = [];
     }
+    tokensByPositionId[token.positionId]!.add(token);
+  }
 
-    // Apply size adjustment and incremental margin within each group
-    groupedTokens.forEach((positionId, group) {
-      final sizeFactor = group.length == 2 ? 0.70 : 0.50;
-      final positionIncrement = group.length == 2 ? 10 : 5;
+  final homeSpot = getHomeSpot(world, 6)
+      .whereType<HomeSpot>()
+      .firstWhere((spot) => spot.uniqueId == 'B1');
+  final Vector2 originalSize =
+      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+  final ludoBoardGlobalPosition = ludoBoard.absolutePosition;
 
-      SpotManager spotManager = SpotManager();
+  tokensByPositionId.forEach((positionId, tokenList) {
+    final spot = SpotManager().findSpotById(positionId);
+    final spotGlobalPosition = spot.absolutePosition;
+    final adjustedPosition = spotGlobalPosition - ludoBoardGlobalPosition;
 
-      for (var i = 0; i < group.length; i++) {
-        var token = group[i];
-        // Prevent size change for the attackerToken
-        if (token.tokenId == attackerToken.tokenId) {
-          continue; // Skip size adjustment for the attackerToken
-        }
-        // Scale relative to the original size
+    if (tokenList.length == 1) {
+      final token = tokenList.first;
+      if (token.state == TokenState.onBoard) {
+        token.size = originalSize;
+
+        // Calculate the position once and reuse it
+        token.position = Vector2(
+          adjustedPosition.x + (token.size.x * 0.10),
+          adjustedPosition.y - (token.size.x * 0.05),
+        );
+      }
+    } else if (tokenList.length == 2) {
+      const sizeFactor = 0.70;
+      const positionIncrement = 10;
+      for (var i = 0; i < tokenList.length; i++) {
+        final token = tokenList[i];
         token.size = originalSize * sizeFactor;
-        final spot = spotManager.findSpotById(token.positionId);
-        final spotGlobalPosition = spot.absolutePosition;
-        final ludoBoardGlobalPosition = ludoBoard.absolutePosition;
-
         token.position = Vector2(
             spotGlobalPosition.x +
                 (i * positionIncrement) -
                 ludoBoardGlobalPosition.x,
             spotGlobalPosition.y - ludoBoardGlobalPosition.y);
       }
-    });
-  }
-
-  // Filter miniTokens to find tokens that are not in duplicateTokens
-  final tokensNotInDuplicateTokens = currentMiniTokens
-      .where((token) => !duplicateTokenIds.contains(token.tokenId))
-      .toList();
-
-  // Adjust size and position for tokens not in duplicateTokens
-  if (tokensNotInDuplicateTokens.isNotEmpty) {
-    final ludoBoardGlobalPosition =
-        ludoBoard.absolutePositionOf(Vector2.zero());
-
-    SpotManager spotManager = SpotManager();
-
-    for (var token in tokensNotInDuplicateTokens) {
-      // Restore the original size
-      token.size = originalSize;
-      final spot = spotManager.findSpotById(token.positionId);
-      final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
-
-      // Calculate the position once and reuse it
-      final adjustedPosition = spotGlobalPosition - ludoBoardGlobalPosition;
-
-      token.position = Vector2(
-        adjustedPosition.x + (token.size.x * 0.10),
-        adjustedPosition.y - (token.size.x * 0.05),
-      );
+    } else if (tokenList.length > 2) {
+      const sizeFactor = 0.50;
+      const positionIncrement = 5;
+      for (var i = 0; i < tokenList.length; i++) {
+        final token = tokenList[i];
+        token.size = originalSize * sizeFactor;
+        token.position = Vector2(
+            spotGlobalPosition.x +
+                (i * positionIncrement) -
+                ludoBoardGlobalPosition.x,
+            spotGlobalPosition.y - ludoBoardGlobalPosition.y);
+      }
     }
-  }
+  });
 }
 
 void addTokenTrail(List<Token> tokensOnBoard) {
@@ -597,6 +545,7 @@ Future<void> moveForward({
   required int diceNumber,
   required PositionComponent ludoBoard,
 }) async {
+  // get all spots
   List<Spot> allSpots = SpotManager().getSpots();
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
