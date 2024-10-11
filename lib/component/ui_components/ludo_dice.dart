@@ -198,7 +198,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
       ludoBoard: ludoBoard,
     );
     await Future.delayed(Duration(milliseconds: 300));
-    tokenCollision(world);
+    tokenCollision(world, token);
     return Future.value();
   }
 

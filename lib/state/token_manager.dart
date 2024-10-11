@@ -56,17 +56,7 @@ class TokenManager {
         .where((token) => token.positionId.length == 2)
         .toList();
   }
-
-  List<String> getTokenPath(String player) {
-    if (player == 'B') {
-      return blueTokenPath;
-    } else if (player == 'G') {
-      return greenTokenPath;
-    } else {
-      return [];
-    }
-  }
-
+  
   List<Token> getBlueTokens() {
     return getAllTokens('B');
   }
