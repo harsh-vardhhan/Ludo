@@ -5,7 +5,6 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:collection/collection.dart';
 
@@ -145,13 +144,7 @@ class Ludo extends FlameGame
     final ludoBoard = world.children.whereType<LudoBoard>().first;
 
     if (TokenManager().getBlueTokens().isEmpty) {
-      final tokenToHome = {
-        'BT1': 'B1',
-        'BT2': 'B2',
-        'BT3': 'B3',
-        'BT4': 'B4',
-      };
-      TokenManager().initializeTokens(tokenToHome);
+      TokenManager().initializeTokens(TokenManager().blueTokensBase);
 
       final ludoBoardPosition = ludoBoard.absolutePosition;
       const homeSpotSizeFactorX = 0.10;
@@ -226,13 +219,7 @@ class Ludo extends FlameGame
     }
 
     if (TokenManager().getGreenTokens().isEmpty) {
-      final tokenToHome = {
-        'GT1': 'G1',
-        'GT2': 'G2',
-        'GT3': 'G3',
-        'GT4': 'G4',
-      };
-      TokenManager().initializeTokens(tokenToHome);
+      TokenManager().initializeTokens(TokenManager().greenTokensBase);
 
       final ludoBoardPosition = ludoBoard.absolutePosition;
       const homeSpotSizeFactorX = 0.10;
@@ -362,7 +349,7 @@ void applyMoveEffect(World world, Token token, Vector2 targetPosition) async {
   );
 
   await token.add(moveToEffect);
-  await Future.delayed(Duration(milliseconds: 100)); // Reduced delay
+  await Future.delayed(const Duration(milliseconds: 100)); // Reduced delay
   tokenCollision(world, token);
 }
 
@@ -530,11 +517,81 @@ Future<void> moveBackward({
       token,
       MoveToEffect(
         targetPosition,
-        EffectController(duration: 0.05, curve: Curves.easeInOut),
+        EffectController(duration: 0.03, curve: Curves.easeInOut),
       ),
     );
 
-    await Future.delayed(Duration(milliseconds: 50));
+    await Future.delayed(const Duration(milliseconds: 30));
+  }
+
+  if (token.playerId == 'BP') {
+    for (var entry in TokenManager().blueTokensBase.entries) {
+      var tokenId = entry.key;
+      var homePosition = entry.value;
+      if (token.tokenId == tokenId) {
+        token.positionId = homePosition;
+        token.state = TokenState.inBase;
+      }
+    }
+    final homeSpot = getHomeSpot(world, 6)
+        .whereType<HomeSpot>()
+        .firstWhere((spot) => spot.uniqueId == token.positionId);
+
+    const homeSpotSizeFactorX = 0.10;
+    const homeSpotSizeFactorY = 0.05;
+
+    final targetPosition = Vector2(
+      homeSpot.absolutePosition.x +
+          (homeSpot.size.x * homeSpotSizeFactorX) -
+          ludoBoardGlobalPosition.x,
+      homeSpot.absolutePosition.y -
+          (homeSpot.size.x * homeSpotSizeFactorY) -
+          ludoBoardGlobalPosition.y,
+    );
+
+    await _applyEffect(
+      token,
+      MoveToEffect(
+        targetPosition,
+        EffectController(duration: 0.03, curve: Curves.easeInOut),
+      ),
+    );
+    // Reduce delay to improve performance
+    await Future.delayed(const Duration(milliseconds: 30));
+  } else if (token.playerId == 'GP') {
+    for (var entry in TokenManager().greenTokensBase.entries) {
+      var tokenId = entry.key;
+      var homePosition = entry.value;
+      if (token.tokenId == tokenId) {
+        token.positionId = homePosition;
+        token.state = TokenState.inBase;
+      }
+    }
+    final homeSpot = getHomeSpot(world, 2)
+        .whereType<HomeSpot>()
+        .firstWhere((spot) => spot.uniqueId == token.positionId);
+
+    const homeSpotSizeFactorX = 0.10;
+    const homeSpotSizeFactorY = 0.05;
+
+    final targetPosition = Vector2(
+      homeSpot.absolutePosition.x +
+          (homeSpot.size.x * homeSpotSizeFactorX) -
+          ludoBoardGlobalPosition.x,
+      homeSpot.absolutePosition.y -
+          (homeSpot.size.x * homeSpotSizeFactorY) -
+          ludoBoardGlobalPosition.y,
+    );
+
+    await _applyEffect(
+      token,
+      MoveToEffect(
+        targetPosition,
+        EffectController(duration: 0.05, curve: Curves.easeInOut),
+      ),
+    );
+    // Reduce delay to improve performance
+    await Future.delayed(const Duration(milliseconds: 50));
   }
 }
 
@@ -563,7 +620,13 @@ Future<void> moveForward({
 
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     String positionId = tokenPath[i];
+    
     token.positionId = positionId;
+    if (token.positionId == 'BF') {
+      token.state = TokenState.inHome;
+    } else if (token.positionId == 'GF') {
+      token.state = TokenState.inHome;
+    }
 
     final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
     final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
@@ -589,7 +652,7 @@ Future<void> moveForward({
     );
 
     // Reduce delay to improve performance
-    await Future.delayed(Duration(milliseconds: 50));
+    await Future.delayed(const Duration(milliseconds: 50));
   }
 
   tokenCollision(world, token);

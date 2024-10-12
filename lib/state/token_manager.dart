@@ -17,6 +17,20 @@ class TokenManager {
   // Cache for player-specific tokens
   final Map<String, List<Token>> _playerTokensCache = {};
 
+  final blueTokensBase = {
+    'BT1': 'B1',
+    'BT2': 'B2',
+    'BT3': 'B3',
+    'BT4': 'B4',
+  };
+
+  final greenTokensBase = {
+    'GT1': 'G1',
+    'GT2': 'G2',
+    'GT3': 'G3',
+    'GT4': 'G4',
+  };
+
   void initializeTokens(Map<String, String> tokenToHomeSpotMap) {
     for (var entry in tokenToHomeSpotMap.entries) {
       final token = Token(
@@ -55,7 +69,7 @@ class TokenManager {
         .where((token) => token.positionId.length == 2)
         .toList();
   }
-  
+
   List<Token> getBlueTokens() {
     return getAllTokens('B');
   }

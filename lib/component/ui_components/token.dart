@@ -82,7 +82,11 @@ class Token extends PositionComponent with TapCallbacks {
 
     final world = parent?.parent;
 
-    if (!spaceToMove() || !enableToken || world is! World) return;
+    if (!spaceToMove() ||
+        !enableToken ||
+        world is! World ||
+        (isInBase() && gameState.diceNumber != 6) ||
+        isInHome()) return;
 
     enableToken = false;
     final ludoBoard = world.children.whereType<LudoBoard>().first;
