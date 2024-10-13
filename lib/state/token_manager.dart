@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../component/ui_components/token.dart';
+import '../component/ui_components/spot.dart';
 
 class TokenManager {
   static final TokenManager _instance = TokenManager._internal();
@@ -56,6 +57,11 @@ class TokenManager {
           size: Vector2(50, 50), // Adjust size
           innerCircleColor: Colors.transparent);
       allTokens.add(token);
+      SpotManager().addSpot(Spot(
+          uniqueId: entry.value,
+          position: Vector2(100, 100),
+          size: Vector2(50, 50),
+          paint: Paint()));
     }
     _cachePlayerTokens();
   }

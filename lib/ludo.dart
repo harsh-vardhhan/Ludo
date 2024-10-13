@@ -247,8 +247,9 @@ class Ludo extends FlameGame
             final homeSpot = getHomeSpot(world, 6)
                 .whereType<HomeSpot>()
                 .firstWhere((spot) => spot.uniqueId == token.positionId);
-            token.innerCircleColor = Colors.blue;
-            token.position = Vector2(
+            final spot = SpotManager().findSpotById(token.positionId);
+            // update spot position
+            spot.position = Vector2(
               homeSpot.absolutePosition.x +
                   (homeSpot.size.x * homeSpotSizeFactorX) -
                   ludoBoardPosition.x,
@@ -256,6 +257,9 @@ class Ludo extends FlameGame
                   (homeSpot.size.x * homeSpotSizeFactorY) -
                   ludoBoardPosition.y,
             );
+            // update token position
+            token.innerCircleColor = Colors.blue;
+            token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
               homeSpot.size.x * tokenSizeFactorY,
@@ -323,8 +327,9 @@ class Ludo extends FlameGame
             final homeSpot = getHomeSpot(world, 2)
                 .whereType<HomeSpot>()
                 .firstWhere((spot) => spot.uniqueId == token.positionId);
-            token.innerCircleColor = Colors.green;
-            token.position = Vector2(
+            final spot = SpotManager().findSpotById(token.positionId);
+            // update spot position
+            spot.position = Vector2(
               homeSpot.absolutePosition.x +
                   (homeSpot.size.x * homeSpotSizeFactorX) -
                   ludoBoardPosition.x,
@@ -332,6 +337,9 @@ class Ludo extends FlameGame
                   (homeSpot.size.x * homeSpotSizeFactorY) -
                   ludoBoardPosition.y,
             );
+            // update token position
+            token.innerCircleColor = Colors.green;
+            token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
               homeSpot.size.x * tokenSizeFactorY,
@@ -400,8 +408,9 @@ class Ludo extends FlameGame
             final homeSpot = getHomeSpot(world, 8)
                 .whereType<HomeSpot>()
                 .firstWhere((spot) => spot.uniqueId == token.positionId);
-            token.innerCircleColor = Colors.yellow;
-            token.position = Vector2(
+            final spot = SpotManager().findSpotById(token.positionId);
+            // update spot position
+            spot.position = Vector2(
               homeSpot.absolutePosition.x +
                   (homeSpot.size.x * homeSpotSizeFactorX) -
                   ludoBoardPosition.x,
@@ -409,6 +418,9 @@ class Ludo extends FlameGame
                   (homeSpot.size.x * homeSpotSizeFactorY) -
                   ludoBoardPosition.y,
             );
+            // update token position
+            token.innerCircleColor = Colors.yellow;
+            token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
               homeSpot.size.x * tokenSizeFactorY,
@@ -477,8 +489,9 @@ class Ludo extends FlameGame
             final homeSpot = getHomeSpot(world, 0)
                 .whereType<HomeSpot>()
                 .firstWhere((spot) => spot.uniqueId == token.positionId);
-            token.innerCircleColor = Colors.red;
-            token.position = Vector2(
+            final spot = SpotManager().findSpotById(token.positionId);
+            // update spot position
+            spot.position = Vector2(
               homeSpot.absolutePosition.x +
                   (homeSpot.size.x * homeSpotSizeFactorX) -
                   ludoBoardPosition.x,
@@ -486,6 +499,9 @@ class Ludo extends FlameGame
                   (homeSpot.size.x * homeSpotSizeFactorY) -
                   ludoBoardPosition.y,
             );
+            // update token position
+            token.innerCircleColor = Colors.red;
+            token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
               homeSpot.size.x * tokenSizeFactorY,
@@ -645,7 +661,15 @@ void tokenCollision(World world, Token attackerToken) async {
     }
   }
 
-  //set size and position of tokens on spot
+  // Ensure this block completes before resizing tokens
+  await Future.delayed(Duration.zero);
+
+  // Call the function to resize tokens after moveBackward is complete
+  resizeTokensOnSpot(world, ludoBoard);
+}
+
+void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
+  final tokens = TokenManager().allTokens;
   final Map<String, List<Token>> tokensByPositionId = {};
   for (var token in tokens) {
     if (!tokensByPositionId.containsKey(token.positionId)) {
@@ -670,12 +694,14 @@ void tokenCollision(World world, Token attackerToken) async {
       final token = tokenList.first;
       if (token.state == TokenState.onBoard) {
         token.size = originalSize;
-
         // Calculate the position once and reuse it
         token.position = Vector2(
           adjustedPosition.x + (token.size.x * 0.10),
           adjustedPosition.y - (token.size.x * 0.05),
         );
+      } else if (token.state == TokenState.inBase) {
+        token.size = originalSize;
+        token.position = spot.position;
       }
     } else if (tokenList.length == 2) {
       const sizeFactor = 0.70;
@@ -775,73 +801,37 @@ Future<void> moveBackward({
   }
 
   if (token.playerId == 'BP') {
-    for (var entry in TokenManager().blueTokensBase.entries) {
-      var tokenId = entry.key;
-      var homePosition = entry.value;
-      if (token.tokenId == tokenId) {
-        token.positionId = homePosition;
-        token.state = TokenState.inBase;
-      }
-    }
-    final homeSpot = getHomeSpot(world, 6)
-        .whereType<HomeSpot>()
-        .firstWhere((spot) => spot.uniqueId == token.positionId);
-
-    const homeSpotSizeFactorX = 0.10;
-    const homeSpotSizeFactorY = 0.05;
-
-    final targetPosition = Vector2(
-      homeSpot.absolutePosition.x +
-          (homeSpot.size.x * homeSpotSizeFactorX) -
-          ludoBoardGlobalPosition.x,
-      homeSpot.absolutePosition.y -
-          (homeSpot.size.x * homeSpotSizeFactorY) -
-          ludoBoardGlobalPosition.y,
+    moveTokenToBase(
+      world: world,
+      token: token,
+      tokenBase: TokenManager().blueTokensBase,
+      homeSpotIndex: 6,
+      ludoBoard: ludoBoard,
     );
-
-    await _applyEffect(
-      token,
-      MoveToEffect(
-        targetPosition,
-        EffectController(duration: 0.03, curve: Curves.easeInOut),
-      ),
-    );
-    // Reduce delay to improve performance
-    await Future.delayed(const Duration(milliseconds: 30));
   } else if (token.playerId == 'GP') {
-    for (var entry in TokenManager().greenTokensBase.entries) {
-      var tokenId = entry.key;
-      var homePosition = entry.value;
-      if (token.tokenId == tokenId) {
-        token.positionId = homePosition;
-        token.state = TokenState.inBase;
-      }
-    }
-    final homeSpot = getHomeSpot(world, 2)
-        .whereType<HomeSpot>()
-        .firstWhere((spot) => spot.uniqueId == token.positionId);
-
-    const homeSpotSizeFactorX = 0.10;
-    const homeSpotSizeFactorY = 0.05;
-
-    final targetPosition = Vector2(
-      homeSpot.absolutePosition.x +
-          (homeSpot.size.x * homeSpotSizeFactorX) -
-          ludoBoardGlobalPosition.x,
-      homeSpot.absolutePosition.y -
-          (homeSpot.size.x * homeSpotSizeFactorY) -
-          ludoBoardGlobalPosition.y,
+    moveTokenToBase(
+      world: world,
+      token: token,
+      tokenBase: TokenManager().greenTokensBase,
+      homeSpotIndex: 2,
+      ludoBoard: ludoBoard,
     );
-
-    await _applyEffect(
-      token,
-      MoveToEffect(
-        targetPosition,
-        EffectController(duration: 0.05, curve: Curves.easeInOut),
-      ),
+  } else if (token.playerId == 'RP') {
+    moveTokenToBase(
+      world: world,
+      token: token,
+      tokenBase: TokenManager().redTokensBase,
+      homeSpotIndex: 0,
+      ludoBoard: ludoBoard,
     );
-    // Reduce delay to improve performance
-    await Future.delayed(const Duration(milliseconds: 50));
+  } else if (token.playerId == 'YP') {
+    moveTokenToBase(
+      world: world,
+      token: token,
+      tokenBase: TokenManager().yellowTokensBase,
+      homeSpotIndex: 8,
+      ludoBoard: ludoBoard,
+    );
   }
 }
 
@@ -876,6 +866,10 @@ Future<void> moveForward({
       token.state = TokenState.inHome;
     } else if (token.positionId == 'GF') {
       token.state = TokenState.inHome;
+    } else if (token.positionId == 'YF') {
+      token.state = TokenState.inHome;
+    } else if (token.positionId == 'RF') {
+      token.state = TokenState.inHome;
     }
 
     final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
@@ -907,17 +901,6 @@ Future<void> moveForward({
 
   tokenCollision(world, token);
   clearTokenTrail(token);
-}
-
-Vector2 tokenOriginalSize(world) {
-  final homeSpot = getHomeSpot(world, 6)
-      .whereType<HomeSpot>()
-      .firstWhere((spot) => spot.uniqueId == 'B1');
-
-  // Step 1: Store original size and position of tokens based on homeSpot
-  final Vector2 originalSize =
-      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-  return originalSize;
 }
 
 void clearTokenTrail(Token token) {
@@ -977,4 +960,32 @@ Future<void> _applyEffect(PositionComponent component, Effect effect) {
   effect.onComplete = completer.complete;
   component.add(effect);
   return completer.future;
+}
+
+void moveTokenToBase({
+  required World world,
+  required Token token,
+  required Map<String, String> tokenBase,
+  required int homeSpotIndex,
+  required PositionComponent ludoBoard,
+}) async {
+  for (var entry in tokenBase.entries) {
+    var tokenId = entry.key;
+    var homePosition = entry.value;
+    if (token.tokenId == tokenId) {
+      token.positionId = homePosition;
+      token.state = TokenState.inBase;
+    }
+  }
+  final spot = SpotManager().findSpotById(token.positionId);
+  final targetPosition = spot.position;
+
+  await _applyEffect(
+    token,
+    MoveToEffect(
+      targetPosition,
+      EffectController(duration: 0.03, curve: Curves.easeInOut),
+    ),
+  );
+  await Future.delayed(const Duration(milliseconds: 30));
 }
