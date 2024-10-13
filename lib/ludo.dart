@@ -109,7 +109,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _redBlinkEffect ??= ColorEffect(
-      Colors.redAccent,
+      Color(0xFFFF8A8A),
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
