@@ -70,6 +70,12 @@ class GameState {
       case 'BP':
         EventBus().emit(BlinkBlueBaseEvent());
         break;
+      case 'RP':
+        EventBus().emit(BlinkRedBaseEvent());
+        break;
+      case 'YP':
+        EventBus().emit(BlinkYellowBaseEvent());
+        break;
     }
   }
 

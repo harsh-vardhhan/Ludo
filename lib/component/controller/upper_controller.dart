@@ -46,7 +46,11 @@ class UpperController extends RectangleComponent with HasGameReference<Ludo> {
                 ..color = Colors.transparent
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 4.0
-                ..color = Color(0xFF03346E)),
+                ..color = Color(0xFF03346E),
+              children: [
+                RectangleComponent(
+                    position: Vector2(innerWidth * 0.20, innerHeight * 0.5)),
+              ]),
         ] // Adjust color as needed
         );
 

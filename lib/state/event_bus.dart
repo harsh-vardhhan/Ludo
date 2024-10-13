@@ -2,6 +2,10 @@ class BlinkGreenBaseEvent {}
 
 class BlinkBlueBaseEvent {}
 
+class BlinkYellowBaseEvent {}
+
+class BlinkRedBaseEvent {}
+
 class EventBus {
   static final EventBus _instance = EventBus._internal();
 

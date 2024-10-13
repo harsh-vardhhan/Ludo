@@ -31,6 +31,20 @@ class TokenManager {
     'GT4': 'G4',
   };
 
+  final redTokensBase = {
+    'RT1': 'R1',
+    'RT2': 'R2',
+    'RT3': 'R3',
+    'RT4': 'R4',
+  };
+
+  final yellowTokensBase = {
+    'YT1': 'Y1',
+    'YT2': 'Y2',
+    'YT3': 'Y3',
+    'YT4': 'Y4',
+  };
+
   void initializeTokens(Map<String, String> tokenToHomeSpotMap) {
     for (var entry in tokenToHomeSpotMap.entries) {
       final token = Token(
@@ -76,5 +90,13 @@ class TokenManager {
 
   List<Token> getGreenTokens() {
     return getAllTokens('G');
+  }
+
+  List<Token> getYellowTokens() {
+    return getAllTokens('Y');
+  }
+
+  List<Token> getRedTokens() {
+    return getAllTokens('R');
   }
 }

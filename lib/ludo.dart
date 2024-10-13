@@ -36,8 +36,15 @@ class Ludo extends FlameGame
 
   ColorEffect? _greenBlinkEffect;
   ColorEffect? _greenStaticEffect;
+
   ColorEffect? _blueBlinkEffect;
   ColorEffect? _blueStaticEffect;
+
+  ColorEffect? _yellowBlinkEffect;
+  ColorEffect? _yellowStaticEffect;
+
+  ColorEffect? _redBlinkEffect;
+  ColorEffect? _redStaticEffect;
 
   @override
   FutureOr<void> onLoad() async {
@@ -66,13 +73,95 @@ class Ludo extends FlameGame
 
     EventBus().on<BlinkGreenBaseEvent>((event) {
       blinkGreenBase(true);
-      blinkBlueBase(false); // Call your blinkGreenBase method
+      blinkBlueBase(false);
+      blinkRedBase(false);
+      blinkYellowBase(false);
     });
 
     EventBus().on<BlinkBlueBaseEvent>((event) {
+      blinkBlueBase(true);
       blinkGreenBase(false);
-      blinkBlueBase(true); // Call your blinkGreenBase method
+      blinkRedBase(false);
+      blinkYellowBase(false);
     });
+
+    EventBus().on<BlinkRedBaseEvent>((event) {
+      blinkRedBase(true);
+      blinkGreenBase(false);
+      blinkBlueBase(false);
+      blinkYellowBase(false);
+    });
+
+    EventBus().on<BlinkYellowBaseEvent>((event) {
+      blinkYellowBase(true);
+      blinkGreenBase(false);
+      blinkBlueBase(false);
+      blinkRedBase(false);
+    });
+  }
+
+  void blinkRedBase(bool shouldBlink) {
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
+    final childrenOfLudoBoard = ludoBoard.children.toList();
+    final child = childrenOfLudoBoard[0];
+    final home = child.children.toList();
+    final homePlate = home[0] as Home;
+
+    // Initialize effects if they haven't been created yet
+    _redBlinkEffect ??= ColorEffect(
+      Colors.redAccent,
+      EffectController(
+        duration: 0.2,
+        reverseDuration: 0.2,
+        infinite: true,
+        alternate: true,
+      ),
+    );
+
+    _redStaticEffect ??= ColorEffect(
+      Colors.red,
+      EffectController(
+        duration: 0.2,
+        reverseDuration: 0.2,
+        infinite: true,
+        alternate: true,
+      ),
+    );
+
+    // Add the appropriate effect based on shouldBlink
+    homePlate.add(shouldBlink ? _redBlinkEffect! : _redStaticEffect!);
+  }
+
+  void blinkYellowBase(bool shouldBlink) {
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
+    final childrenOfLudoBoard = ludoBoard.children.toList();
+    final child = childrenOfLudoBoard[8];
+    final home = child.children.toList();
+    final homePlate = home[0] as Home;
+
+    // Initialize effects if they haven't been created yet
+    _yellowBlinkEffect ??= ColorEffect(
+      Colors.yellowAccent,
+      EffectController(
+        duration: 0.2,
+        reverseDuration: 0.2,
+        infinite: true,
+        alternate: true,
+      ),
+    );
+
+    _yellowStaticEffect ??= ColorEffect(
+      Colors.yellow,
+      EffectController(
+        duration: 0.2,
+        reverseDuration: 0.2,
+        infinite: true,
+        alternate: true,
+      ),
+    );
+
+    // Add the appropriate effect based on shouldBlink
+    homePlate.add(shouldBlink ? _yellowBlinkEffect! : _yellowStaticEffect!);
   }
 
   void blinkBlueBase(bool shouldBlink) {
@@ -143,157 +232,315 @@ class Ludo extends FlameGame
     final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
 
+    teams.forEach((team) {
+      if (team == 'BP') {
+        if (TokenManager().getBlueTokens().isEmpty) {
+          TokenManager().initializeTokens(TokenManager().blueTokensBase);
 
-    if (TokenManager().getBlueTokens().isEmpty) {
-      TokenManager().initializeTokens(TokenManager().blueTokensBase);
+          final ludoBoardPosition = ludoBoard.absolutePosition;
+          const homeSpotSizeFactorX = 0.10;
+          const homeSpotSizeFactorY = 0.05;
+          const tokenSizeFactorX = 0.80;
+          const tokenSizeFactorY = 1.05;
 
-      final ludoBoardPosition = ludoBoard.absolutePosition;
-      const homeSpotSizeFactorX = 0.10;
-      const homeSpotSizeFactorY = 0.05;
-      const tokenSizeFactorX = 0.80;
-      const tokenSizeFactorY = 1.05;
+          for (var token in TokenManager().getBlueTokens()) {
+            final homeSpot = getHomeSpot(world, 6)
+                .whereType<HomeSpot>()
+                .firstWhere((spot) => spot.uniqueId == token.positionId);
+            token.innerCircleColor = Colors.blue;
+            token.position = Vector2(
+              homeSpot.absolutePosition.x +
+                  (homeSpot.size.x * homeSpotSizeFactorX) -
+                  ludoBoardPosition.x,
+              homeSpot.absolutePosition.y -
+                  (homeSpot.size.x * homeSpotSizeFactorY) -
+                  ludoBoardPosition.y,
+            );
+            token.size = Vector2(
+              homeSpot.size.x * tokenSizeFactorX,
+              homeSpot.size.x * tokenSizeFactorY,
+            );
+            ludoBoard.add(token);
+          }
 
-      for (var token in TokenManager().getBlueTokens()) {
-        final homeSpot = getHomeSpot(world, 6)
-            .whereType<HomeSpot>()
-            .firstWhere((spot) => spot.uniqueId == token.positionId);
-        token.innerCircleColor = Colors.blue;
-        token.position = Vector2(
-          homeSpot.absolutePosition.x +
-              (homeSpot.size.x * homeSpotSizeFactorX) -
-              ludoBoardPosition.x,
-          homeSpot.absolutePosition.y -
-              (homeSpot.size.x * homeSpotSizeFactorY) -
-              ludoBoardPosition.y,
-        );
-        token.size = Vector2(
-          homeSpot.size.x * tokenSizeFactorX,
-          homeSpot.size.x * tokenSizeFactorY,
-        );
-        ludoBoard.add(token);
-      }
+          const playerId = 'BP';
+          final tokens = TokenManager().getBlueTokens();
 
-      const playerId = 'BP';
-      final tokens = TokenManager().getBlueTokens();
+          if (gameState.players.isEmpty) {
+            blinkBlueBase(true);
+            Player bluePlayer = Player(
+              playerId: playerId,
+              tokens: tokens,
+              isCurrentTurn: true,
+              enableDice: true,
+            );
+            gameState.players.add(bluePlayer);
+            for (var token in tokens) {
+              token.playerId = bluePlayer.playerId;
+              token.enableToken = true;
+            }
+          } else {
+            Player bluePlayer = Player(
+              playerId: playerId,
+              tokens: tokens,
+            );
+            gameState.players.add(bluePlayer);
+            for (var token in tokens) {
+              token.playerId = bluePlayer.playerId;
+            }
+          }
 
-      if (gameState.players.isEmpty) {
-        blinkBlueBase(true);
-        Player bluePlayer = Player(
-          playerId: playerId,
-          tokens: tokens,
-          isCurrentTurn: true,
-          enableDice: true,
-        );
-        gameState.players.add(bluePlayer);
-        for (var token in tokens) {
-          token.playerId = bluePlayer.playerId;
-          token.enableToken = true;
+          final player = gameState.players
+              .firstWhere((player) => player.playerId == playerId);
+
+          // dice for player blue
+          final lowerController =
+              world.children.whereType<LowerController>().first;
+          final lowerControllerComponents = lowerController.children.toList();
+          final leftDice = lowerControllerComponents[0]
+              .children
+              .whereType<RectangleComponent>()
+              .first;
+          final leftDiceContainer =
+              leftDice.children.whereType<RectangleComponent>().first;
+
+          leftDiceContainer.add(LudoDice(
+            player: player,
+            faceSize: leftDice.size.x * 0.70,
+          ));
         }
-      } else {
-        Player bluePlayer = Player(
-          playerId: playerId,
-          tokens: tokens,
-        );
-        gameState.players.add(bluePlayer);
-        for (var token in tokens) {
-          token.playerId = bluePlayer.playerId;
+      } else if (team == 'GP') {
+        if (TokenManager().getGreenTokens().isEmpty) {
+          TokenManager().initializeTokens(TokenManager().greenTokensBase);
+
+          final ludoBoardPosition = ludoBoard.absolutePosition;
+          const homeSpotSizeFactorX = 0.10;
+          const homeSpotSizeFactorY = 0.05;
+          const tokenSizeFactorX = 0.80;
+          const tokenSizeFactorY = 1.05;
+
+          for (var token in TokenManager().getGreenTokens()) {
+            final homeSpot = getHomeSpot(world, 2)
+                .whereType<HomeSpot>()
+                .firstWhere((spot) => spot.uniqueId == token.positionId);
+            token.innerCircleColor = Colors.green;
+            token.position = Vector2(
+              homeSpot.absolutePosition.x +
+                  (homeSpot.size.x * homeSpotSizeFactorX) -
+                  ludoBoardPosition.x,
+              homeSpot.absolutePosition.y -
+                  (homeSpot.size.x * homeSpotSizeFactorY) -
+                  ludoBoardPosition.y,
+            );
+            token.size = Vector2(
+              homeSpot.size.x * tokenSizeFactorX,
+              homeSpot.size.x * tokenSizeFactorY,
+            );
+            ludoBoard.add(token);
+          }
+
+          const playerId = 'GP';
+          final tokens = TokenManager().getGreenTokens();
+
+          if (gameState.players.isEmpty) {
+            blinkGreenBase(true);
+            Player greenPlayer = Player(
+              playerId: playerId,
+              tokens: tokens,
+              isCurrentTurn: true,
+              enableDice: true,
+            );
+            gameState.players.add(greenPlayer);
+            for (var token in tokens) {
+              token.playerId = greenPlayer.playerId;
+              token.enableToken = true;
+            }
+          } else {
+            Player greenPlayer = Player(
+              playerId: playerId,
+              tokens: tokens,
+            );
+            gameState.players.add(greenPlayer);
+            for (var token in tokens) {
+              token.playerId = greenPlayer.playerId;
+              token.enableToken = false;
+            }
+          }
+
+          final player = gameState.players
+              .firstWhere((player) => player.playerId == playerId);
+
+          // dice for player green
+          final upperController =
+              world.children.whereType<UpperController>().first;
+          final upperControllerComponents = upperController.children.toList();
+          final rightDice = upperControllerComponents[2]
+              .children
+              .whereType<RectangleComponent>()
+              .first;
+          final rightDiceContainer =
+              rightDice.children.whereType<RectangleComponent>().first;
+
+          rightDiceContainer.add(LudoDice(
+            player: player,
+            faceSize: rightDice.size.x * 0.70,
+          ));
+        }
+      } else if (team == 'YP') {
+        if (TokenManager().getYellowTokens().isEmpty) {
+          TokenManager().initializeTokens(TokenManager().yellowTokensBase);
+
+          final ludoBoardPosition = ludoBoard.absolutePosition;
+          const homeSpotSizeFactorX = 0.10;
+          const homeSpotSizeFactorY = 0.05;
+          const tokenSizeFactorX = 0.80;
+          const tokenSizeFactorY = 1.05;
+
+          for (var token in TokenManager().getYellowTokens()) {
+            final homeSpot = getHomeSpot(world, 8)
+                .whereType<HomeSpot>()
+                .firstWhere((spot) => spot.uniqueId == token.positionId);
+            token.innerCircleColor = Colors.yellow;
+            token.position = Vector2(
+              homeSpot.absolutePosition.x +
+                  (homeSpot.size.x * homeSpotSizeFactorX) -
+                  ludoBoardPosition.x,
+              homeSpot.absolutePosition.y -
+                  (homeSpot.size.x * homeSpotSizeFactorY) -
+                  ludoBoardPosition.y,
+            );
+            token.size = Vector2(
+              homeSpot.size.x * tokenSizeFactorX,
+              homeSpot.size.x * tokenSizeFactorY,
+            );
+            ludoBoard.add(token);
+          }
+
+          const playerId = 'YP';
+          final tokens = TokenManager().getYellowTokens();
+
+          if (gameState.players.isEmpty) {
+            blinkYellowBase(true);
+            Player yellowPlayer = Player(
+              playerId: playerId,
+              tokens: tokens,
+              isCurrentTurn: true,
+              enableDice: true,
+            );
+            gameState.players.add(yellowPlayer);
+            for (var token in tokens) {
+              token.playerId = yellowPlayer.playerId;
+              token.enableToken = true;
+            }
+          } else {
+            Player yellowPlayer = Player(
+              playerId: playerId,
+              tokens: tokens,
+            );
+            gameState.players.add(yellowPlayer);
+            for (var token in tokens) {
+              token.playerId = yellowPlayer.playerId;
+              token.enableToken = false;
+            }
+          }
+
+          final player = gameState.players
+              .firstWhere((player) => player.playerId == playerId);
+
+          // dice for player yellow
+          final lowerController =
+              world.children.whereType<LowerController>().first;
+          final lowerControllerComponents = lowerController.children.toList();
+          final rightDice = lowerControllerComponents[2]
+              .children
+              .whereType<RectangleComponent>()
+              .first;
+          final rightDiceContainer =
+              rightDice.children.whereType<RectangleComponent>().first;
+
+          rightDiceContainer.add(LudoDice(
+            player: player,
+            faceSize: rightDice.size.x * 0.70,
+          ));
+        }
+      } else if (team == 'RP') {
+        if (TokenManager().getRedTokens().isEmpty) {
+          TokenManager().initializeTokens(TokenManager().redTokensBase);
+
+          final ludoBoardPosition = ludoBoard.absolutePosition;
+          const homeSpotSizeFactorX = 0.10;
+          const homeSpotSizeFactorY = 0.05;
+          const tokenSizeFactorX = 0.80;
+          const tokenSizeFactorY = 1.05;
+
+          for (var token in TokenManager().getRedTokens()) {
+            final homeSpot = getHomeSpot(world, 0)
+                .whereType<HomeSpot>()
+                .firstWhere((spot) => spot.uniqueId == token.positionId);
+            token.innerCircleColor = Colors.red;
+            token.position = Vector2(
+              homeSpot.absolutePosition.x +
+                  (homeSpot.size.x * homeSpotSizeFactorX) -
+                  ludoBoardPosition.x,
+              homeSpot.absolutePosition.y -
+                  (homeSpot.size.x * homeSpotSizeFactorY) -
+                  ludoBoardPosition.y,
+            );
+            token.size = Vector2(
+              homeSpot.size.x * tokenSizeFactorX,
+              homeSpot.size.x * tokenSizeFactorY,
+            );
+            ludoBoard.add(token);
+          }
+
+          const playerId = 'RP';
+          final tokens = TokenManager().getRedTokens();
+
+          if (gameState.players.isEmpty) {
+            blinkRedBase(true);
+            Player redPlayer = Player(
+              playerId: playerId,
+              tokens: tokens,
+              isCurrentTurn: true,
+              enableDice: true,
+            );
+            gameState.players.add(redPlayer);
+            for (var token in tokens) {
+              token.playerId = redPlayer.playerId;
+              token.enableToken = true;
+            }
+          } else {
+            Player redPlayer = Player(
+              playerId: playerId,
+              tokens: tokens,
+            );
+            gameState.players.add(redPlayer);
+            for (var token in tokens) {
+              token.playerId = redPlayer.playerId;
+              token.enableToken = false;
+            }
+          }
+
+          final player = gameState.players
+              .firstWhere((player) => player.playerId == playerId);
+
+          // dice for player yellow
+          final upperController =
+              world.children.whereType<UpperController>().first;
+          final upperControllerComponents = upperController.children.toList();
+          final leftDice = upperControllerComponents[0]
+              .children
+              .whereType<RectangleComponent>()
+              .first;
+          final rightDiceContainer =
+              leftDice.children.whereType<RectangleComponent>().first;
+          rightDiceContainer.add(LudoDice(
+            player: player,
+            faceSize: leftDice.size.x * 0.70,
+          ));
         }
       }
-
-      final player =
-          gameState.players.firstWhere((player) => player.playerId == playerId);
-
-      // dice for player blue
-      final lowerController = world.children.whereType<LowerController>().first;
-      final lowerControllerComponents = lowerController.children.toList();
-      final leftDice = lowerControllerComponents[0]
-          .children
-          .whereType<RectangleComponent>()
-          .first;
-      final leftDiceContainer =
-          leftDice.children.whereType<RectangleComponent>().first;
-
-      leftDiceContainer.add(LudoDice(
-        player: player,
-        faceSize: leftDice.size.x * 0.70,
-      ));
-    }
-
-    if (TokenManager().getGreenTokens().isEmpty) {
-      TokenManager().initializeTokens(TokenManager().greenTokensBase);
-
-      final ludoBoardPosition = ludoBoard.absolutePosition;
-      const homeSpotSizeFactorX = 0.10;
-      const homeSpotSizeFactorY = 0.05;
-      const tokenSizeFactorX = 0.80;
-      const tokenSizeFactorY = 1.05;
-
-      for (var token in TokenManager().getGreenTokens()) {
-        final homeSpot = getHomeSpot(world, 2)
-            .whereType<HomeSpot>()
-            .firstWhere((spot) => spot.uniqueId == token.positionId);
-        token.innerCircleColor = Colors.green;
-        token.position = Vector2(
-          homeSpot.absolutePosition.x +
-              (homeSpot.size.x * homeSpotSizeFactorX) -
-              ludoBoardPosition.x,
-          homeSpot.absolutePosition.y -
-              (homeSpot.size.x * homeSpotSizeFactorY) -
-              ludoBoardPosition.y,
-        );
-        token.size = Vector2(
-          homeSpot.size.x * tokenSizeFactorX,
-          homeSpot.size.x * tokenSizeFactorY,
-        );
-        ludoBoard.add(token);
-      }
-
-      const playerId = 'GP';
-      final tokens = TokenManager().getGreenTokens();
-
-      if (gameState.players.isEmpty) {
-        blinkGreenBase(true);
-        Player greenPlayer = Player(
-          playerId: playerId,
-          tokens: tokens,
-          isCurrentTurn: true,
-          enableDice: true,
-        );
-        gameState.players.add(greenPlayer);
-        for (var token in tokens) {
-          token.playerId = greenPlayer.playerId;
-          token.enableToken = true;
-        }
-      } else {
-        Player greenPlayer = Player(
-          playerId: playerId,
-          tokens: tokens,
-        );
-        gameState.players.add(greenPlayer);
-        for (var token in tokens) {
-          token.playerId = greenPlayer.playerId;
-          token.enableToken = false;
-        }
-      }
-
-      final player =
-          gameState.players.firstWhere((player) => player.playerId == playerId);
-
-      // dice for player green
-      final upperController = world.children.whereType<UpperController>().first;
-      final upperControllerComponents = upperController.children.toList();
-      final rightDice = upperControllerComponents[2]
-          .children
-          .whereType<RectangleComponent>()
-          .first;
-      final rightDiceContainer =
-          rightDice.children.whereType<RectangleComponent>().first;
-
-      rightDiceContainer.add(LudoDice(
-        player: player,
-        faceSize: rightDice.size.x * 0.70,
-      ));
-    }
+    });
   }
 
   @override
@@ -621,7 +868,7 @@ Future<void> moveForward({
 
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     String positionId = tokenPath[i];
-    
+
     token.positionId = positionId;
     if (token.positionId == 'BF') {
       token.state = TokenState.inHome;
