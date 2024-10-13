@@ -546,7 +546,9 @@ class Ludo extends FlameGame
   @override
   void onTap() {
     if (TokenManager().getBlueTokens().isEmpty &&
-        TokenManager().getGreenTokens().isEmpty) {
+        TokenManager().getGreenTokens().isEmpty &&
+        TokenManager().getRedTokens().isEmpty &&
+        TokenManager().getYellowTokens().isEmpty) {
       startGame();
     }
   }
