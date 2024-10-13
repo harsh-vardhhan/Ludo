@@ -690,42 +690,30 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
     final spotGlobalPosition = spot.absolutePosition;
     final adjustedPosition = spotGlobalPosition - ludoBoardGlobalPosition;
 
+    double sizeFactor;
+    int positionIncrement;
+
     if (tokenList.length == 1) {
-      final token = tokenList.first;
-      if (token.state == TokenState.onBoard) {
-        token.size = originalSize;
-        // Calculate the position once and reuse it
-        token.position = Vector2(
-          adjustedPosition.x + (token.size.x * 0.10),
-          adjustedPosition.y - (token.size.x * 0.05),
-        );
-      } else if (token.state == TokenState.inBase) {
-        token.size = originalSize;
-        token.position = spot.position;
-      }
+      sizeFactor = 1.0;
+      positionIncrement = 0;
     } else if (tokenList.length == 2) {
-      const sizeFactor = 0.70;
-      const positionIncrement = 10;
-      for (var i = 0; i < tokenList.length; i++) {
-        final token = tokenList[i];
-        token.size = originalSize * sizeFactor;
-        token.position = Vector2(
-            spotGlobalPosition.x +
-                (i * positionIncrement) -
-                ludoBoardGlobalPosition.x,
-            spotGlobalPosition.y - ludoBoardGlobalPosition.y);
-      }
-    } else if (tokenList.length > 2) {
-      const sizeFactor = 0.50;
-      const positionIncrement = 5;
-      for (var i = 0; i < tokenList.length; i++) {
-        final token = tokenList[i];
-        token.size = originalSize * sizeFactor;
-        token.position = Vector2(
-            spotGlobalPosition.x +
-                (i * positionIncrement) -
-                ludoBoardGlobalPosition.x,
-            spotGlobalPosition.y - ludoBoardGlobalPosition.y);
+      sizeFactor = 0.70;
+      positionIncrement = 10;
+    } else {
+      sizeFactor = 0.50;
+      positionIncrement = 5;
+    }
+
+    for (var i = 0; i < tokenList.length; i++) {
+      final token = tokenList[i];
+      token.size = originalSize * sizeFactor;
+      token.position = Vector2(
+        adjustedPosition.x + (i * positionIncrement) + (token.size.x * 0.10),
+        adjustedPosition.y - (token.size.x * 0.05),
+      );
+
+      if (token.state == TokenState.inBase) {
+        token.position = spot.position;
       }
     }
   });
@@ -742,9 +730,13 @@ void addTokenTrail(List<Token> tokensOnBoard) {
     // Determine the color based on the tokenId prefix
     Color? color;
     if (token.tokenId.startsWith('B')) {
-      color = Color(0xFF4FC3F7); // Blue color
+      color = const Color(0xFFB7E0FF); // Blue color
     } else if (token.tokenId.startsWith('G')) {
-      color = Colors.lightGreen; // Green color
+      color = const Color(0xFFB6FFA1); // Green color
+    } else if (token.tokenId.startsWith('Y')) {
+      color = const Color(0xFFFEFFA7); // Yellow color
+    } else if (token.tokenId.startsWith('R')) {
+      color = const Color(0xFFFF8A8A); // Red color
     }
 
     // Set the color if it's determined
