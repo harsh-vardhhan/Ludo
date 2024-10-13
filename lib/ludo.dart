@@ -24,10 +24,10 @@ import 'component/ui_components/ludo_dice.dart';
 
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
-  int playerCount;
+  List<String> teams;
 
-  Ludo(this.playerCount) {
-    print(playerCount);
+  Ludo(this.teams) {
+    print(teams);
   }
 
   final rand = Random();
@@ -142,6 +142,7 @@ class Ludo extends FlameGame
   void startGame() {
     final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
+
 
     if (TokenManager().getBlueTokens().isEmpty) {
       TokenManager().initializeTokens(TokenManager().blueTokensBase);
