@@ -826,7 +826,7 @@ Future<void> moveBackward({
   }
 
   if (token.playerId == 'BP') {
-    moveTokenToBase(
+    await moveTokenToBase(
       world: world,
       token: token,
       tokenBase: TokenManager().blueTokensBase,
@@ -834,7 +834,7 @@ Future<void> moveBackward({
       ludoBoard: ludoBoard,
     );
   } else if (token.playerId == 'GP') {
-    moveTokenToBase(
+    await moveTokenToBase(
       world: world,
       token: token,
       tokenBase: TokenManager().greenTokensBase,
@@ -842,7 +842,7 @@ Future<void> moveBackward({
       ludoBoard: ludoBoard,
     );
   } else if (token.playerId == 'RP') {
-    moveTokenToBase(
+    await moveTokenToBase(
       world: world,
       token: token,
       tokenBase: TokenManager().redTokensBase,
@@ -850,7 +850,7 @@ Future<void> moveBackward({
       ludoBoard: ludoBoard,
     );
   } else if (token.playerId == 'YP') {
-    moveTokenToBase(
+    await moveTokenToBase(
       world: world,
       token: token,
       tokenBase: TokenManager().yellowTokensBase,
@@ -987,7 +987,7 @@ Future<void> _applyEffect(PositionComponent component, Effect effect) {
   return completer.future;
 }
 
-void moveTokenToBase({
+Future<void> moveTokenToBase({
   required World world,
   required Token token,
   required Map<String, String> tokenBase,
