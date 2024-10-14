@@ -302,29 +302,32 @@ class _GameAppState extends State<GameApp> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xff98DED9),
-                Color(0xffFFFFFF),
-              ],
+    return PopScope(
+      canPop: false,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xff98DED9),
+                  Color(0xffFFFFFF),
+                ],
+              ),
             ),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Center(
-                child: FittedBox(
-                  child: SizedBox(
-                      width: screenWidth,
-                      height: screenWidth + screenWidth * 0.70,
-                      child: GameWidget(game: game!)),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: FittedBox(
+                    child: SizedBox(
+                        width: screenWidth,
+                        height: screenWidth + screenWidth * 0.70,
+                        child: GameWidget(game: game!)),
+                  ),
                 ),
               ),
             ),
