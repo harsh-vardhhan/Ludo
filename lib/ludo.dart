@@ -6,7 +6,6 @@ import 'package:flame/game.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flame_audio/flame_audio.dart';
-import 'package:collection/collection.dart';
 
 import 'state/player.dart';
 import 'component/home/home.dart';
@@ -26,10 +25,8 @@ class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
   List<String> teams;
 
-  Ludo(this.teams) {
-    print(teams);
-  }
-
+  Ludo(this.teams);
+  
   final rand = Random();
   double get width => size.x;
   double get height => size.y;
@@ -109,7 +106,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _redBlinkEffect ??= ColorEffect(
-      Color(0xFFFF8A8A),
+      const Color(0xFFFF8A8A),
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -173,7 +170,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _blueBlinkEffect ??= ColorEffect(
-      Color(0xFF4FC3F7),
+      const Color(0xFF4FC3F7),
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -232,7 +229,7 @@ class Ludo extends FlameGame
     final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
 
-    teams.forEach((team) {
+    for (var team in teams) {
       if (team == 'BP') {
         if (TokenManager().getBlueTokens().isEmpty) {
           TokenManager().initializeTokens(TokenManager().blueTokensBase);
@@ -556,7 +553,7 @@ class Ludo extends FlameGame
           ));
         }
       }
-    });
+    }
   }
 
   @override
@@ -723,7 +720,7 @@ void addTokenTrail(List<Token> tokensOnBoard) {
   SpotManager spotManager = SpotManager();
   for (var token in tokensOnBoard) {
     final spot = spotManager.findSpotById(token.positionId);
-    if (spot == null || !token.spaceToMove()) {
+    if (!token.spaceToMove()) {
       continue;
     }
 

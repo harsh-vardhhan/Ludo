@@ -29,10 +29,7 @@ class SpotManager {
   }
 
   List<Spot> getSpots() {
-    if (_cachedSpots == null) {
-      // Ensure the cache is populated with a fresh list
-      _cachedSpots = List.unmodifiable(_spotMap.values.toList());
-    }
+    _cachedSpots ??= List.unmodifiable(_spotMap.values.toList());
     return _cachedSpots!;
   }
 

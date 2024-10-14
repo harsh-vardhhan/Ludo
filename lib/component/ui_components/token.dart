@@ -102,7 +102,7 @@ class Token extends PositionComponent with TapCallbacks {
             tokenPath: getTokenPath(playerId),
             ludoBoard: ludoBoard);
         // Consider reducing delay or making it conditional
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 100));
       } else if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
         await moveForward(
             world: world,

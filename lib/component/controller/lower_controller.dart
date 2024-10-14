@@ -20,7 +20,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     final leftToken = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
         position: Vector2(2.2, innerWidth * 0.05), // Sticks to the left
-        paint: Paint()..color = Color(0xFFA0DEFF),
+        paint: Paint()..color = const Color(0xFFA0DEFF),
         children: [
           ControllerBlock(
               transparentRight: true,
@@ -31,14 +31,14 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
                 ..color = Colors.black
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 1.0
-                ..color = Color(0xFF03346E),
+                ..color = const Color(0xFF03346E),
               children: []),
         ]);
 
     final leftDice = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight),
         position: Vector2(innerWidth * 0.4, 0), // Sticks to the left
-        paint: Paint()..color = Color(0xFFA0DEFF),
+        paint: Paint()..color = const Color(0xFFA0DEFF),
         children: [
           RectangleComponent(
               size: Vector2(innerWidth * 0.4, innerHeight),
@@ -46,7 +46,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
                 ..color = Colors.transparent
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 4.0
-                ..color = Color(0xFF03346E),
+                ..color = const Color(0xFF03346E),
               children: [
                 RectangleComponent(
                     position: Vector2(innerWidth * 0.20, innerHeight * 0.5)),
@@ -57,7 +57,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     final rightDice = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight),
         position: Vector2(width - innerWidth * 0.8, 0), // Sticks to the right
-        paint: Paint()..color = Color(0xFFFCDE70),
+        paint: Paint()..color = const Color(0xFFFCDE70),
         children: [
           RectangleComponent(
               size: Vector2(innerWidth * 0.4, innerHeight),
@@ -65,7 +65,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
                 ..color = Colors.transparent
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 4.0
-                ..color = Color(0xFF03346E),
+                ..color = const Color(0xFF03346E),
               children: [
                 RectangleComponent(
                     position: Vector2(innerWidth * 0.20, innerHeight * 0.5)),
@@ -75,7 +75,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     final rightToken = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
         position: Vector2(width - innerWidth * 0.4 - 2.5, innerWidth * 0.05),
-        paint: Paint()..color = Color(0xFFFCDE70),
+        paint: Paint()..color = const Color(0xFFFCDE70),
         children: [
           ControllerBlock(
               transparentLeft: true,
@@ -85,7 +85,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
                 ..color = Colors.black
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 1.0
-                ..color = Color(0xFF03346E),
+                ..color = const Color(0xFF03346E),
               children: []),
         ]);
 

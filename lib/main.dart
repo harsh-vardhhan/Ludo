@@ -30,10 +30,10 @@ class FirstScreen extends StatefulWidget {
   final int? selectedPlayerCount;
 
   @override
-  _FirstScreenState createState() => _FirstScreenState();
+  FirstScreenState createState() => FirstScreenState();
 }
 
-class _FirstScreenState extends State<FirstScreen> {
+class FirstScreenState extends State<FirstScreen> {
   int? selectedPlayerCount;
 
   @override
@@ -139,13 +139,13 @@ class _FirstScreenState extends State<FirstScreen> {
 class SecondScreen extends StatefulWidget {
   final int? selectedPlayerCount;
 
-  SecondScreen({super.key, this.selectedPlayerCount});
+  const SecondScreen({super.key, this.selectedPlayerCount});
 
   @override
-  _SecondScreenState createState() => _SecondScreenState();
+  SecondScreenState createState() => SecondScreenState();
 }
 
-class _SecondScreenState extends State<SecondScreen> {
+class SecondScreenState extends State<SecondScreen> {
   List<String> selectedTeams = [];
   int? selectedOption; // New state variable to track selected radio option
 
@@ -315,7 +315,7 @@ class _GameAppState extends State<GameApp> {
 class TokenDisplay extends StatelessWidget {
   final Color color;
 
-  const TokenDisplay({required this.color});
+  const TokenDisplay({super.key, required this.color});
 
   @override
   Widget build(BuildContext context) {

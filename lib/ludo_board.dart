@@ -249,4 +249,4 @@ class DiagonalRectangleComponent extends PositionComponent {
 
 
 // Define transparentPaint
-final Paint transparentPaint = Paint()..color = Color(0x00000000);
+final Paint transparentPaint = Paint()..color = const Color(0x00000000);

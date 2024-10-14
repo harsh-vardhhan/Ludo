@@ -52,7 +52,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     // Apply dice rotation effect
     await _applyDiceRollEffect();
 
-    await Future.delayed(Duration(milliseconds: 700));
+    await Future.delayed(const Duration(milliseconds: 700));
 
     final world = parent?.parent?.parent?.parent?.parent;
     if (world is! World) return; // Ensure the world is available
@@ -118,7 +118,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
         .toList();
 
     if (tokensOnBoard.isEmpty) {
-      print('No tokens available to move for player ${player.playerId}.');
       gameState.switchToNextPlayer();
       return;
     }
@@ -197,7 +196,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
       diceNumber: diceNumber,
       ludoBoard: ludoBoard,
     );
-    await Future.delayed(Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 300));
     tokenCollision(world, token);
     return Future.value();
   }
