@@ -10,7 +10,6 @@ class Player {
   bool hasWon; // Has the player won the game?
   int extraTurns; // Count of extra turns granted
   bool enableDice;
-  bool enableToken;
 
   // Constructor to initialize the player's attributes
   Player({
@@ -23,7 +22,6 @@ class Player {
     this.hasWon = false, // Default: player hasn't won yet
     this.extraTurns = 0,
     this.enableDice = false, // Default to 0 extra turns
-    this.enableToken = false,
   });
 
   // Helper method to check if all tokens are in base

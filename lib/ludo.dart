@@ -26,7 +26,7 @@ class Ludo extends FlameGame
   List<String> teams;
 
   Ludo(this.teams);
-  
+
   final rand = Random();
   double get width => size.x;
   double get height => size.y;
@@ -633,11 +633,15 @@ Vector2 calculateTargetPosition(Token token, Spot spot, LudoBoard ludoBoard) {
 }
 
 void tokenCollision(World world, Token attackerToken) async {
+  final gameState = GameState();
   final ludoBoard = world.children.whereType<LudoBoard>().first;
   final spotId = attackerToken.positionId;
   final tokens = TokenManager().allTokens;
   final tokensOnSpot =
       tokens.where((token) => token.positionId == spotId).toList();
+
+  // Initialize the flag to track if any token was attacked
+  bool wasTokenAttacked = false;
 
   // only attacker token on spot, return
   if (tokensOnSpot.length > 1) {
@@ -647,14 +651,46 @@ void tokenCollision(World world, Token attackerToken) async {
       // attacker token is not in safe zone, check for collision
       for (var token in tokensOnSpot) {
         if (token.playerId != attackerToken.playerId) {
-          // if token is from different player, move backward
           await moveBackward(
               world: world,
               token: token,
               tokenPath: getTokenPath(token.playerId),
               ludoBoard: ludoBoard);
+
+          // Set the flag to true if a token was attacked
+          wasTokenAttacked = true;
         }
       }
+    }
+  }
+
+  // Grant another turn or switch to next player
+  final player = gameState.players
+      .firstWhere((player) => player.playerId == attackerToken.playerId);
+
+  if (wasTokenAttacked) {
+    player.grantAnotherTurn();
+    if (player.hasRolledThreeConsecutiveSixes()) {
+      player.resetExtraTurns();
+    }
+    player.enableDice = true;
+    for (var token in player.tokens) {
+      token.enableToken = false;
+    }
+  } else {
+    if (gameState.diceNumber == 6) {
+      if (player.hasRolledThreeConsecutiveSixes()) {
+        player.resetExtraTurns();
+        gameState.switchToNextPlayer();
+      } else {
+        player.grantAnotherTurn();
+        player.enableDice = true;
+        for (var token in player.tokens) {
+          token.enableToken = false;
+        }
+      }
+    } else {
+      gameState.switchToNextPlayer();
     }
   }
 

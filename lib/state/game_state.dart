@@ -47,7 +47,6 @@ class GameState {
     var current = currentPlayer;
     current.isCurrentTurn = false;
     current.enableDice = false;
-    current.enableToken = false;
     current.resetExtraTurns();
 
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
@@ -57,10 +56,6 @@ class GameState {
 
     for (var token in currentPlayer.tokens) {
       token.enableToken = false;
-    }
-
-    for (var token in nextPlayer.tokens) {
-      token.enableToken = true;
     }
 
     switch (nextPlayer.playerId) {

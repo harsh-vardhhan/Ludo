@@ -81,13 +81,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
   // Handle logic when the player rolls a 6
   Future<void> _handleSixRoll(
       World world, LudoBoard ludoBoard, int diceNumber) async {
-    player.grantAnotherTurn(); // Grant extra turn for rolling a six
-
-    if (player.hasRolledThreeConsecutiveSixes()) {
-      gameState.switchToNextPlayer();
-      return;
-    }
-
     // Filter tokens once and reuse the lists
     final tokensInBase = player.tokens
         .where((token) => token.state == TokenState.inBase)
@@ -125,7 +118,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
     if (tokensOnBoard.length == 1 && tokensOnBoard.first.spaceToMove()) {
       await _moveForwardSingleToken(
           world, ludoBoard, diceNumber, tokensOnBoard.first);
-      gameState.switchToNextPlayer();
       return;
     }
 
@@ -163,14 +155,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
       await _moveForwardSingleToken(
           world, ludoBoard, diceNumber, tokensOnBoard.first);
     }
-    gameState.switchToNextPlayer();
-    player.enableDice = true;
   }
 
   // Enable manual selection if multiple tokens can move
   Future<void> _enableManualTokenSelection(
       List<Token> tokensInBase, List<Token> tokensOnBoard) {
-    player.enableToken = true;
     for (var token in player.tokens) {
       token.enableToken = true;
     }
@@ -197,7 +186,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
       ludoBoard: ludoBoard,
     );
     await Future.delayed(const Duration(milliseconds: 300));
-    tokenCollision(world, token);
     return Future.value();
   }
 

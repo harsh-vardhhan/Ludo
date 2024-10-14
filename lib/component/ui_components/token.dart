@@ -111,7 +111,6 @@ class Token extends PositionComponent with TapCallbacks {
             diceNumber: gameState.diceNumber,
             ludoBoard: ludoBoard);
       }
-      gameState.currentPlayer.enableDice = true;
       return;
     }
 
@@ -124,8 +123,6 @@ class Token extends PositionComponent with TapCallbacks {
           diceNumber: gameState.diceNumber,
           ludoBoard: ludoBoard);
     }
-
-    gameState.switchToNextPlayer();
   }
 
   bool spaceToMove() {
