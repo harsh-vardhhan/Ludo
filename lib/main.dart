@@ -45,17 +45,14 @@ class FirstScreenState extends State<FirstScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('First Screen'),
-      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xff98DED9),
-              Color(0xffFFFFFF),
+              Color(0xff002fa7),
+              Color(0xff002fa7),
             ],
           ),
         ),
@@ -67,13 +64,19 @@ class FirstScreenState extends State<FirstScreen> {
               children: [
                 const Text(
                   'Select Number of Players',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
                 const SizedBox(height: 20),
                 Column(
                   children: [
                     RadioListTile<int>(
-                      title: const Text('2 Players'),
+                      title: const Text(
+                        '2 Players',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       value: 2,
                       groupValue: selectedPlayerCount,
                       onChanged: (int? value) {
@@ -83,7 +86,10 @@ class FirstScreenState extends State<FirstScreen> {
                       },
                     ),
                     RadioListTile<int>(
-                      title: const Text('4 Players'),
+                      title: const Text(
+                        '4 Players',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       value: 4,
                       groupValue: selectedPlayerCount,
                       onChanged: (int? value) {
@@ -99,8 +105,11 @@ class FirstScreenState extends State<FirstScreen> {
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Colors.yellow, // Set button color to yellow
                       shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(20.0)), // Set border radius
                       ),
                     ),
                     onPressed: () {
@@ -154,6 +163,7 @@ class SecondScreenState extends State<SecondScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Teams'),
+        backgroundColor: Colors.white, // Set AppBar background color to white
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -161,8 +171,8 @@ class SecondScreenState extends State<SecondScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xff98DED9),
-              Color(0xffFFFFFF),
+              Color(0xff002fa7),
+              Color(0xff002fa7),
             ],
           ),
         ),
@@ -179,11 +189,23 @@ class SecondScreenState extends State<SecondScreen> {
                           children: [
                             TokenDisplay(color: Colors.blue),
                             SizedBox(width: 4),
-                            Text('Player 1'),
+                            Text(
+                              'Player 1',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold, // Make text bold
+                              ),
+                            ),
                             SizedBox(width: 30),
                             TokenDisplay(color: Colors.green),
                             SizedBox(width: 4),
-                            Text('Player 2'),
+                            Text(
+                              'Player 2',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold, // Make text bold
+                              ),
+                            ),
                           ],
                         ),
                         value: 1,
@@ -201,11 +223,23 @@ class SecondScreenState extends State<SecondScreen> {
                           children: [
                             TokenDisplay(color: Colors.red),
                             SizedBox(width: 4),
-                            Text('Player 1'),
+                            Text(
+                              'Player 1',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold, // Make text bold
+                              ),
+                            ),
                             SizedBox(width: 30),
                             TokenDisplay(color: Colors.yellow),
                             SizedBox(width: 4),
-                            Text('Player 2'),
+                            Text(
+                              'Player 2',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold, // Make text bold
+                              ),
+                            ),
                           ],
                         ),
                         value: 2,
@@ -218,17 +252,30 @@ class SecondScreenState extends State<SecondScreen> {
                           });
                         },
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  GameApp(selectedTeams: selectedTeams),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width *
+                            0.8, // Set width to 80% of screen
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Colors.yellow, // Set button color to yellow
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(20.0)), // Set border radius
                             ),
-                          );
-                        },
-                        child: const Text('Start Game'),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    GameApp(selectedTeams: selectedTeams),
+                              ),
+                            );
+                          },
+                          child: const Text('Start Game'),
+                        ),
                       )
                     ],
                   );
