@@ -70,35 +70,28 @@ class FirstScreenState extends State<FirstScreen> {
                       color: Colors.white),
                 ),
                 const SizedBox(height: 20),
-                Column(
-                  children: [
-                    RadioListTile<int>(
-                      title: const Text(
-                        '2 Players',
-                        style: TextStyle(color: Colors.white),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Colors.yellow, // Set button color to yellow
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(20.0)), // Set border radius
                       ),
-                      value: 2,
-                      groupValue: selectedPlayerCount,
-                      onChanged: (int? value) {
-                        setState(() {
-                          selectedPlayerCount = value;
-                        });
-                      },
                     ),
-                    RadioListTile<int>(
-                      title: const Text(
-                        '4 Players',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      value: 4,
-                      groupValue: selectedPlayerCount,
-                      onChanged: (int? value) {
-                        setState(() {
-                          selectedPlayerCount = value;
-                        });
-                      },
-                    ),
-                  ],
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const SecondScreen(selectedPlayerCount: 2),
+                        ),
+                      );
+                    }, // Button is disabled if no selection
+                    child: const Text('2 player game'),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -113,27 +106,15 @@ class FirstScreenState extends State<FirstScreen> {
                       ),
                     ),
                     onPressed: () {
-                      if (selectedPlayerCount != null) {
-                        if (selectedPlayerCount == 2) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SecondScreen(
-                                  selectedPlayerCount: selectedPlayerCount),
-                            ),
-                          );
-                        } else if (selectedPlayerCount == 4) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const GameApp(
-                                  selectedTeams: ['BP', 'RP', 'GP', 'YP']),
-                            ),
-                          );
-                        }
-                      }
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GameApp(
+                              selectedTeams: ['BP', 'RP', 'GP', 'YP']),
+                        ),
+                      );
                     }, // Button is disabled if no selection
-                    child: const Text('Start Game'),
+                    child: const Text('4 player game'),
                   ),
                 ),
               ],
@@ -161,10 +142,6 @@ class SecondScreenState extends State<SecondScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Teams'),
-        backgroundColor: Colors.white, // Set AppBar background color to white
-      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -184,99 +161,99 @@ class SecondScreenState extends State<SecondScreen> {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      RadioListTile<int>(
-                        title: const Row(
-                          children: [
-                            TokenDisplay(color: Colors.blue),
-                            SizedBox(width: 4),
-                            Text(
-                              'Player 1',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold, // Make text bold
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20.0)),
                               ),
                             ),
-                            SizedBox(width: 30),
-                            TokenDisplay(color: Colors.green),
-                            SizedBox(width: 4),
-                            Text(
-                              'Player 2',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold, // Make text bold
-                              ),
-                            ),
-                          ],
-                        ),
-                        value: 1,
-                        groupValue:
-                            selectedOption, // Use the new state variable
-                        onChanged: (value) {
-                          setState(() {
-                            selectedOption = value;
-                            selectedTeams = ['BP', 'GP'];
-                          });
-                        },
-                      ),
-                      RadioListTile<int>(
-                        title: const Row(
-                          children: [
-                            TokenDisplay(color: Colors.red),
-                            SizedBox(width: 4),
-                            Text(
-                              'Player 1',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold, // Make text bold
-                              ),
-                            ),
-                            SizedBox(width: 30),
-                            TokenDisplay(color: Colors.yellow),
-                            SizedBox(width: 4),
-                            Text(
-                              'Player 2',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold, // Make text bold
-                              ),
-                            ),
-                          ],
-                        ),
-                        value: 2,
-                        groupValue:
-                            selectedOption, // Use the new state variable
-                        onChanged: (value) {
-                          setState(() {
-                            selectedOption = value;
-                            selectedTeams = ['RP', 'YP'];
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width *
-                            0.8, // Set width to 80% of screen
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Colors.yellow, // Set button color to yellow
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                  Radius.circular(20.0)), // Set border radius
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const GameApp(
+                                      selectedTeams: ['BP', 'GP']),
+                                ),
+                              );
+                            }, // Empty onPressed action
+                            child: const Row(
+                              children: [
+                                TokenDisplay(color: Colors.blue),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Player 1',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(width: 30),
+                                TokenDisplay(color: Colors.green),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Player 2',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    GameApp(selectedTeams: selectedTeams),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20.0)),
                               ),
-                            );
-                          },
-                          child: const Text('Start Game'),
-                        ),
-                      )
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const GameApp(
+                                      selectedTeams: ['RP', 'YP']),
+                                ),
+                              );
+                            },
+                            child: const Row(
+                              children: [
+                                TokenDisplay(color: Colors.red),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Player 1',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(width: 30),
+                                TokenDisplay(color: Colors.yellow),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Player 2',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   );
                 case 4:
@@ -319,7 +296,6 @@ class _GameAppState extends State<GameApp> {
   void initState() {
     super.initState();
     game = Ludo(widget.selectedTeams);
-    // You can now use widget.selectedTeams here
   }
 
   @override
