@@ -225,7 +225,6 @@ class Ludo extends FlameGame
 
     // Add the appropriate effect based on shouldBlink
     homePlate.add(shouldBlink ? _greenBlinkEffect! : _greenStaticEffect!);
-
   }
 
   Future<void> startGame() async {
@@ -669,25 +668,15 @@ void tokenCollision(World world, Token attackerToken) async {
     if (player.hasRolledThreeConsecutiveSixes()) {
       player.resetExtraTurns();
     }
-    player.enableDice = true;
-    for (var token in player.tokens) {
-      token.enableToken = false;
-    }
   } else {
-    if (gameState.diceNumber == 6) {
-      if (player.hasRolledThreeConsecutiveSixes()) {
-        player.resetExtraTurns();
-        gameState.switchToNextPlayer();
-      } else {
-        player.grantAnotherTurn();
-        player.enableDice = true;
-        for (var token in player.tokens) {
-          token.enableToken = false;
-        }
-      }
-    } else {
+    if (gameState.diceNumber != 6) {
       gameState.switchToNextPlayer();
     }
+  }
+
+  player.enableDice = true;
+  for (var token in player.tokens) {
+    token.enableToken = false;
   }
 
   // Ensure this block completes before resizing tokens
@@ -919,7 +908,6 @@ Future<void> moveForward({
     // Reduce delay to improve performance
     await Future.delayed(const Duration(milliseconds: 50));
   }
-
   tokenCollision(world, token);
   clearTokenTrail(token);
 }

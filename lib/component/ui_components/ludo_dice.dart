@@ -81,6 +81,13 @@ class LudoDice extends PositionComponent with TapCallbacks {
   // Handle logic when the player rolls a 6
   Future<void> _handleSixRoll(
       World world, LudoBoard ludoBoard, int diceNumber) async {
+
+    player.grantAnotherTurn(); 
+    
+    if (player.hasRolledThreeConsecutiveSixes()) {
+      gameState.switchToNextPlayer();
+      return;
+    }
     // Filter tokens once and reuse the lists
     final tokensInBase = player.tokens
         .where((token) => token.state == TokenState.inBase)

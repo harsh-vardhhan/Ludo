@@ -54,6 +54,7 @@ class Player {
   // Method to grant another turn (includes handling six rolls)
   void grantAnotherTurn() {
     extraTurns++; // Increment the count of extra turns
+    enableDice = true;
   }
 
   // Method to check if three consecutive sixes were rolled
