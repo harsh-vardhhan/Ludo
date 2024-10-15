@@ -105,4 +105,11 @@ class TokenManager {
   List<Token> getRedTokens() {
     return getAllTokens('R');
   }
+
+  Future<void> clearTokens() async {
+    allTokens.clear();
+    miniTokens.clear();
+    _playerTokensCache.clear();
+    return Future.value();
+  }
 }

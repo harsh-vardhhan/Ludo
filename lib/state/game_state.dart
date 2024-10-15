@@ -1,3 +1,5 @@
+import 'package:flutter/rendering.dart';
+
 import 'player.dart';
 import 'event_bus.dart';
 
@@ -76,4 +78,12 @@ class GameState {
 
   // Get the current player
   Player get currentPlayer => players[currentPlayerIndex];
+
+  Future<void> clearPlayers() async {
+    players.clear();
+    currentPlayerIndex = 0;
+    diceNumber = 5;
+    resetTokenMovement();
+    return Future.value();
+  }
 }

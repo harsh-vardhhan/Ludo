@@ -95,6 +95,8 @@ class Ludo extends FlameGame
       blinkBlueBase(false);
       blinkRedBase(false);
     });
+
+    await startGame();
   }
 
   void blinkRedBase(bool shouldBlink) {
@@ -223,9 +225,12 @@ class Ludo extends FlameGame
 
     // Add the appropriate effect based on shouldBlink
     homePlate.add(shouldBlink ? _greenBlinkEffect! : _greenStaticEffect!);
+
   }
 
-  void startGame() {
+  Future<void> startGame() async {
+    await TokenManager().clearTokens();
+    await GameState().clearPlayers();
     final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
 
@@ -554,16 +559,7 @@ class Ludo extends FlameGame
         }
       }
     }
-  }
-
-  @override
-  void onTap() {
-    if (TokenManager().getBlueTokens().isEmpty &&
-        TokenManager().getGreenTokens().isEmpty &&
-        TokenManager().getRedTokens().isEmpty &&
-        TokenManager().getYellowTokens().isEmpty) {
-      startGame();
-    }
+    return Future.value();
   }
 
   @override

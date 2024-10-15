@@ -295,7 +295,7 @@ class _GameAppState extends State<GameApp> {
   @override
   void initState() {
     super.initState();
-    game = Ludo(widget.selectedTeams);
+    game = Ludo(widget.selectedTeams); // Initialize game instance
   }
 
   @override
@@ -304,6 +304,9 @@ class _GameAppState extends State<GameApp> {
 
     return PopScope(
       canPop: false,
+      onPopInvokedWithResult: (didPop, dynamic) {
+        _showExitConfirmationDialog();
+      },
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -334,6 +337,37 @@ class _GameAppState extends State<GameApp> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showExitConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Exit Game'),
+          content: const Text('Do you really want to exit the game?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FirstScreen(),
+                  ),
+                );
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
