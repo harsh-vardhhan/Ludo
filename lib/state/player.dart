@@ -3,9 +3,8 @@ import '../component/ui_components/token.dart';
 class Player {
   String playerId;
   List<Token> tokens; // Tokens belonging to the player
-  bool isActive; // Is the player still active in the game?
   bool isCurrentTurn; // Is it the player's turn right now?
-  int score; // Player's current score
+  int rank; // Player's current score
   int totalTokensInHome; // Number of tokens in the home position
   bool hasWon; // Has the player won the game?
   int extraTurns; // Count of extra turns granted
@@ -15,9 +14,8 @@ class Player {
   Player({
     required this.playerId,
     required this.tokens,
-    this.isActive = true, // Default: player is active when initialized
     this.isCurrentTurn = false, // Default: not the player's turn initially
-    this.score = 0, // Default: score starts at 0
+    this.rank = 0, // Default: rank is 0 till player wins
     this.totalTokensInHome = 0, // Default: no tokens in home initially
     this.hasWon = false, // Default: player hasn't won yet
     this.extraTurns = 0,

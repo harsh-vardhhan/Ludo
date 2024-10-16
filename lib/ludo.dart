@@ -872,14 +872,29 @@ Future<void> moveForward({
     String positionId = tokenPath[i];
 
     token.positionId = positionId;
-    if (token.positionId == 'BF') {
+    // if token is in home
+    if (token.positionId == 'BF' ||
+        token.positionId == 'GF' ||
+        token.positionId == 'YF' ||
+        token.positionId == 'RF') {
       token.state = TokenState.inHome;
-    } else if (token.positionId == 'GF') {
-      token.state = TokenState.inHome;
-    } else if (token.positionId == 'YF') {
-      token.state = TokenState.inHome;
-    } else if (token.positionId == 'RF') {
-      token.state = TokenState.inHome;
+      final player = GameState()
+          .players
+          .firstWhere((player) => player.playerId == token.playerId);
+      player.totalTokensInHome++;
+      // if player has 4 tokens in home, he wins and gets rank
+      if (player.totalTokensInHome == 4) {
+        player.hasWon = true;
+        final playersWhoWon =
+            GameState().players.where((player) => player.hasWon).toList();
+        player.rank = playersWhoWon.length + 1;
+      } else {
+        // extra turn for reaching home
+        player.grantAnotherTurn();
+        if (player.hasRolledThreeConsecutiveSixes()) {
+          player.resetExtraTurns();
+        }
+      }
     }
 
     final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);

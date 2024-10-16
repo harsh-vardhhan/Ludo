@@ -49,15 +49,21 @@ class GameState {
     current.enableDice = false;
     current.resetExtraTurns();
 
-    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    // Loop to find the next player who hasn't won
+    do {
+      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    } while (players[currentPlayerIndex].hasWon);
+
     var nextPlayer = players[currentPlayerIndex];
     nextPlayer.isCurrentTurn = true;
     nextPlayer.enableDice = true;
 
+    // Disable tokens of the current player
     for (var token in currentPlayer.tokens) {
       token.enableToken = false;
     }
 
+    // Emit events based on the next player's ID
     switch (nextPlayer.playerId) {
       case 'GP':
         EventBus().emit(BlinkGreenBaseEvent());

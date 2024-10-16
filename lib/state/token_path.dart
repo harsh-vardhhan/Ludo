@@ -230,14 +230,12 @@ const yellowTokenPath = [
   'Y40',
   'Y50',
   'Y51',
-  'Y52',
-  'Y51',
   'Y41',
   'Y31',
   'Y21',
   'Y11',
   'Y01',
-  'YP',
+  'YF',
 ];
 
 final Map<String, List<String>> tokenPaths = {
