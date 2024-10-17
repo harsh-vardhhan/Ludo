@@ -572,7 +572,6 @@ class Ludo extends FlameGame
   PlayerModalComponent? _playerModal;
 
   void showPlayerModal() {
-    print('***showPlayerModal***');
     _playerModal = PlayerModalComponent(
       players: GameState().players,
       position: Vector2(size.x * 0.05, size.y * 0.10),
@@ -1045,19 +1044,18 @@ class PlayerModalComponent extends PositionComponent with TapCallbacks {
 
   PlayerModalComponent({
     required this.players,
-    Vector2? position,
-    Vector2? size,
-  }) : super(position: position, size: size);
+    super.position,
+    super.size,
+  }) : super();
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    print('***PlayerModalComponent***');
 
     // Add the background rectangle
     add(
       RectangleComponent(
-        size: size!,
+        size: size,
         paint: Paint()..color = const Color(0xff002fa7), // Background color
         position: Vector2.zero(),
       ),
@@ -1079,7 +1077,7 @@ class PlayerModalComponent extends PositionComponent with TapCallbacks {
       final player = entry.value; // Get the player
 
       // Calculate the width of the rectangle as 80% of the parent's width
-      final rectangleWidth = size!.x * 0.8;
+      final rectangleWidth = size.x * 0.8;
       const rectangleHeight = 40.0; // Set a fixed height for the rectangle
 
       final backgroundColor =
@@ -1090,7 +1088,7 @@ class PlayerModalComponent extends PositionComponent with TapCallbacks {
         size: Vector2(rectangleWidth, rectangleHeight),
         paint: Paint()..color = backgroundColor,
         position: Vector2(
-            (size!.x - rectangleWidth) / 2, yOffset), // Center horizontally
+            (size.x - rectangleWidth) / 2, yOffset), // Center horizontally
       );
 
       // Create the text components for the rank and suffix
@@ -1171,10 +1169,10 @@ class PlayerModalComponent extends PositionComponent with TapCallbacks {
 
   void _addCloseButton() {
     // Calculate button size and position
-    final buttonWidth = size!.x * 0.9;
+    final buttonWidth = size.x * 0.9;
     const buttonHeight = 50.0;
-    final buttonX = (size!.x - buttonWidth) / 2;
-    final buttonY = size!.y - buttonHeight - 20; // 20 pixels from the bottom
+    final buttonX = (size.x - buttonWidth) / 2;
+    final buttonY = size.y - buttonHeight - 20; // 20 pixels from the bottom
 
     // Create the button as a PositionComponent
     final button = PositionComponent(
