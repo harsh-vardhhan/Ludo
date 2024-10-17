@@ -6,6 +6,8 @@ class BlinkYellowBaseEvent {}
 
 class BlinkRedBaseEvent {}
 
+class OpenPlayerModalEvent{}
+
 class EventBus {
   static final EventBus _instance = EventBus._internal();
 

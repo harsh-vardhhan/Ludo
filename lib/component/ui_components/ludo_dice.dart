@@ -9,6 +9,7 @@ import 'package:flame_audio/flame_audio.dart';
 // user files
 import 'dice_face_component.dart';
 import '../../state/game_state.dart';
+import '../../state/event_bus.dart';
 import '../../state/player.dart';
 import '../../ludo_board.dart';
 import 'token.dart';
@@ -39,6 +40,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
         player != gameState.currentPlayer) {
       return; // Exit if the player cannot roll the dice
     }
+
+    EventBus().emit(OpenPlayerModalEvent());
 
     // Disable dice to prevent multiple taps
     player.enableDice = false;
