@@ -295,7 +295,7 @@ class _GameAppState extends State<GameApp> {
   @override
   void initState() {
     super.initState();
-    game = Ludo(widget.selectedTeams); // Initialize game instance
+    game = Ludo(widget.selectedTeams, context); // Initialize game instance
   }
 
   @override

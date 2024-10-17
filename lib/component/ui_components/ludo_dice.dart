@@ -40,9 +40,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
         player != gameState.currentPlayer) {
       return; // Exit if the player cannot roll the dice
     }
-
-    EventBus().emit(OpenPlayerModalEvent());
-
     // Disable dice to prevent multiple taps
     player.enableDice = false;
 

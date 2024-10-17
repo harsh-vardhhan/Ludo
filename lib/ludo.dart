@@ -17,6 +17,7 @@ import 'state/token_path.dart';
 import 'component/controller/upper_controller.dart';
 import 'component/controller/lower_controller.dart';
 import 'ludo_board.dart';
+import 'main.dart';
 import 'component/ui_components/token.dart';
 import 'component/ui_components/spot.dart';
 import 'component/ui_components/ludo_dice.dart';
@@ -24,9 +25,10 @@ import 'component/ui_components/ludo_dice.dart';
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
   List<String> teams;
+  final BuildContext context;
 
   // Add an unnamed constructor
-  Ludo(this.teams);
+  Ludo(this.teams, this.context);
 
   final rand = Random();
   double get width => size.x;
@@ -69,6 +71,10 @@ class Ludo extends FlameGame
       anchor: Anchor.topLeft, // Set anchor to align top-left
     ));
 
+    EventBus().on<OpenPlayerModalEvent>((event) {
+      showPlayerModal();
+    });
+
     EventBus().on<BlinkGreenBaseEvent>((event) {
       blinkGreenBase(true);
       blinkBlueBase(false);
@@ -95,10 +101,6 @@ class Ludo extends FlameGame
       blinkGreenBase(false);
       blinkBlueBase(false);
       blinkRedBase(false);
-    });
-
-    EventBus().on<OpenPlayerModalEvent>((event) {
-      showPlayerModal();
     });
 
     await startGame();
@@ -576,6 +578,7 @@ class Ludo extends FlameGame
       players: GameState().players,
       position: Vector2(size.x * 0.05, size.y * 0.10),
       size: Vector2(size.x * 0.90, size.y * 0.90),
+      context: context,
     );
     world.add(_playerModal!);
   }
@@ -912,7 +915,15 @@ Future<void> moveForward({
         // end game and show ranks if only one player has not won
         final playersWhoNotWon =
             GameState().players.where((player) => !player.hasWon).toList();
-        if (playersWhoNotWon.length == 1) {}
+        if (playersWhoNotWon.length == 1) {
+          for (var player in GameState().players) {
+            player.enableDice = false;
+          }
+          for (var token in TokenManager().allTokens) {
+            token.enableToken = false;
+          }
+          EventBus().emit(OpenPlayerModalEvent());
+        }
       } else {
         // not all tokens are in home, grant another turn
         player.grantAnotherTurn();
@@ -1041,9 +1052,11 @@ Future<void> moveTokenToBase({
 
 class PlayerModalComponent extends PositionComponent with TapCallbacks {
   final List<Player> players;
+  final BuildContext context;
 
   PlayerModalComponent({
     required this.players,
+    required this.context,
     super.position,
     super.size,
   }) : super();
@@ -1213,7 +1226,10 @@ class PlayerModalComponent extends PositionComponent with TapCallbacks {
 
   @override
   void onTapDown(TapDownEvent event) {
-    closeModal(); // Close the modal on tap
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FirstScreen()),
+    );
   }
 
   void closeModal() {
