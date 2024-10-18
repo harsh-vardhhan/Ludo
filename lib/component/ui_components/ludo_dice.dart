@@ -116,17 +116,28 @@ class LudoDice extends PositionComponent with TapCallbacks {
         .where((token) => token.state == TokenState.onBoard)
         .toList();
 
+    // if no tokens on board, switch to next player
     if (tokensOnBoard.isEmpty) {
       gameState.switchToNextPlayer();
       return;
     }
 
+    // check if tokens on board have space to move
+    for (var token in tokensOnBoard) {
+      if (!token.spaceToMove()) {
+        gameState.switchToNextPlayer();
+        return;
+      }
+    }
+
+    // If there's only one token on board and it has space to move, move it
     if (tokensOnBoard.length == 1 && tokensOnBoard.first.spaceToMove()) {
       await _moveForwardSingleToken(
           world, ludoBoard, diceNumber, tokensOnBoard.first);
       return;
     }
 
+    // if all tokens are in base, let player select which token to move
     final tokensInBase = player.tokens
         .where((token) => token.state == TokenState.inBase)
         .toList();
