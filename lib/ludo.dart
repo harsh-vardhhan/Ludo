@@ -688,10 +688,10 @@ void tokenCollision(World world, Token attackerToken) async {
       .firstWhere((player) => player.playerId == attackerToken.playerId);
 
   if (wasTokenAttacked) {
-    player.grantAnotherTurn();
     if (player.hasRolledThreeConsecutiveSixes()) {
       player.resetExtraTurns();
     }
+    player.grantAnotherTurn();
   } else {
     if (gameState.diceNumber != 6) {
       gameState.switchToNextPlayer();
@@ -1247,11 +1247,10 @@ bool checkTokenInHomeAndHandle(Token token) {
       for (var token in player.tokens) {
         token.enableToken = false;
       }
-      player.grantAnotherTurn();
       if (player.hasRolledThreeConsecutiveSixes()) {
         player.resetExtraTurns();
-        GameState().switchToNextPlayer();
       }
+      player.grantAnotherTurn();
       return true;
     }
   }
