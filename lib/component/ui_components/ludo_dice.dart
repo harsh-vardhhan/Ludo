@@ -80,9 +80,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
   // Handle logic when the player rolls a 6
   Future<void> _handleSixRoll(
       World world, LudoBoard ludoBoard, int diceNumber) async {
+    player.grantAnotherTurn();
 
-    player.grantAnotherTurn(); 
-    
     if (player.hasRolledThreeConsecutiveSixes()) {
       gameState.switchToNextPlayer();
       return;
@@ -122,33 +121,23 @@ class LudoDice extends PositionComponent with TapCallbacks {
       return;
     }
 
-    // check atleast one token has space to move else switch to next player
-    bool atleastOneTokenCanMove = false;
-    for (var token in tokensOnBoard) {
-      if (token.spaceToMove()) {
-        atleastOneTokenCanMove = true;
-        break;
-      }
-    }
-    if (!atleastOneTokenCanMove) {
-      gameState.switchToNextPlayer();
-      return;
-    }
-
-
-    // If there's only one token on board and it has space to move, move it
-    if (tokensOnBoard.length == 1 && tokensOnBoard.first.spaceToMove()) {
-      await _moveForwardSingleToken(
-          world, ludoBoard, diceNumber, tokensOnBoard.first);
-      return;
-    }
-
-    // if all tokens are in base, let player select which token to move
+    final movableTokens =
+        tokensOnBoard.where((token) => token.spaceToMove()).toList();
     final tokensInBase = player.tokens
         .where((token) => token.state == TokenState.inBase)
         .toList();
 
-    _enableManualTokenSelection(tokensInBase, tokensOnBoard);
+    // if only one token can move, move it
+    if (movableTokens.length == 1) {
+      await _moveForwardSingleToken(
+          world, ludoBoard, diceNumber, movableTokens.first);
+      return;
+    } else if (movableTokens.length > 1) {
+      _enableManualTokenSelection(tokensInBase, tokensOnBoard);
+    } else if (movableTokens.isEmpty) {
+      gameState.switchToNextPlayer();
+      return;
+    }
   }
 
   // Check if the player can move a single token (either from base or on the board)
