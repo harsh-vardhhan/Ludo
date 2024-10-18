@@ -154,28 +154,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
     }
   }
 
-  // Move a single token based on whether it's in base or on the board
-  Future<void> _moveSingleToken(
-      World world,
-      LudoBoard ludoBoard,
-      int diceNumber,
-      List<Token> tokensInBase,
-      List<Token> tokensOnBoard,
-      List<String> tokenPath) async {
-    if (tokensInBase.length == 1) {
-      moveOutOfBase(
-        world: world,
-        token: tokensInBase.first,
-        tokenPath: tokenPath, // Use the provided tokenPath directly
-        ludoBoard: ludoBoard,
-      );
-      gameState.resetTokenMovement();
-    } else if (tokensOnBoard.length == 1 && tokensOnBoard.first.spaceToMove()) {
-      await _moveForwardSingleToken(
-          world, ludoBoard, diceNumber, tokensOnBoard.first);
-    }
-  }
-
   // Enable manual selection if multiple tokens can move
   Future<void> _enableManualTokenSelection(
       List<Token> tokensInBase, List<Token> tokensOnBoard) {

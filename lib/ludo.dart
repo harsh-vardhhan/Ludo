@@ -1061,7 +1061,7 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
       } // end game for only one player
       else {
         // set rank of current player
-        player.rank = playersWhoWon.length + 1;
+        player.rank = playersWhoWon.length;
         player.hasWon = true;
       }
       return true;
