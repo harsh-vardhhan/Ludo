@@ -43,7 +43,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     player.enableDice = false;
 
     // Roll the dice and update the dice face
-    final int diceNumber = Random().nextInt(6) + 1;
+    final int diceNumber = Random().nextBool() ? 6 : 1;
     gameState.diceNumber = diceNumber;
     diceFace.updateDiceValue(diceNumber);
 
@@ -90,21 +90,35 @@ class LudoDice extends PositionComponent with TapCallbacks {
     final tokensInBase = player.tokens
         .where((token) => token.state == TokenState.inBase)
         .toList();
+
     final tokensOnBoard = player.tokens
         .where((token) => token.state == TokenState.onBoard)
         .toList();
 
-    if (_canMoveSingleToken(tokensInBase, tokensOnBoard)) {
-      await _moveSingleToken(
-        world,
-        ludoBoard,
-        diceNumber,
-        tokensInBase,
-        tokensOnBoard,
-        getTokenPath(player.playerId),
-      );
-    } else {
-      await _enableManualTokenSelection(tokensInBase, tokensOnBoard);
+    final movableTokens =
+        tokensOnBoard.where((token) => token.spaceToMove()).toList();
+
+    final allMovableTokens = [...movableTokens, ...tokensInBase];
+
+    // if only one token can move, move it
+    if (allMovableTokens.length == 1) {
+      if (movableTokens.first.state == TokenState.inBase) {
+        moveOutOfBase(
+          world: world,
+          token: movableTokens.first,
+          tokenPath: getTokenPath(player.playerId),
+          ludoBoard: ludoBoard,
+        );
+      } else if (movableTokens.first.state == TokenState.onBoard) {
+        await _moveForwardSingleToken(
+            world, ludoBoard, diceNumber, movableTokens.first);
+      }
+      return;
+    } else if (allMovableTokens.length > 1) {
+      _enableManualTokenSelection(tokensInBase, tokensOnBoard);
+    } else if (allMovableTokens.isEmpty) {
+      gameState.switchToNextPlayer();
+      return;
     }
   }
 
@@ -138,13 +152,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
       gameState.switchToNextPlayer();
       return;
     }
-  }
-
-  // Check if the player can move a single token (either from base or on the board)
-  bool _canMoveSingleToken(
-      List<Token> tokensInBase, List<Token> tokensOnBoard) {
-    return (tokensInBase.length == 1 && tokensOnBoard.isEmpty) ||
-        (tokensOnBoard.length == 1 && tokensInBase.isEmpty);
   }
 
   // Move a single token based on whether it's in base or on the board

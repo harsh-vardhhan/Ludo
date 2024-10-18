@@ -1035,18 +1035,22 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
         .players
         .firstWhere((player) => player.playerId == token.playerId);
     player.totalTokensInHome++;
-    
+
     // if player has 4 tokens in home, he wins and gets rank
     if (player.totalTokensInHome == 4) {
       player.hasWon = true;
+      // get players who won and who not won
       final playersWhoWon =
           GameState().players.where((player) => player.hasWon).toList();
-      player.rank = playersWhoWon.length + 1;
-
-      // end game and show ranks if only one player has not won
       final playersWhoNotWon =
           GameState().players.where((player) => !player.hasWon).toList();
-      if (playersWhoNotWon.length == 1) {
+
+      // game end condition
+      if (playersWhoWon.length == GameState().players.length - 1) {
+        // set rank of last player
+        playersWhoNotWon.first.rank = GameState().players.length;
+        // set rank of player who won
+        player.rank = playersWhoWon.length + 1;
         for (var player in GameState().players) {
           player.enableDice = false;
         }
@@ -1054,6 +1058,11 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
           token.enableToken = false;
         }
         EventBus().emit(OpenPlayerModalEvent());
+      } // end game for only one player
+      else {
+        // set rank of current player
+        player.rank = playersWhoWon.length + 1;
+        player.hasWon = true;
       }
       return true;
     } else {
