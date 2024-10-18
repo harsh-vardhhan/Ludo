@@ -43,7 +43,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     player.enableDice = false;
 
     // Roll the dice and update the dice face
-    final int diceNumber = Random().nextBool() ? 6 : 1;
+    final int diceNumber = Random().nextInt(6) + 1;
     gameState.diceNumber = diceNumber;
     diceFace.updateDiceValue(diceNumber);
 
