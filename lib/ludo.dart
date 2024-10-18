@@ -896,42 +896,6 @@ Future<void> moveForward({
     String positionId = tokenPath[i];
 
     token.positionId = positionId;
-    // if token is in home
-    if (token.positionId == 'BF' ||
-        token.positionId == 'GF' ||
-        token.positionId == 'YF' ||
-        token.positionId == 'RF') {
-      token.state = TokenState.inHome;
-      final player = GameState()
-          .players
-          .firstWhere((player) => player.playerId == token.playerId);
-      player.totalTokensInHome++;
-      // if player has 4 tokens in home, he wins and gets rank
-      if (player.totalTokensInHome == 4) {
-        player.hasWon = true;
-        final playersWhoWon =
-            GameState().players.where((player) => player.hasWon).toList();
-        player.rank = playersWhoWon.length + 1;
-        // end game and show ranks if only one player has not won
-        final playersWhoNotWon =
-            GameState().players.where((player) => !player.hasWon).toList();
-        if (playersWhoNotWon.length == 1) {
-          for (var player in GameState().players) {
-            player.enableDice = false;
-          }
-          for (var token in TokenManager().allTokens) {
-            token.enableToken = false;
-          }
-          EventBus().emit(OpenPlayerModalEvent());
-        }
-      } else {
-        // not all tokens are in home, grant another turn
-        player.grantAnotherTurn();
-        if (player.hasRolledThreeConsecutiveSixes()) {
-          player.resetExtraTurns();
-        }
-      }
-    }
 
     final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
     final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
@@ -959,7 +923,17 @@ Future<void> moveForward({
     // Reduce delay to improve performance
     await Future.delayed(const Duration(milliseconds: 50));
   }
-  tokenCollision(world, token);
+
+  // if token is in home
+  bool isTokenInHome = checkTokenInHomeAndHandle(token);
+
+  if (isTokenInHome) {
+    final ludoBoard = world.children.whereType<LudoBoard>().first;
+    resizeTokensOnSpot(world, ludoBoard);
+  } else {
+    tokenCollision(world, token);
+  }
+
   clearTokenTrail(token);
 }
 
@@ -1235,4 +1209,51 @@ class PlayerModalComponent extends PositionComponent with TapCallbacks {
   void closeModal() {
     removeFromParent();
   }
+}
+
+bool checkTokenInHomeAndHandle(Token token) {
+  // if token is in home
+  if (token.positionId == 'BF' ||
+      token.positionId == 'GF' ||
+      token.positionId == 'YF' ||
+      token.positionId == 'RF') {
+    token.state = TokenState.inHome;
+    final player = GameState()
+        .players
+        .firstWhere((player) => player.playerId == token.playerId);
+    player.totalTokensInHome++;
+    // if player has 4 tokens in home, he wins and gets rank
+    if (player.totalTokensInHome >= 4) {
+      player.hasWon = true;
+      final playersWhoWon =
+          GameState().players.where((player) => player.hasWon).toList();
+      player.rank = playersWhoWon.length + 1;
+      // end game and show ranks if only one player has not won
+      final playersWhoNotWon =
+          GameState().players.where((player) => !player.hasWon).toList();
+      if (playersWhoNotWon.length == 1) {
+        for (var player in GameState().players) {
+          player.enableDice = false;
+        }
+        for (var token in TokenManager().allTokens) {
+          token.enableToken = false;
+        }
+        EventBus().emit(OpenPlayerModalEvent());
+      }
+      return true;
+    } else {
+      // not all tokens are in home, grant another turn
+      player.enableDice = true;
+      for (var token in player.tokens) {
+        token.enableToken = false;
+      }
+      player.grantAnotherTurn();
+      if (player.hasRolledThreeConsecutiveSixes()) {
+        player.resetExtraTurns();
+        GameState().switchToNextPlayer();
+      }
+      return true;
+    }
+  }
+  return false;
 }

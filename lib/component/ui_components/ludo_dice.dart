@@ -9,7 +9,6 @@ import 'package:flame_audio/flame_audio.dart';
 // user files
 import 'dice_face_component.dart';
 import '../../state/game_state.dart';
-import '../../state/event_bus.dart';
 import '../../state/player.dart';
 import '../../ludo_board.dart';
 import 'token.dart';
@@ -167,15 +166,16 @@ class LudoDice extends PositionComponent with TapCallbacks {
   // Enable manual selection if multiple tokens can move
   Future<void> _enableManualTokenSelection(
       List<Token> tokensInBase, List<Token> tokensOnBoard) {
+    player.enableDice = false;
     for (var token in player.tokens) {
       token.enableToken = true;
     }
     if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
       gameState.enableMoveFromBoth();
       addTokenTrail(tokensOnBoard);
-    } else if (tokensInBase.isNotEmpty) {
+    } else if (tokensInBase.isNotEmpty && tokensOnBoard.isEmpty) {
       gameState.enableMoveFromBase();
-    } else if (tokensOnBoard.isNotEmpty) {
+    } else if (tokensOnBoard.isNotEmpty && tokensInBase.isEmpty) {
       addTokenTrail(tokensOnBoard);
       gameState.enableMoveOnBoard();
     }
