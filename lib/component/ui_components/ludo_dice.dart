@@ -97,21 +97,21 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     final movableTokens =
         tokensOnBoard.where((token) => token.spaceToMove()).toList();
-
+ 
     final allMovableTokens = [...movableTokens, ...tokensInBase];
 
     // if only one token can move, move it
     if (allMovableTokens.length == 1) {
-      if (movableTokens.first.state == TokenState.inBase) {
+      if (allMovableTokens.first.state == TokenState.inBase) {
         moveOutOfBase(
           world: world,
-          token: movableTokens.first,
+          token: allMovableTokens.first,
           tokenPath: getTokenPath(player.playerId),
           ludoBoard: ludoBoard,
         );
-      } else if (movableTokens.first.state == TokenState.onBoard) {
+      } else if (allMovableTokens.first.state == TokenState.onBoard) {
         await _moveForwardSingleToken(
-            world, ludoBoard, diceNumber, movableTokens.first);
+            world, ludoBoard, diceNumber, allMovableTokens.first);
       }
       return;
     } else if (allMovableTokens.length > 1) {

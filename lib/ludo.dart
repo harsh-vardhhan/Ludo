@@ -1050,7 +1050,7 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
         // set rank of last player
         playersWhoNotWon.first.rank = GameState().players.length;
         // set rank of player who won
-        player.rank = playersWhoWon.length + 1;
+        player.rank = playersWhoWon.length;
         for (var player in GameState().players) {
           player.enableDice = false;
         }
