@@ -44,9 +44,10 @@ class Player {
   }
 
   // Method to reset extra turns (including after three consecutive sixes)
-  void resetExtraTurns() {
+  Future<void> resetExtraTurns() async {
     extraTurns = 0;
-    _cachedTokensOnBoard = null; // Invalidate cache if tokens state changes
+    _cachedTokensOnBoard = null; 
+    return Future.value();
   }
 
   // Method to grant another turn (includes handling six rolls)

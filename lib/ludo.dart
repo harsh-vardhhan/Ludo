@@ -689,7 +689,7 @@ void tokenCollision(World world, Token attackerToken) async {
 
   if (wasTokenAttacked) {
     if (player.hasRolledThreeConsecutiveSixes()) {
-      player.resetExtraTurns();
+      await player.resetExtraTurns();
     }
     player.grantAnotherTurn();
   } else {
@@ -925,7 +925,7 @@ Future<void> moveForward({
   }
 
   // if token is in home
-  bool isTokenInHome = checkTokenInHomeAndHandle(token);
+  bool isTokenInHome = await checkTokenInHomeAndHandle(token);
 
   if (isTokenInHome) {
     final ludoBoard = world.children.whereType<LudoBoard>().first;
@@ -1211,7 +1211,7 @@ class PlayerModalComponent extends PositionComponent with TapCallbacks {
   }
 }
 
-bool checkTokenInHomeAndHandle(Token token) {
+Future<bool> checkTokenInHomeAndHandle(Token token) async {
   // if token is in home
   if (token.positionId == 'BF' ||
       token.positionId == 'GF' ||
@@ -1248,7 +1248,7 @@ bool checkTokenInHomeAndHandle(Token token) {
         token.enableToken = false;
       }
       if (player.hasRolledThreeConsecutiveSixes()) {
-        player.resetExtraTurns();
+        await player.resetExtraTurns();
       }
       player.grantAnotherTurn();
       return true;

@@ -122,13 +122,19 @@ class LudoDice extends PositionComponent with TapCallbacks {
       return;
     }
 
-    // check if tokens on board have space to move
+    // check atleast one token has space to move else switch to next player
+    bool atleastOneTokenCanMove = false;
     for (var token in tokensOnBoard) {
-      if (!token.spaceToMove()) {
-        gameState.switchToNextPlayer();
-        return;
+      if (token.spaceToMove()) {
+        atleastOneTokenCanMove = true;
+        break;
       }
     }
+    if (!atleastOneTokenCanMove) {
+      gameState.switchToNextPlayer();
+      return;
+    }
+
 
     // If there's only one token on board and it has space to move, move it
     if (tokensOnBoard.length == 1 && tokensOnBoard.first.spaceToMove()) {
