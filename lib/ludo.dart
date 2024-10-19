@@ -1031,27 +1031,26 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
       token.positionId == 'YF' ||
       token.positionId == 'RF') {
     token.state = TokenState.inHome;
-    final player = GameState()
-        .players
-        .firstWhere((player) => player.playerId == token.playerId);
+    final players = GameState().players;
+    final player =
+        players.firstWhere((player) => player.playerId == token.playerId);
     player.totalTokensInHome++;
 
     // if player has 4 tokens in home, he wins and gets rank
     if (player.totalTokensInHome == 4) {
       player.hasWon = true;
       // get players who won and who not won
-      final playersWhoWon =
-          GameState().players.where((player) => player.hasWon).toList();
+      final playersWhoWon = players.where((player) => player.hasWon).toList();
       final playersWhoNotWon =
-          GameState().players.where((player) => !player.hasWon).toList();
+          players.where((player) => !player.hasWon).toList();
 
       // game end condition
-      if (playersWhoWon.length == GameState().players.length - 1) {
+      if (playersWhoWon.length == players.length - 1) {
         // set rank of last player
-        playersWhoNotWon.first.rank = GameState().players.length;
+        playersWhoNotWon.first.rank = players.length;
         // set rank of player who won
         player.rank = playersWhoWon.length;
-        for (var player in GameState().players) {
+        for (var player in players) {
           player.enableDice = false;
         }
         for (var token in TokenManager().allTokens) {
