@@ -710,7 +710,30 @@ void tokenCollision(World world, Token attackerToken) async {
 }
 
 void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
+  // Precompute values
+  final homeSpot = getHomeSpot(world, 6)
+      .whereType<HomeSpot>()
+      .firstWhere((spot) => spot.uniqueId == 'B1');
+  final Vector2 originalSize =
+      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+  final ludoBoardGlobalPosition = ludoBoard.absolutePosition;
+
+  // Precompute size factors and position increments
+  final sizeFactors = {
+    1: 1.0,
+    2: 0.70,
+    3: 0.50,
+  };
+  final positionIncrements = {
+    1: 0,
+    2: 10,
+    3: 5,
+  };
+
+  // Get all tokens
   final tokens = TokenManager().allTokens;
+
+  // Group tokens by position ID
   final Map<String, List<Token>> tokensByPositionId = {};
   for (var token in tokens) {
     if (!tokensByPositionId.containsKey(token.positionId)) {
@@ -719,32 +742,17 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
     tokensByPositionId[token.positionId]!.add(token);
   }
 
-  final homeSpot = getHomeSpot(world, 6)
-      .whereType<HomeSpot>()
-      .firstWhere((spot) => spot.uniqueId == 'B1');
-  final Vector2 originalSize =
-      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-  final ludoBoardGlobalPosition = ludoBoard.absolutePosition;
-
   tokensByPositionId.forEach((positionId, tokenList) {
+    // Precompute spot global position and adjusted position
     final spot = SpotManager().findSpotById(positionId);
     final spotGlobalPosition = spot.absolutePosition;
     final adjustedPosition = spotGlobalPosition - ludoBoardGlobalPosition;
 
-    double sizeFactor;
-    int positionIncrement;
+    // Compute size factor and position increment
+    final sizeFactor = sizeFactors[tokenList.length] ?? 0.50;
+    final positionIncrement = positionIncrements[tokenList.length] ?? 5;
 
-    if (tokenList.length == 1) {
-      sizeFactor = 1.0;
-      positionIncrement = 0;
-    } else if (tokenList.length == 2) {
-      sizeFactor = 0.70;
-      positionIncrement = 10;
-    } else {
-      sizeFactor = 0.50;
-      positionIncrement = 5;
-    }
-
+    // Resize and reposition tokens
     for (var i = 0; i < tokenList.length; i++) {
       final token = tokenList[i];
       token.size = originalSize * sizeFactor;
