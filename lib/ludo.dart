@@ -656,40 +656,42 @@ void tokenCollision(World world, Token attackerToken) async {
   final ludoBoard = world.children.whereType<LudoBoard>().first;
   final spotId = attackerToken.positionId;
   final tokens = TokenManager().allTokens;
-  final tokensOnSpot =
-      tokens.where((token) => token.positionId == spotId).toList();
+  final tokensOnSpot = tokens.where((token) => token.positionId == spotId).toList();
 
   // Initialize the flag to track if any token was attacked
   bool wasTokenAttacked = false;
 
   // only attacker token on spot, return
-  if (tokensOnSpot.length > 1) {
-    // if attacker token is in safe zone, return
-    final safeZones = ['B04', 'B23', 'R22', 'R10', 'G02', 'G21', 'Y30', 'Y42'];
-    if (!safeZones.contains(spotId)) {
-      // attacker token is not in safe zone, check for collision
-      for (var token in tokensOnSpot) {
-        if (token.playerId != attackerToken.playerId) {
-          await moveBackward(
-              world: world,
-              token: token,
-              tokenPath: getTokenPath(token.playerId),
-              ludoBoard: ludoBoard);
+  if (tokensOnSpot.length > 1 && !['B04', 'B23', 'R22', 'R10', 'G02', 'G21', 'Y30', 'Y42'].contains(spotId)) {
+    // Batch token movements
+    final tokensToMove = tokensOnSpot.where((token) => token.playerId != attackerToken.playerId).toList();
 
-          // Set the flag to true if a token was attacked
-          wasTokenAttacked = true;
-        }
-      }
+    for (var token in tokensToMove) {
+      moveBackward(
+        world: world,
+        token: token,
+        tokenPath: getTokenPath(token.playerId),
+        ludoBoard: ludoBoard,
+      ).then((_) {
+        wasTokenAttacked = true;
+      });
     }
+
+    // Wait for all movements to complete
+    await Future.wait(tokensToMove.map((token) => moveBackward(
+      world: world,
+      token: token,
+      tokenPath: getTokenPath(token.playerId),
+      ludoBoard: ludoBoard,
+    )));
   }
 
   // Grant another turn or switch to next player
-  final player = gameState.players
-      .firstWhere((player) => player.playerId == attackerToken.playerId);
+  final player = gameState.players.firstWhere((player) => player.playerId == attackerToken.playerId);
 
   if (wasTokenAttacked) {
     if (player.hasRolledThreeConsecutiveSixes()) {
-      await player.resetExtraTurns();
+      player.resetExtraTurns();
     }
     player.grantAnotherTurn();
   } else {
@@ -702,9 +704,6 @@ void tokenCollision(World world, Token attackerToken) async {
   for (var token in player.tokens) {
     token.enableToken = false;
   }
-
-  // Ensure this block completes before resizing tokens
-  await Future.delayed(Duration.zero);
 
   // Call the function to resize tokens after moveBackward is complete
   resizeTokensOnSpot(world, ludoBoard);
