@@ -712,7 +712,6 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
       .firstWhere((spot) => spot.uniqueId == 'B1');
   final Vector2 originalSize =
       Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-  final ludoBoardGlobalPosition = ludoBoard.absolutePosition;
 
   // Precompute size factors and position increments
   final sizeFactors = {
@@ -741,8 +740,6 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
   tokensByPositionId.forEach((positionId, tokenList) {
     // Precompute spot global position and adjusted position
     final spot = SpotManager().findSpotById(positionId);
-    final spotGlobalPosition = spot.absolutePosition;
-    final adjustedPosition = spotGlobalPosition - ludoBoardGlobalPosition;
 
     // Compute size factor and position increment
     final sizeFactor = sizeFactors[tokenList.length] ?? 0.50;
@@ -752,13 +749,12 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
     for (var i = 0; i < tokenList.length; i++) {
       final token = tokenList[i];
       token.size = originalSize * sizeFactor;
-      token.position = Vector2(
-        adjustedPosition.x + (i * positionIncrement) + (token.size.x * 0.10),
-        adjustedPosition.y - (token.size.x * 0.50),
-      );
-
       if (token.state == TokenState.inBase) {
         token.position = spot.position;
+      } else if (token.state == TokenState.onBoard || token.state == TokenState.inHome) {
+        token.position = Vector2(
+            spot.tokenPosition.x + i * positionIncrement,
+            spot.tokenPosition.y);
       }
     }
   });
