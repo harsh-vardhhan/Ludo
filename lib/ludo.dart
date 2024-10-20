@@ -71,6 +71,10 @@ class Ludo extends FlameGame
       anchor: Anchor.topLeft, // Set anchor to align top-left
     ));
 
+    // Preload audio
+    FlameAudio.audioCache.load('move.mp3');
+    FlameAudio.audioCache.load('dice.mp3');
+
     EventBus().on<OpenPlayerModalEvent>((event) {
       showPlayerModal();
     });
@@ -631,7 +635,7 @@ void applyMoveEffect(World world, Token token, Vector2 targetPosition) async {
   );
 
   await token.add(moveToEffect);
-  await Future.delayed(const Duration(milliseconds: 100)); // Reduced delay
+  Future.delayed(const Duration(milliseconds: 100)); // Reduced delay
   tokenCollision(world, token);
 }
 
@@ -656,15 +660,20 @@ void tokenCollision(World world, Token attackerToken) async {
   final ludoBoard = world.children.whereType<LudoBoard>().first;
   final spotId = attackerToken.positionId;
   final tokens = TokenManager().allTokens;
-  final tokensOnSpot = tokens.where((token) => token.positionId == spotId).toList();
+  final tokensOnSpot =
+      tokens.where((token) => token.positionId == spotId).toList();
 
   // Initialize the flag to track if any token was attacked
   bool wasTokenAttacked = false;
 
   // only attacker token on spot, return
-  if (tokensOnSpot.length > 1 && !['B04', 'B23', 'R22', 'R10', 'G02', 'G21', 'Y30', 'Y42'].contains(spotId)) {
+  if (tokensOnSpot.length > 1 &&
+      !['B04', 'B23', 'R22', 'R10', 'G02', 'G21', 'Y30', 'Y42']
+          .contains(spotId)) {
     // Batch token movements
-    final tokensToMove = tokensOnSpot.where((token) => token.playerId != attackerToken.playerId).toList();
+    final tokensToMove = tokensOnSpot
+        .where((token) => token.playerId != attackerToken.playerId)
+        .toList();
 
     for (var token in tokensToMove) {
       moveBackward(
@@ -679,15 +688,16 @@ void tokenCollision(World world, Token attackerToken) async {
 
     // Wait for all movements to complete
     await Future.wait(tokensToMove.map((token) => moveBackward(
-      world: world,
-      token: token,
-      tokenPath: getTokenPath(token.playerId),
-      ludoBoard: ludoBoard,
-    )));
+          world: world,
+          token: token,
+          tokenPath: getTokenPath(token.playerId),
+          ludoBoard: ludoBoard,
+        )));
   }
 
   // Grant another turn or switch to next player
-  final player = gameState.players.firstWhere((player) => player.playerId == attackerToken.playerId);
+  final player = gameState.players
+      .firstWhere((player) => player.playerId == attackerToken.playerId);
 
   if (wasTokenAttacked) {
     if (player.hasRolledThreeConsecutiveSixes()) {
@@ -795,7 +805,6 @@ void addTokenTrail(List<Token> tokensOnBoard) {
   }
 }
 
-
 Future<void> moveBackward({
   required World world,
   required Token token,
@@ -848,7 +857,6 @@ Future<void> moveBackward({
     // await Future.delayed(const Duration(milliseconds: 30));
   }
 
-
   if (token.playerId == 'BP') {
     await moveTokenToBase(
       world: world,
@@ -884,7 +892,6 @@ Future<void> moveBackward({
   }
 }
 
-
 Future<void> moveForward({
   required World world,
   required Token token,
@@ -900,14 +907,13 @@ Future<void> moveForward({
   final tokenSizeAdjustmentX = token.size.x * 0.10;
   final tokenSizeAdjustmentY = token.size.x * 0.50;
 
-  // Preload audio
-  FlameAudio.audioCache.load('move.mp3');
-
   // Precompute target positions
   List<Vector2> targetPositions = [];
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     String positionId = tokenPath[i];
-    final spot = SpotManager().getSpots().firstWhere((spot) => spot.uniqueId == positionId);
+    final spot = SpotManager()
+        .getSpots()
+        .firstWhere((spot) => spot.uniqueId == positionId);
     final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
     targetPositions.add(
       Vector2(
@@ -950,7 +956,6 @@ Future<void> moveForward({
 
   clearTokenTrail(token);
 }
-
 
 void clearTokenTrail(Token token) {
   final spots = SpotManager().getSpots();
@@ -1036,7 +1041,7 @@ Future<void> moveTokenToBase({
       EffectController(duration: 0.03, curve: Curves.easeInOut),
     ),
   );
-  await Future.delayed(const Duration(milliseconds: 30));
+  Future.delayed(const Duration(milliseconds: 30));
 }
 
 Future<bool> checkTokenInHomeAndHandle(Token token) async {
