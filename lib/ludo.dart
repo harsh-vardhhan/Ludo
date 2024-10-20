@@ -247,7 +247,7 @@ class Ludo extends FlameGame
 
           final ludoBoardPosition = ludoBoard.absolutePosition;
           const homeSpotSizeFactorX = 0.10;
-          const homeSpotSizeFactorY = 0.05;
+          const homeSpotSizeFactorY = 0.50;
           const tokenSizeFactorX = 0.80;
           const tokenSizeFactorY = 1.05;
 
@@ -327,7 +327,7 @@ class Ludo extends FlameGame
 
           final ludoBoardPosition = ludoBoard.absolutePosition;
           const homeSpotSizeFactorX = 0.10;
-          const homeSpotSizeFactorY = 0.05;
+          const homeSpotSizeFactorY = 0.50;
           const tokenSizeFactorX = 0.80;
           const tokenSizeFactorY = 1.05;
 
@@ -408,7 +408,7 @@ class Ludo extends FlameGame
 
           final ludoBoardPosition = ludoBoard.absolutePosition;
           const homeSpotSizeFactorX = 0.10;
-          const homeSpotSizeFactorY = 0.05;
+          const homeSpotSizeFactorY = 0.50;
           const tokenSizeFactorX = 0.80;
           const tokenSizeFactorY = 1.05;
 
@@ -489,7 +489,7 @@ class Ludo extends FlameGame
 
           final ludoBoardPosition = ludoBoard.absolutePosition;
           const homeSpotSizeFactorX = 0.10;
-          const homeSpotSizeFactorY = 0.05;
+          const homeSpotSizeFactorY = 0.50;
           const tokenSizeFactorX = 0.80;
           const tokenSizeFactorY = 1.05;
 
@@ -638,7 +638,7 @@ void applyMoveEffect(World world, Token token, Vector2 targetPosition) async {
 Vector2 calculateTargetPosition(Token token, Spot spot, LudoBoard ludoBoard) {
   // Precompute the token size adjustments
   final tokenSizeAdjustmentX = token.size.x * 0.10;
-  final tokenSizeAdjustmentY = token.size.x * 0.05;
+  final tokenSizeAdjustmentY = token.size.x * 0.50;
 
   // Precompute the global positions
   final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
@@ -751,7 +751,7 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
       token.size = originalSize * sizeFactor;
       token.position = Vector2(
         adjustedPosition.x + (i * positionIncrement) + (token.size.x * 0.10),
-        adjustedPosition.y - (token.size.x * 0.05),
+        adjustedPosition.y - (token.size.x * 0.50),
       );
 
       if (token.state == TokenState.inBase) {
@@ -804,7 +804,7 @@ Future<void> moveBackward({
   bool audioPlayed = false;
 
   final tokenSizeAdjustmentX = token.size.x * 0.10;
-  final tokenSizeAdjustmentY = token.size.x * 0.05;
+  final tokenSizeAdjustmentY = token.size.x * 0.50;
 
   for (int i = currentIndex; i >= finalIndex; i--) {
     String positionId = tokenPath[i];
@@ -883,7 +883,7 @@ Future<void> moveForward({
   // Precompute values
   final ludoBoardGlobalPosition = ludoBoard.absolutePositionOf(Vector2.zero());
   final tokenSizeAdjustmentX = token.size.x * 0.10;
-  final tokenSizeAdjustmentY = token.size.x * 0.05;
+  final tokenSizeAdjustmentY = token.size.x * 0.50;
 
   // Preload audio
   FlameAudio.audioCache.load('move.mp3');
