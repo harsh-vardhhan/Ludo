@@ -788,6 +788,7 @@ void addTokenTrail(List<Token> tokensOnBoard) {
   }
 }
 
+
 Future<void> moveBackward({
   required World world,
   required Token token,
@@ -806,17 +807,22 @@ Future<void> moveBackward({
   final tokenSizeAdjustmentX = token.size.x * 0.10;
   final tokenSizeAdjustmentY = token.size.x * 0.50;
 
+  // Precompute target positions
+  List<Vector2> targetPositions = [];
   for (int i = currentIndex; i >= finalIndex; i--) {
     String positionId = tokenPath[i];
-    token.positionId = positionId;
-
     final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
     final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
-
-    final targetPosition = Vector2(
-      spotGlobalPosition.x + tokenSizeAdjustmentX - ludoBoardGlobalPosition.x,
-      spotGlobalPosition.y - tokenSizeAdjustmentY - ludoBoardGlobalPosition.y,
+    targetPositions.add(
+      Vector2(
+        spotGlobalPosition.x + tokenSizeAdjustmentX - ludoBoardGlobalPosition.x,
+        spotGlobalPosition.y - tokenSizeAdjustmentY - ludoBoardGlobalPosition.y,
+      ),
     );
+  }
+
+  for (int i = 0; i < targetPositions.length; i++) {
+    token.positionId = tokenPath[currentIndex - i];
 
     if (!audioPlayed) {
       FlameAudio.play('move.mp3');
@@ -826,13 +832,15 @@ Future<void> moveBackward({
     await _applyEffect(
       token,
       MoveToEffect(
-        targetPosition,
+        targetPositions[i],
         EffectController(duration: 0.03, curve: Curves.easeInOut),
       ),
     );
 
-    await Future.delayed(const Duration(milliseconds: 30));
+    // Optional: Increase delay duration or remove it
+    // await Future.delayed(const Duration(milliseconds: 30));
   }
+
 
   if (token.playerId == 'BP') {
     await moveTokenToBase(
