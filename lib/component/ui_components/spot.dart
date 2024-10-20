@@ -1,5 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo/state/token_manager.dart';
+import '../../state/game_state.dart';
 
 class SpotManager {
   static final SpotManager _instance = SpotManager._internal();
@@ -50,6 +52,7 @@ class SpotManager {
 
 class Spot extends RectangleComponent {
   final String uniqueId;
+  late final Vector2 tokenPosition;
 
   Spot({
     required this.uniqueId,
@@ -64,5 +67,18 @@ class Spot extends RectangleComponent {
           children: children ?? [],
         ) {
     SpotManager().addSpot(this);
+  }
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    final token = TokenManager().allTokens.first;
+    final tokenSizeAdjustmentX = token.size.x * 0.10;
+    final tokenSizeAdjustmentY = token.size.x * 0.50;
+    final spotGlobalPosition = absolutePositionOf(Vector2.zero());
+    final ludoBoardGlobalPosition = GameState().ludoBoardAbsolutePosition;
+    tokenPosition = Vector2(
+        spotGlobalPosition.x + tokenSizeAdjustmentX - ludoBoardGlobalPosition.x,
+        spotGlobalPosition.y - tokenSizeAdjustmentY - ludoBoardGlobalPosition.y);
   }
 }

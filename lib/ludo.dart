@@ -243,6 +243,8 @@ class Ludo extends FlameGame
     await GameState().clearPlayers();
     final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
+    final ludoBoardAbsolutePosition = ludoBoard.absolutePosition;
+    gameState.ludoBoardAbsolutePosition = ludoBoardAbsolutePosition;
 
     for (var team in teams) {
       if (team == 'BP') {
@@ -621,7 +623,7 @@ void moveOutOfBase({
   Spot spot = spotManager.findSpotById(tokenPath.first);
 
   // Calculate the target position on the board
-  Vector2 targetPosition = calculateTargetPosition(token, spot, ludoBoard);
+  Vector2 targetPosition = spot.tokenPosition;
 
   // Apply the movement effect to move the token out of base
   applyMoveEffect(world, token, targetPosition);
@@ -635,24 +637,8 @@ void applyMoveEffect(World world, Token token, Vector2 targetPosition) async {
   );
 
   await token.add(moveToEffect);
-  Future.delayed(const Duration(milliseconds: 100)); // Reduced delay
+  await Future.delayed(const Duration(milliseconds: 100)); // Reduced delay
   tokenCollision(world, token);
-}
-
-Vector2 calculateTargetPosition(Token token, Spot spot, LudoBoard ludoBoard) {
-  // Precompute the token size adjustments
-  final tokenSizeAdjustmentX = token.size.x * 0.10;
-  final tokenSizeAdjustmentY = token.size.x * 0.50;
-
-  // Precompute the global positions
-  final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
-  final ludoBoardGlobalPosition = ludoBoard.absolutePositionOf(Vector2.zero());
-
-  // Calculate the target position using precomputed values
-  return Vector2(
-    spotGlobalPosition.x + tokenSizeAdjustmentX - ludoBoardGlobalPosition.x,
-    spotGlobalPosition.y - tokenSizeAdjustmentY - ludoBoardGlobalPosition.y,
-  );
 }
 
 void tokenCollision(World world, Token attackerToken) async {
@@ -814,27 +800,16 @@ Future<void> moveBackward({
   List<Spot> allSpots = SpotManager().getSpots();
   final currentIndex = tokenPath.indexOf(token.positionId);
   const finalIndex = 0;
-  final ludoBoardGlobalPosition = ludoBoard.absolutePositionOf(Vector2.zero());
 
   // Preload audio to avoid delays during playback
-  FlameAudio.audioCache.load('move.mp3');
   bool audioPlayed = false;
-
-  final tokenSizeAdjustmentX = token.size.x * 0.10;
-  final tokenSizeAdjustmentY = token.size.x * 0.50;
 
   // Precompute target positions
   List<Vector2> targetPositions = [];
   for (int i = currentIndex; i >= finalIndex; i--) {
     String positionId = tokenPath[i];
     final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
-    final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
-    targetPositions.add(
-      Vector2(
-        spotGlobalPosition.x + tokenSizeAdjustmentX - ludoBoardGlobalPosition.x,
-        spotGlobalPosition.y - tokenSizeAdjustmentY - ludoBoardGlobalPosition.y,
-      ),
-    );
+    targetPositions.add(spot.tokenPosition);
   }
 
   for (int i = 0; i < targetPositions.length; i++) {
@@ -902,11 +877,6 @@ Future<void> moveForward({
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
 
-  // Precompute values
-  final ludoBoardGlobalPosition = ludoBoard.absolutePositionOf(Vector2.zero());
-  final tokenSizeAdjustmentX = token.size.x * 0.10;
-  final tokenSizeAdjustmentY = token.size.x * 0.50;
-
   // Precompute target positions
   List<Vector2> targetPositions = [];
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
@@ -914,13 +884,7 @@ Future<void> moveForward({
     final spot = SpotManager()
         .getSpots()
         .firstWhere((spot) => spot.uniqueId == positionId);
-    final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
-    targetPositions.add(
-      Vector2(
-        spotGlobalPosition.x + tokenSizeAdjustmentX - ludoBoardGlobalPosition.x,
-        spotGlobalPosition.y - tokenSizeAdjustmentY - ludoBoardGlobalPosition.y,
-      ),
-    );
+    targetPositions.add(spot.tokenPosition);
   }
 
   // Move token to each target position

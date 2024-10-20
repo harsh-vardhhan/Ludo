@@ -1,3 +1,5 @@
+import 'package:flame/components.dart';
+
 import 'player.dart';
 import 'event_bus.dart';
 
@@ -17,6 +19,8 @@ class GameState {
 
   bool canMoveTokenFromBase = false;
   bool canMoveTokenOnBoard = false;
+
+  Vector2 ludoBoardAbsolutePosition = Vector2.zero();
 
   // Factory method to access the instance
   factory GameState() {
