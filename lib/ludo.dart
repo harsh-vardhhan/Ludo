@@ -797,7 +797,6 @@ Future<void> moveBackward({
   required List<String> tokenPath,
   required PositionComponent ludoBoard,
 }) async {
-  List<Spot> allSpots = SpotManager().getSpots();
   final currentIndex = tokenPath.indexOf(token.positionId);
   const finalIndex = 0;
 
@@ -808,7 +807,7 @@ Future<void> moveBackward({
   List<Vector2> targetPositions = [];
   for (int i = currentIndex; i >= finalIndex; i--) {
     String positionId = tokenPath[i];
-    final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
+    final spot = SpotManager().findSpotById(positionId);
     targetPositions.add(spot.tokenPosition);
   }
 
@@ -881,9 +880,7 @@ Future<void> moveForward({
   List<Vector2> targetPositions = [];
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     String positionId = tokenPath[i];
-    final spot = SpotManager()
-        .getSpots()
-        .firstWhere((spot) => spot.uniqueId == positionId);
+    final spot = SpotManager().findSpotById(positionId);
     targetPositions.add(spot.tokenPosition);
   }
 
