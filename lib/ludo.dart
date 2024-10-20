@@ -66,12 +66,10 @@ class Ludo extends FlameGame
         width: width,
         height: width * 0.20));
 
-    /*
     add(FpsTextComponent(
       position: Vector2(10, 10), // Adjust position as needed
       anchor: Anchor.topLeft, // Set anchor to align top-left
     ));
-    */
 
     EventBus().on<OpenPlayerModalEvent>((event) {
       showPlayerModal();
@@ -871,6 +869,7 @@ Future<void> moveBackward({
   }
 }
 
+
 Future<void> moveForward({
   required World world,
   required Token token,
@@ -878,52 +877,50 @@ Future<void> moveForward({
   required int diceNumber,
   required PositionComponent ludoBoard,
 }) async {
-  // get all spots
-  List<Spot> allSpots = SpotManager().getSpots();
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
+
+  // Precompute values
   final ludoBoardGlobalPosition = ludoBoard.absolutePositionOf(Vector2.zero());
-
-  // Preload audio to avoid delays during playback
-  FlameAudio.audioCache.load('move.mp3');
-
-  // Precompute the initial audio play flag
-  bool audioPlayed = false;
-
-  // Precompute the token size adjustments
   final tokenSizeAdjustmentX = token.size.x * 0.10;
   final tokenSizeAdjustmentY = token.size.x * 0.05;
 
+  // Preload audio
+  FlameAudio.audioCache.load('move.mp3');
+
+  // Precompute target positions
+  List<Vector2> targetPositions = [];
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     String positionId = tokenPath[i];
-
-    token.positionId = positionId;
-
-    final spot = allSpots.firstWhere((spot) => spot.uniqueId == positionId);
+    final spot = SpotManager().getSpots().firstWhere((spot) => spot.uniqueId == positionId);
     final spotGlobalPosition = spot.absolutePositionOf(Vector2.zero());
-
-    final targetPosition = Vector2(
-      spotGlobalPosition.x + tokenSizeAdjustmentX - ludoBoardGlobalPosition.x,
-      spotGlobalPosition.y - tokenSizeAdjustmentY - ludoBoardGlobalPosition.y,
+    targetPositions.add(
+      Vector2(
+        spotGlobalPosition.x + tokenSizeAdjustmentX - ludoBoardGlobalPosition.x,
+        spotGlobalPosition.y - tokenSizeAdjustmentY - ludoBoardGlobalPosition.y,
+      ),
     );
+  }
 
-    // Play audio only once per move
+  // Move token to each target position
+  bool audioPlayed = false;
+  for (int i = 0; i < targetPositions.length; i++) {
+    token.positionId = tokenPath[currentIndex + 1 + i];
+
     if (!audioPlayed) {
       FlameAudio.play('move.mp3');
       audioPlayed = true;
     }
 
-    // Apply move effect only, remove size effect to reduce load
     await _applyEffect(
       token,
       MoveToEffect(
-        targetPosition,
-        EffectController(duration: 0.05, curve: Curves.easeInOut),
+        targetPositions[i],
+        EffectController(duration: 0.10, curve: Curves.easeInOut),
       ),
     );
 
-    // Reduce delay to improve performance
-    await Future.delayed(const Duration(milliseconds: 50));
+    Future.delayed(const Duration(milliseconds: 100));
   }
 
   // if token is in home
@@ -938,6 +935,7 @@ Future<void> moveForward({
 
   clearTokenTrail(token);
 }
+
 
 void clearTokenTrail(Token token) {
   final spots = SpotManager().getSpots();
