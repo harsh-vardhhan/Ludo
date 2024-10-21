@@ -751,10 +751,10 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
       token.size = originalSize * sizeFactor;
       if (token.state == TokenState.inBase) {
         token.position = spot.position;
-      } else if (token.state == TokenState.onBoard || token.state == TokenState.inHome) {
+      } else if (token.state == TokenState.onBoard ||
+          token.state == TokenState.inHome) {
         token.position = Vector2(
-            spot.tokenPosition.x + i * positionIncrement,
-            spot.tokenPosition.y);
+            spot.tokenPosition.x + i * positionIncrement, spot.tokenPosition.y);
       }
     }
   });
@@ -762,20 +762,21 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
 
 void addTokenTrail(List<Token> tokensOnBoard) {
   SpotManager spotManager = SpotManager();
-    final colorMap = {
+  final colorMap = {
     'B': const Color(0xFFB7E0FF), // Blue color
     'G': const Color(0xFFB6FFA1), // Green color
     'Y': const Color(0xFFFEFFA7), // Yellow color
     'R': const Color(0xFFFF8A8A), // Red color
   };
-  
+
   for (var token in tokensOnBoard) {
     final spot = spotManager.findSpotById(token.positionId);
     if (!token.spaceToMove()) {
       continue;
     }
 
-    final colorPrefix = token.tokenId.substring(0, 1); // Get the first character
+    final colorPrefix =
+        token.tokenId.substring(0, 1); // Get the first character
     final color = colorMap[colorPrefix];
 
     // Set the color if it's determined
@@ -860,6 +861,17 @@ Future<void> moveBackward({
   }
 }
 
+Vector2 tokenOriginalSize(world) {
+  final homeSpot = getHomeSpot(world, 6)
+      .whereType<HomeSpot>()
+      .firstWhere((spot) => spot.uniqueId == 'B1');
+
+  // Step 1: Store original size and position of tokens based on homeSpot
+  final Vector2 originalSize =
+      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
+  return originalSize;
+}
+
 Future<void> moveForward({
   required World world,
   required Token token,
@@ -869,6 +881,8 @@ Future<void> moveForward({
 }) async {
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
+  final originalSize = tokenOriginalSize(world).clone();
+  final bigSize = Vector2(originalSize.x * 1.30, originalSize.y * 1.30).clone();
 
   // Precompute target positions
   List<Vector2> targetPositions = [];
@@ -879,26 +893,39 @@ Future<void> moveForward({
   }
 
   // Move token to each target position
-  bool audioPlayed = false;
   for (int i = 0; i < targetPositions.length; i++) {
     token.positionId = tokenPath[currentIndex + 1 + i];
 
-    if (!audioPlayed) {
-      FlameAudio.play('move.mp3');
-      audioPlayed = true;
-    }
+    FlameAudio.play('move.mp3');
 
+    // Apply size increase and move effects in parallel
+    await Future.wait([
+      _applyEffect(
+        token,
+        SizeEffect.to(
+          bigSize,
+          EffectController(duration: 0.1),
+        ),
+      ),
+      _applyEffect(
+        token,
+        MoveToEffect(
+          targetPositions[i],
+          EffectController(duration: 0.1, curve: Curves.easeInOut),
+        ),
+      ),
+    ]);
+
+    // Restore token to original size
     await _applyEffect(
       token,
-      MoveToEffect(
-        targetPositions[i],
-        EffectController(
-          duration: 0.10,
-          curve: Curves.easeInOut),
+      SizeEffect.to(
+        originalSize,
+        EffectController(duration: 0.1),
       ),
     );
 
-    Future.delayed(const Duration(milliseconds: 10));
+    await Future.delayed(const Duration(milliseconds: 150));
   }
 
   // if token is in home
