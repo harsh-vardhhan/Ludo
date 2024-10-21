@@ -1002,57 +1002,53 @@ Future<void> moveTokenToBase({
 }
 
 Future<bool> checkTokenInHomeAndHandle(Token token) async {
-  // if token is in home
-  if (token.positionId == 'BF' ||
-      token.positionId == 'GF' ||
-      token.positionId == 'YF' ||
-      token.positionId == 'RF') {
-    token.state = TokenState.inHome;
-    final players = GameState().players;
-    final player =
-        players.firstWhere((player) => player.playerId == token.playerId);
-    player.totalTokensInHome++;
+  // Define home position IDs
+  const homePositions = ['BF', 'GF', 'YF', 'RF'];
 
-    // if player has 4 tokens in home, he wins and gets rank
-    if (player.totalTokensInHome == 4) {
-      player.hasWon = true;
-      // get players who won and who not won
-      final playersWhoWon = players.where((player) => player.hasWon).toList();
-      final playersWhoNotWon =
-          players.where((player) => !player.hasWon).toList();
+  // Check if the token is in home
+  if (!homePositions.contains(token.positionId)) return false;
 
-      // game end condition
-      if (playersWhoWon.length == players.length - 1) {
-        // set rank of last player
-        playersWhoNotWon.first.rank = players.length;
-        // set rank of player who won
-        player.rank = playersWhoWon.length;
-        for (var player in players) {
-          player.enableDice = false;
-        }
-        for (var token in TokenManager().allTokens) {
-          token.enableToken = false;
-        }
-        EventBus().emit(OpenPlayerModalEvent());
-      } // end game for only one player
-      else {
-        // set rank of current player
-        player.rank = playersWhoWon.length;
-        player.hasWon = true;
-      }
-      return true;
+  token.state = TokenState.inHome;
+
+  // Cache players from GameState
+  final players = GameState().players;
+  final player = players.firstWhere((p) => p.playerId == token.playerId);
+  player.totalTokensInHome++;
+
+  // Handle win condition
+  if (player.totalTokensInHome == 4) {
+    player.hasWon = true;
+
+    // Get winners and non-winners
+    final playersWhoWon = players.where((p) => p.hasWon).toList();
+    final playersWhoNotWon = players.where((p) => !p.hasWon).toList();
+
+    // End game condition
+    if (playersWhoWon.length == players.length - 1) {
+      playersWhoNotWon.first.rank = players.length; // Rank last player
+      player.rank = playersWhoWon.length; // Set rank for current player
+      // Disable dice for all players
+      players.forEach((p) => p.enableDice = false);
+      TokenManager().allTokens.forEach((t) => t.enableToken = false);
+      EventBus().emit(OpenPlayerModalEvent());
     } else {
-      // not all tokens are in home, grant another turn
-      player.enableDice = true;
-      for (var token in player.tokens) {
-        token.enableToken = false;
-      }
-      if (player.hasRolledThreeConsecutiveSixes()) {
-        await player.resetExtraTurns();
-      }
-      player.grantAnotherTurn();
-      return true;
+      // Set rank for current player
+      player.rank = playersWhoWon.length;
     }
+    return true;
   }
-  return false;
+
+  // Grant another turn if not all tokens are home
+  player.enableDice = true;
+
+  // Disable tokens for current player
+  player.tokens.forEach((t) => t.enableToken = false);
+
+  // Reset extra turns if applicable
+  if (player.hasRolledThreeConsecutiveSixes()) {
+    await player.resetExtraTurns();
+  }
+
+  player.grantAnotherTurn();
+  return true;
 }
