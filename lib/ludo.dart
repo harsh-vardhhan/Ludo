@@ -762,23 +762,21 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
 
 void addTokenTrail(List<Token> tokensOnBoard) {
   SpotManager spotManager = SpotManager();
+    final colorMap = {
+    'B': const Color(0xFFB7E0FF), // Blue color
+    'G': const Color(0xFFB6FFA1), // Green color
+    'Y': const Color(0xFFFEFFA7), // Yellow color
+    'R': const Color(0xFFFF8A8A), // Red color
+  };
+  
   for (var token in tokensOnBoard) {
     final spot = spotManager.findSpotById(token.positionId);
     if (!token.spaceToMove()) {
       continue;
     }
 
-    // Determine the color based on the tokenId prefix
-    Color? color;
-    if (token.tokenId.startsWith('B')) {
-      color = const Color(0xFFB7E0FF); // Blue color
-    } else if (token.tokenId.startsWith('G')) {
-      color = const Color(0xFFB6FFA1); // Green color
-    } else if (token.tokenId.startsWith('Y')) {
-      color = const Color(0xFFFEFFA7); // Yellow color
-    } else if (token.tokenId.startsWith('R')) {
-      color = const Color(0xFFFF8A8A); // Red color
-    }
+    final colorPrefix = token.tokenId.substring(0, 1); // Get the first character
+    final color = colorMap[colorPrefix];
 
     // Set the color if it's determined
     if (color != null) {
@@ -894,11 +892,13 @@ Future<void> moveForward({
       token,
       MoveToEffect(
         targetPositions[i],
-        EffectController(duration: 0.10, curve: Curves.easeInOut),
+        EffectController(
+          duration: 0.10,
+          curve: Curves.easeInOut),
       ),
     );
 
-    Future.delayed(const Duration(milliseconds: 100));
+    Future.delayed(const Duration(milliseconds: 10));
   }
 
   // if token is in home
