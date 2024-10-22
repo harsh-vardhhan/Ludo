@@ -885,12 +885,12 @@ Future<void> moveForward({
       token,
       MoveToEffect(
         SpotManager().getSpots().firstWhere((spot) => spot.uniqueId == positionId).tokenPosition,
-        EffectController(duration: 0.1, curve: Curves.easeInOut),
+        EffectController(duration: 0.2, curve: Curves.easeInOut),
       ),
     );
 
     // Reduce delay to improve performance
-    await Future.delayed(const Duration(milliseconds: 50));
+    // await Future.delayed(const Duration(milliseconds: 50));
   }
 
   // if token is in home
