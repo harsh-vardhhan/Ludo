@@ -861,9 +861,6 @@ Future<void> moveForward({
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
 
-  // Preload audio to avoid delays during playback
-  FlameAudio.audioCache.load('move.mp3');
-
   // Precompute the initial audio play flag
   bool audioPlayed = false;
 
