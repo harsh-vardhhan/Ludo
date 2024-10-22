@@ -47,7 +47,7 @@ class Ludo extends FlameGame
   ColorEffect? _redStaticEffect;
 
   @override
-  FutureOr<void> onLoad() async {
+  void onLoad() async {
     super.onLoad();
     camera = CameraComponent.withFixedResolution(
       width: width,
@@ -611,7 +611,7 @@ void moveOutOfBase({
   required Token token,
   required List<String> tokenPath,
   required LudoBoard ludoBoard,
-}) {
+}) async {
   // Update token position to the first position in the path
   token.positionId = tokenPath.first;
   token.state = TokenState.onBoard;
@@ -626,17 +626,13 @@ void moveOutOfBase({
   Vector2 targetPosition = spot.tokenPosition;
 
   // Apply the movement effect to move the token out of base
-  applyMoveEffect(world, token, targetPosition);
-}
+  // applyMoveEffect(world, token, targetPosition);
 
-void applyMoveEffect(World world, Token token, Vector2 targetPosition) async {
-  final moveToEffect = MoveToEffect(
-    targetPosition,
-    EffectController(
-        duration: 5, curve: Curves.easeInOut), // Reduced duration
-  );
+  await _applyEffect(
+      token,
+      MoveToEffect(targetPosition,
+          EffectController(duration: 0.1, curve: Curves.easeInOut)));
 
-  token.add(moveToEffect); // Reduced delay
   tokenCollision(world, token);
 }
 

@@ -165,7 +165,7 @@ class DiagonalRectangleComponent extends PositionComponent {
   }
 
   @override
-  Future<void> onLoad() async {
+  void onLoad() {
     super.onLoad();
 
     // Size of the transparent rectangle

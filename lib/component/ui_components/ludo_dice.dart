@@ -79,7 +79,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   // Handle logic when the player rolls a 6
   void _handleSixRoll(
-      World world, LudoBoard ludoBoard, int diceNumber) async {
+      World world, LudoBoard ludoBoard, int diceNumber) {
     player.grantAnotherTurn();
 
     if (player.hasRolledThreeConsecutiveSixes()) {
@@ -124,7 +124,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   // Handle logic for non-six dice rolls
   void _handleNonSixRoll(
-      World world, LudoBoard ludoBoard, int diceNumber) async {
+      World world, LudoBoard ludoBoard, int diceNumber) {
     final tokensOnBoard = player.tokens
         .where((token) => token.state == TokenState.onBoard)
         .toList();
@@ -174,7 +174,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   // Move the token forward on the board
   void _moveForwardSingleToken(
-      World world, LudoBoard ludoBoard, int diceNumber, Token token) async {
+      World world, LudoBoard ludoBoard, int diceNumber, Token token) {
     moveForward(
       world: world,
       token: token,
