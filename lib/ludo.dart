@@ -74,6 +74,10 @@ class Ludo extends FlameGame
     FlameAudio.audioCache.load('move.mp3');
     FlameAudio.audioCache.load('dice.mp3');
 
+    GameState().ludoBoard = world.children.whereType<LudoBoard>().first;
+    final ludoBoard = GameState().ludoBoard as PositionComponent;
+    GameState().ludoBoardAbsolutePosition = ludoBoard.absolutePosition;
+
     EventBus().on<OpenPlayerModalEvent>((event) {
       showPlayerModal();
     });
@@ -110,9 +114,9 @@ class Ludo extends FlameGame
   }
 
   void blinkRedBase(bool shouldBlink) {
-    final ludoBoard = world.children.whereType<LudoBoard>().first;
-    final childrenOfLudoBoard = ludoBoard.children.toList();
-    final child = childrenOfLudoBoard[0];
+
+    final childrenOfLudoBoard = GameState().ludoBoard?.children.toList();
+    final child = childrenOfLudoBoard![0];
     final home = child.children.toList();
     final homePlate = home[0] as Home;
 
@@ -142,9 +146,8 @@ class Ludo extends FlameGame
   }
 
   void blinkYellowBase(bool shouldBlink) {
-    final ludoBoard = world.children.whereType<LudoBoard>().first;
-    final childrenOfLudoBoard = ludoBoard.children.toList();
-    final child = childrenOfLudoBoard[8];
+    final childrenOfLudoBoard = GameState().ludoBoard?.children.toList();
+    final child = childrenOfLudoBoard![8];
     final home = child.children.toList();
     final homePlate = home[0] as Home;
 
@@ -174,9 +177,8 @@ class Ludo extends FlameGame
   }
 
   void blinkBlueBase(bool shouldBlink) {
-    final ludoBoard = world.children.whereType<LudoBoard>().first;
-    final childrenOfLudoBoard = ludoBoard.children.toList();
-    final child = childrenOfLudoBoard[6];
+    final childrenOfLudoBoard = GameState().ludoBoard?.children.toList();
+    final child = childrenOfLudoBoard![6];
     final home = child.children.toList();
     final homePlate = home[0] as Home;
 
@@ -206,9 +208,8 @@ class Ludo extends FlameGame
   }
 
   void blinkGreenBase(bool shouldBlink) {
-    final ludoBoard = world.children.whereType<LudoBoard>().first;
-    final childrenOfLudoBoard = ludoBoard.children.toList();
-    final child = childrenOfLudoBoard[2];
+    final childrenOfLudoBoard = GameState().ludoBoard?.children.toList();
+    final child = childrenOfLudoBoard![2];
     final home = child.children.toList();
     final homePlate = home[0] as Home;
 
@@ -240,16 +241,12 @@ class Ludo extends FlameGame
   Future<void> startGame() async {
     await TokenManager().clearTokens();
     await GameState().clearPlayers();
-    final ludoBoard = world.children.whereType<LudoBoard>().first;
-    final ludoBoardAbsolutePosition = ludoBoard.absolutePosition;
-    GameState().ludoBoardAbsolutePosition = ludoBoardAbsolutePosition;
 
     for (var team in teams) {
       if (team == 'BP') {
         if (TokenManager().getBlueTokens().isEmpty) {
           TokenManager().initializeTokens(TokenManager().blueTokensBase);
 
-          final ludoBoardPosition = ludoBoard.absolutePosition;
           const homeSpotSizeFactorX = 0.10;
           const homeSpotSizeFactorY = 0.05;
           const tokenSizeFactorX = 0.80;
@@ -264,10 +261,10 @@ class Ludo extends FlameGame
             spot.position = Vector2(
               homeSpot.absolutePosition.x +
                   (homeSpot.size.x * homeSpotSizeFactorX) -
-                  ludoBoardPosition.x,
+                  GameState().ludoBoardAbsolutePosition.x,
               homeSpot.absolutePosition.y -
                   (homeSpot.size.x * homeSpotSizeFactorY) -
-                  ludoBoardPosition.y,
+                  GameState().ludoBoardAbsolutePosition.y,
             );
             // update token position
             token.innerCircleColor = Colors.blue;
@@ -276,7 +273,7 @@ class Ludo extends FlameGame
               homeSpot.size.x * tokenSizeFactorX,
               homeSpot.size.x * tokenSizeFactorY,
             );
-            ludoBoard.add(token);
+            GameState().ludoBoard?.add(token);
           }
 
           const playerId = 'BP';
@@ -330,7 +327,7 @@ class Ludo extends FlameGame
         if (TokenManager().getGreenTokens().isEmpty) {
           TokenManager().initializeTokens(TokenManager().greenTokensBase);
 
-          final ludoBoardPosition = ludoBoard.absolutePosition;
+          final ludoBoardPosition = GameState().ludoBoardAbsolutePosition;
           const homeSpotSizeFactorX = 0.10;
           const homeSpotSizeFactorY = 0.05;
           const tokenSizeFactorX = 0.80;
@@ -357,7 +354,7 @@ class Ludo extends FlameGame
               homeSpot.size.x * tokenSizeFactorX,
               homeSpot.size.x * tokenSizeFactorY,
             );
-            ludoBoard.add(token);
+            GameState().ludoBoard?.add(token);
           }
 
           const playerId = 'GP';
@@ -412,7 +409,7 @@ class Ludo extends FlameGame
         if (TokenManager().getYellowTokens().isEmpty) {
           TokenManager().initializeTokens(TokenManager().yellowTokensBase);
 
-          final ludoBoardPosition = ludoBoard.absolutePosition;
+          final ludoBoardPosition = GameState().ludoBoardAbsolutePosition;
           const homeSpotSizeFactorX = 0.10;
           const homeSpotSizeFactorY = 0.05;
           const tokenSizeFactorX = 0.80;
@@ -439,7 +436,7 @@ class Ludo extends FlameGame
               homeSpot.size.x * tokenSizeFactorX,
               homeSpot.size.x * tokenSizeFactorY,
             );
-            ludoBoard.add(token);
+            GameState().ludoBoard?.add(token);
           }
 
           const playerId = 'YP';
@@ -494,7 +491,7 @@ class Ludo extends FlameGame
         if (TokenManager().getRedTokens().isEmpty) {
           TokenManager().initializeTokens(TokenManager().redTokensBase);
 
-          final ludoBoardPosition = ludoBoard.absolutePosition;
+          final ludoBoardPosition = GameState().ludoBoardAbsolutePosition;
           const homeSpotSizeFactorX = 0.10;
           const homeSpotSizeFactorY = 0.05;
           const tokenSizeFactorX = 0.80;
@@ -521,7 +518,7 @@ class Ludo extends FlameGame
               homeSpot.size.x * tokenSizeFactorX,
               homeSpot.size.x * tokenSizeFactorY,
             );
-            ludoBoard.add(token);
+            GameState().ludoBoard?.add(token);
           }
 
           const playerId = 'RP';
@@ -598,9 +595,8 @@ class Ludo extends FlameGame
 }
 
 List<Component> getHomeSpot(world, i) {
-  final ludoBoard = world.children.whereType<LudoBoard>().first;
-  final childrenOfLudoBoard = ludoBoard.children.toList();
-  final child = childrenOfLudoBoard[i];
+  final childrenOfLudoBoard = GameState().ludoBoard?.children.toList();
+  final child = childrenOfLudoBoard![i];
   final home = child.children.toList();
   final homePlate = home[0].children.toList();
   final homeSpotContainer = homePlate[1].children.toList();
@@ -612,7 +608,6 @@ void moveOutOfBase({
   required World world,
   required Token token,
   required List<String> tokenPath,
-  required LudoBoard ludoBoard,
 }) async {
   // Update token position to the first position in the path
   token.positionId = tokenPath.first;
@@ -627,12 +622,9 @@ void moveOutOfBase({
 }
 
 void tokenCollision(World world, Token attackerToken) async {
-  final ludoBoard = world.children.whereType<LudoBoard>().first;
-  final spotId = attackerToken.positionId;
-  // final tokens = TokenManager().allTokens;
   final tokensOnSpot = TokenManager()
       .allTokens
-      .where((token) => token.positionId == spotId)
+      .where((token) => token.positionId == attackerToken.positionId)
       .toList();
 
   // Initialize the flag to track if any token was attacked
@@ -641,7 +633,7 @@ void tokenCollision(World world, Token attackerToken) async {
   // only attacker token on spot, return
   if (tokensOnSpot.length > 1 &&
       !['B04', 'B23', 'R22', 'R10', 'G02', 'G21', 'Y30', 'Y42']
-          .contains(spotId)) {
+          .contains(attackerToken.positionId)) {
     // Batch token movements
     final tokensToMove = tokensOnSpot
         .where((token) => token.playerId != attackerToken.playerId)
@@ -652,7 +644,7 @@ void tokenCollision(World world, Token attackerToken) async {
         world: world,
         token: token,
         tokenPath: GameState().getTokenPath(token.playerId),
-        ludoBoard: ludoBoard,
+        ludoBoard: GameState().ludoBoard as PositionComponent,
       ).then((_) {
         wasTokenAttacked = true;
       });
@@ -663,7 +655,7 @@ void tokenCollision(World world, Token attackerToken) async {
           world: world,
           token: token,
           tokenPath: GameState().getTokenPath(token.playerId),
-          ludoBoard: ludoBoard,
+          ludoBoard: GameState().ludoBoard as PositionComponent,
         )));
   }
 
@@ -689,10 +681,10 @@ void tokenCollision(World world, Token attackerToken) async {
   }
 
   // Call the function to resize tokens after moveBackward is complete
-  resizeTokensOnSpot(world, ludoBoard);
+  resizeTokensOnSpot(world);
 }
 
-void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
+void resizeTokensOnSpot(World world) {
   // Precompute values
   final homeSpot = getHomeSpot(world, 6)
       .whereType<HomeSpot>()
@@ -864,7 +856,6 @@ Future<void> moveForward({
   required Token token,
   required List<String> tokenPath,
   required int diceNumber,
-  required PositionComponent ludoBoard,
 }) async {
   // get all spots
   final currentIndex = tokenPath.indexOf(token.positionId);
@@ -906,8 +897,7 @@ Future<void> moveForward({
   bool isTokenInHome = await checkTokenInHomeAndHandle(token);
 
   if (isTokenInHome) {
-    final ludoBoard = world.children.whereType<LudoBoard>().first;
-    resizeTokensOnSpot(world, ludoBoard);
+    resizeTokensOnSpot(world);
   } else {
     tokenCollision(world, token);
   }

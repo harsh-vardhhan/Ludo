@@ -2,7 +2,6 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import '../../state/game_state.dart';
-import '../../ludo_board.dart';
 import '../../ludo.dart';
 
 // Enum to define token states
@@ -91,7 +90,6 @@ class Token extends PositionComponent with TapCallbacks {
         isInHome()) return;
 
     enableToken = false;
-    final ludoBoard = world.children.whereType<LudoBoard>().first;
 
     if (GameState().currentPlayer.playerId != playerId) return;
 
@@ -101,16 +99,14 @@ class Token extends PositionComponent with TapCallbacks {
         moveOutOfBase(
             world: world,
             token: this,
-            tokenPath: GameState().getTokenPath(playerId),
-            ludoBoard: ludoBoard);
+            tokenPath: GameState().getTokenPath(playerId));
         // Consider reducing delay or making it conditional
       } else if (state == TokenState.onBoard && GameState().canMoveTokenOnBoard) {
         moveForward(
             world: world,
             token: this,
             tokenPath: GameState().getTokenPath(playerId),
-            diceNumber: GameState().diceNumber,
-            ludoBoard: ludoBoard);
+            diceNumber: GameState().diceNumber);
       }
       return;
     }
@@ -121,8 +117,7 @@ class Token extends PositionComponent with TapCallbacks {
           world: world,
           token: this,
           tokenPath: GameState().getTokenPath(playerId),
-          diceNumber: GameState().diceNumber,
-          ludoBoard: ludoBoard);
+          diceNumber: GameState().diceNumber);
     }
   }
 

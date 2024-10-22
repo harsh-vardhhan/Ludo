@@ -54,11 +54,10 @@ class LudoDice extends PositionComponent with TapCallbacks {
     final world = parent?.parent?.parent?.parent?.parent;
     if (world is! World) return; // Ensure the world is available
 
-    final ludoBoard = world.children.whereType<LudoBoard>().first;
 
     // Handle dice roll based on the number
     final handleRoll = GameState().diceNumber == 6 ? _handleSixRoll : _handleNonSixRoll;
-    handleRoll(world, ludoBoard, GameState().diceNumber);
+    handleRoll(world, GameState().ludoBoard as LudoBoard, GameState().diceNumber);
   }
 
   // Apply a 360-degree rotation effect to the dice
@@ -105,7 +104,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
           world: world,
           token: allMovableTokens.first,
           tokenPath: GameState().getTokenPath(player.playerId),
-          ludoBoard: ludoBoard,
         );
       } else if (allMovableTokens.first.state == TokenState.onBoard) {
         _moveForwardSingleToken(
@@ -178,7 +176,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
       token: token,
       tokenPath: GameState().getTokenPath(player.playerId),
       diceNumber: diceNumber,
-      ludoBoard: ludoBoard,
     );
   }
 

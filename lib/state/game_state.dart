@@ -21,6 +21,7 @@ class GameState {
   bool canMoveTokenOnBoard = false;
 
   Vector2 ludoBoardAbsolutePosition = Vector2.zero();
+  Component? ludoBoard;
 
   // Factory method to access the instance
   factory GameState() {
