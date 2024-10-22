@@ -49,9 +49,9 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     FlameAudio.play('dice.mp3');
     // Apply dice rotation effect
-    await _applyDiceRollEffect();
+    _applyDiceRollEffect();
 
-    await Future.delayed(const Duration(milliseconds: 700));
+    await Future.delayed(const Duration(milliseconds: 300));
 
     final world = parent?.parent?.parent?.parent?.parent;
     if (world is! World) return; // Ensure the world is available
@@ -60,7 +60,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     // Handle dice roll based on the number
     final handleRoll = diceNumber == 6 ? _handleSixRoll : _handleNonSixRoll;
-    await handleRoll(world, ludoBoard, diceNumber);
+    handleRoll(world, ludoBoard, diceNumber);
   }
 
   // Apply a 360-degree rotation effect to the dice
@@ -97,7 +97,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     final movableTokens =
         tokensOnBoard.where((token) => token.spaceToMove()).toList();
- 
+
     final allMovableTokens = [...movableTokens, ...tokensInBase];
 
     // if only one token can move, move it
@@ -110,7 +110,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
           ludoBoard: ludoBoard,
         );
       } else if (allMovableTokens.first.state == TokenState.onBoard) {
-        await _moveForwardSingleToken(
+        _moveForwardSingleToken(
             world, ludoBoard, diceNumber, allMovableTokens.first);
       }
       return;
@@ -143,7 +143,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     // if only one token can move, move it
     if (movableTokens.length == 1) {
-      await _moveForwardSingleToken(
+      _moveForwardSingleToken(
           world, ludoBoard, diceNumber, movableTokens.first);
       return;
     } else if (movableTokens.length > 1) {
@@ -174,17 +174,15 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Move the token forward on the board
-  Future<void> _moveForwardSingleToken(
+  void _moveForwardSingleToken(
       World world, LudoBoard ludoBoard, int diceNumber, Token token) async {
-    await moveForward(
+    moveForward(
       world: world,
       token: token,
       tokenPath: getTokenPath(player.playerId),
       diceNumber: diceNumber,
       ludoBoard: ludoBoard,
     );
-    await Future.delayed(const Duration(milliseconds: 300));
-    return Future.value();
   }
 
   LudoDice({required this.faceSize, required this.player}) {

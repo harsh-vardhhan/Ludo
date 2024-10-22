@@ -48,7 +48,7 @@ class Ludo extends FlameGame
 
   @override
   FutureOr<void> onLoad() async {
-    await super.onLoad();
+    super.onLoad();
     camera = CameraComponent.withFixedResolution(
       width: width,
       height: height,
@@ -633,10 +633,10 @@ void applyMoveEffect(World world, Token token, Vector2 targetPosition) async {
   final moveToEffect = MoveToEffect(
     targetPosition,
     EffectController(
-        duration: 0.05, curve: Curves.easeInOut), // Reduced duration
+        duration: 0.1, curve: Curves.easeInOut), // Reduced duration
   );
 
-  await token.add(moveToEffect);
+  token.add(moveToEffect);
   await Future.delayed(const Duration(milliseconds: 100)); // Reduced delay
   tokenCollision(world, token);
 }
