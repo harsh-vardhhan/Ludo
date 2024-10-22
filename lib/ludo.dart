@@ -251,7 +251,7 @@ class Ludo extends FlameGame
 
           final ludoBoardPosition = ludoBoard.absolutePosition;
           const homeSpotSizeFactorX = 0.10;
-          const homeSpotSizeFactorY = 0.50;
+          const homeSpotSizeFactorY = 0.05;
           const tokenSizeFactorX = 0.80;
           const tokenSizeFactorY = 1.05;
 
@@ -331,7 +331,7 @@ class Ludo extends FlameGame
 
           final ludoBoardPosition = ludoBoard.absolutePosition;
           const homeSpotSizeFactorX = 0.10;
-          const homeSpotSizeFactorY = 0.50;
+          const homeSpotSizeFactorY = 0.05;
           const tokenSizeFactorX = 0.80;
           const tokenSizeFactorY = 1.05;
 
@@ -412,7 +412,7 @@ class Ludo extends FlameGame
 
           final ludoBoardPosition = ludoBoard.absolutePosition;
           const homeSpotSizeFactorX = 0.10;
-          const homeSpotSizeFactorY = 0.50;
+          const homeSpotSizeFactorY = 0.05;
           const tokenSizeFactorX = 0.80;
           const tokenSizeFactorY = 1.05;
 
@@ -493,7 +493,7 @@ class Ludo extends FlameGame
 
           final ludoBoardPosition = ludoBoard.absolutePosition;
           const homeSpotSizeFactorX = 0.10;
-          const homeSpotSizeFactorY = 0.50;
+          const homeSpotSizeFactorY = 0.05;
           const tokenSizeFactorX = 0.80;
           const tokenSizeFactorY = 1.05;
 
@@ -852,59 +852,45 @@ Vector2 tokenOriginalSize(world) {
   return originalSize;
 }
 
-void moveForward({
+Future<void> moveForward({
   required World world,
   required Token token,
   required List<String> tokenPath,
   required int diceNumber,
   required PositionComponent ludoBoard,
 }) async {
+  // get all spots
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
-  final originalSize = tokenOriginalSize(world).clone();
-  final bigSize = Vector2(originalSize.x * 1.30, originalSize.y * 1.30).clone();
 
-  // Precompute target positions
-  List<Vector2> targetPositions = [];
+  // Preload audio to avoid delays during playback
+  FlameAudio.audioCache.load('move.mp3');
+
+  // Precompute the initial audio play flag
+  bool audioPlayed = false;
+
+
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     String positionId = tokenPath[i];
-    targetPositions.add(SpotManager().findSpotById(positionId).tokenPosition);
-  }
+    token.positionId = positionId;
 
-  // Move token to each target position
-  for (int i = 0; i < targetPositions.length; i++) {
-    token.positionId = tokenPath[currentIndex + 1 + i];
+    // Play audio only once per move
+    if (!audioPlayed) {
+      FlameAudio.play('move.mp3');
+      audioPlayed = true;
+    }
 
-    FlameAudio.play('move.mp3');
-
-    // Apply size increase and move effects in parallel
-    await Future.wait([
-      _applyEffect(
-        token,
-        SizeEffect.to(
-          bigSize,
-          EffectController(duration: 0.1),
-        ),
-      ),
-      _applyEffect(
-        token,
-        MoveToEffect(
-          targetPositions[i],
-          EffectController(duration: 0.1, curve: Curves.easeInOut),
-        ),
-      ),
-    ]);
-
-    // Restore token to original size
+    // Apply move effect only, remove size effect to reduce load
     await _applyEffect(
       token,
-      SizeEffect.to(
-        originalSize,
-        EffectController(duration: 0.1),
+      MoveToEffect(
+        SpotManager().getSpots().firstWhere((spot) => spot.uniqueId == positionId).tokenPosition,
+        EffectController(duration: 0.1, curve: Curves.easeInOut),
       ),
     );
 
-    await Future.delayed(const Duration(milliseconds: 150));
+    // Reduce delay to improve performance
+    await Future.delayed(const Duration(milliseconds: 50));
   }
 
   // if token is in home

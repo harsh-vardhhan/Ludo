@@ -60,53 +60,22 @@ class Token extends PositionComponent with TapCallbacks {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Save the canvas state before transformation
-    canvas.save();
-
-    // Move the canvas origin to the center of the component and rotate it by 180 degrees
-    canvas.translate(size.x / 2, size.y / 2);
-    canvas.rotate(3.14); // Rotate by 180 degrees (π radians)
-    canvas.translate(
-        -size.x / 2, -size.y / 2); // Move back to top-left of the component
-
-    // Draw the droplet shape
-    final path = Path();
-
-    // Define the droplet's body (bottom is a half-circle, top is a sharp point)
-    final baseRadius = size.x / 2;
-    final bottomCenter = Offset(size.x / 2, size.y - baseRadius);
-
-    // Draw the half-circle with transparent paint
-    path.arcTo(
-      Rect.fromCircle(center: bottomCenter, radius: baseRadius),
-      0, // Start angle
-      3.14, // Sweep angle (half-circle)
-      false,
-    );
-
-    // Draw lines forming the point at the top of the droplet with visible paint
-    path.lineTo(size.x / 2, 0); // Top point of the droplet
-    path.lineTo(size.x, size.y - baseRadius); // Connect to bottom-right
-
-    // Close the path
-    path.close();
-
-    // Fill the droplet shape with grey (or specified color)
-    canvas.drawPath(path, dropletFillPaint);
-
-    // Draw the droplet border with visible paint
-    canvas.drawPath(path, borderPaint);
-
-    // Now, draw a smaller circle inside the droplet at the bottom
+    // Define the radius of the outer circle
+    final outerRadius = size.x / 2;
+    // Define the radius of the smaller inner circle
     final smallerCircleRadius =
-        baseRadius / 1.7; // Radius of the smaller circle
-    final smallerCircleCenter = Offset(size.x / 2, size.y - baseRadius);
+        outerRadius / 1.7; // Radius of the smaller circle
 
-    // Draw the smaller circle
-    canvas.drawCircle(smallerCircleCenter, smallerCircleRadius, fillPaint);
+    // Define the center of the circles
+    final center = Offset(size.x / 2, size.y / 2);
 
-    // Restore the canvas state
-    canvas.restore();
+    // Draw the outer circle with white fill
+    canvas.drawCircle(center, outerRadius,
+        Paint()..color = Colors.white); // Draw outer circle
+    canvas.drawCircle(center, outerRadius, borderPaint); // Draw border
+
+    // Draw the smaller inner circle with the specified innerCircleColor
+    canvas.drawCircle(center, smallerCircleRadius, fillPaint);
   }
 
   @override
