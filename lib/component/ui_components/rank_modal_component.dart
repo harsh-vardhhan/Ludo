@@ -94,10 +94,6 @@ class RankModalComponent extends PositionComponent with TapCallbacks {
         (rectangleHeight - suffixText.height) / 2,
       );
 
-      // Add the text components to the rectangle
-      playerRectangle.add(rankText);
-      playerRectangle.add(suffixText);
-
       // Add the player ID text component
       final playerIdText = TextComponent(
         text: ' ${player.playerId}',
@@ -115,7 +111,7 @@ class RankModalComponent extends PositionComponent with TapCallbacks {
         (rectangleHeight - playerIdText.height) / 2,
       );
 
-      playerRectangle.add(playerIdText);
+      playerRectangle.addAll([rankText, suffixText, playerIdText]);
 
       // Add the rectangle to the parent
       add(playerRectangle);

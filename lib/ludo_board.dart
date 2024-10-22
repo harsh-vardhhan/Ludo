@@ -42,8 +42,8 @@ class LudoBoard extends PositionComponent {
 
     final secondComponent = RectangleComponent(
         size: Vector2(shortDimension, longDimension),
-        position: Vector2(
-            longDimension + horizontalSpacing, rowOne * longDimension),
+        position:
+            Vector2(longDimension + horizontalSpacing, rowOne * longDimension),
         children: [GreenGridComponent(size: shortDimension * 0.3333)]);
 
     final thirdComponent = RectangleComponent(
@@ -66,8 +66,8 @@ class LudoBoard extends PositionComponent {
 
     final fifthComponent = RectangleComponent(
         size: Vector2(shortDimension, shortDimension),
-        position: Vector2(
-            longDimension + horizontalSpacing, rowTwo * longDimension),
+        position:
+            Vector2(longDimension + horizontalSpacing, rowTwo * longDimension),
         children: [
           DiagonalRectangleComponent(size: Vector2.all(shortDimension))
         ]);
@@ -92,8 +92,8 @@ class LudoBoard extends PositionComponent {
 
     final eigthComponent = RectangleComponent(
         size: Vector2(shortDimension, longDimension),
-        position: Vector2(longDimension + horizontalSpacing,
-            longDimension + shortDimension),
+        position: Vector2(
+            longDimension + horizontalSpacing, longDimension + shortDimension),
         children: [BlueGridComponent(size: shortDimension * 0.3333)]);
 
     final ninthComponent = RectangleComponent(
@@ -109,16 +109,17 @@ class LudoBoard extends PositionComponent {
           )
         ]);
 
-    // Add all components to the LudoBoard
-    add(firstComponent);
-    add(secondComponent);
-    add(thirdComponent);
-    add(fourthComponent);
-    add(fifthComponent);
-    add(sixthComponent);
-    add(seventhComponent);
-    add(eigthComponent);
-    add(ninthComponent);
+    addAll([
+      firstComponent,
+      secondComponent,
+      thirdComponent,
+      fourthComponent,
+      fifthComponent,
+      sixthComponent,
+      seventhComponent,
+      eigthComponent,
+      ninthComponent
+    ]);
 
     // Set the position of the LudoBoard
     this.position = position ?? Vector2.zero();
@@ -150,8 +151,7 @@ class DiagonalRectangleComponent extends PositionComponent {
     final center = Offset(
         (topLeft.dx + bottomRight.dx) / 2, (topLeft.dy + bottomRight.dy) / 2);
 
-    centerRedTriangle = Vector2(
-        (topLeft.dx + center.dx + bottomLeft.dx) / 3,
+    centerRedTriangle = Vector2((topLeft.dx + center.dx + bottomLeft.dx) / 3,
         (topLeft.dy + center.dy + bottomLeft.dy) / 3);
     centerYellowTriangle = Vector2(
         (bottomRight.dx + center.dx + topRight.dx) / 3,
@@ -159,8 +159,7 @@ class DiagonalRectangleComponent extends PositionComponent {
     centerBlueTriangle = Vector2(
         (bottomLeft.dx + center.dx + bottomRight.dx) / 3,
         (bottomLeft.dy + center.dy + bottomRight.dy) / 3);
-    centerGreenTriangle = Vector2(
-        (topRight.dx + center.dx + topLeft.dx) / 3,
+    centerGreenTriangle = Vector2((topRight.dx + center.dx + topLeft.dx) / 3,
         (topRight.dy + center.dy + topLeft.dy) / 3);
   }
 
@@ -231,12 +230,15 @@ class DiagonalRectangleComponent extends PositionComponent {
 
     // Draw the triangles and borders
     _drawTriangle(canvas, redPaint, borderPaint, topLeft, center, bottomLeft);
-    _drawTriangle(canvas, yellowPaint, borderPaint, bottomRight, center, topRight);
-    _drawTriangle(canvas, bluePaint, borderPaint, bottomLeft, center, bottomRight);
+    _drawTriangle(
+        canvas, yellowPaint, borderPaint, bottomRight, center, topRight);
+    _drawTriangle(
+        canvas, bluePaint, borderPaint, bottomLeft, center, bottomRight);
     _drawTriangle(canvas, greenPaint, borderPaint, topRight, center, topLeft);
   }
 
-  void _drawTriangle(Canvas canvas, Paint fillPaint, Paint borderPaint, Offset p1, Offset p2, Offset p3) {
+  void _drawTriangle(Canvas canvas, Paint fillPaint, Paint borderPaint,
+      Offset p1, Offset p2, Offset p3) {
     Path triangle = Path()
       ..moveTo(p1.dx, p1.dy)
       ..lineTo(p2.dx, p2.dy)
@@ -246,7 +248,6 @@ class DiagonalRectangleComponent extends PositionComponent {
     canvas.drawPath(triangle, borderPaint);
   }
 }
-
 
 // Define transparentPaint
 final Paint transparentPaint = Paint()..color = const Color(0x00000000);
