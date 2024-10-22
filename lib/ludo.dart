@@ -865,8 +865,7 @@ Future<void> moveForward({
   bool audioPlayed = false;
 
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
-    String positionId = tokenPath[i];
-    token.positionId = positionId;
+    token.positionId = tokenPath[i];
 
     // Play audio only once per move
     if (!audioPlayed) {
@@ -880,14 +879,11 @@ Future<void> moveForward({
       MoveToEffect(
         SpotManager()
             .getSpots()
-            .firstWhere((spot) => spot.uniqueId == positionId)
+            .firstWhere((spot) => spot.uniqueId == token.positionId)
             .tokenPosition,
         EffectController(duration: 0.15, curve: Curves.easeInOut),
       ),
     );
-
-    // Reduce delay to improve performance
-    // await Future.delayed(const Duration(milliseconds: 50));
   }
 
   // if token is in home
