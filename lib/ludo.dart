@@ -885,7 +885,7 @@ Future<void> moveForward({
             .getSpots()
             .firstWhere((spot) => spot.uniqueId == positionId)
             .tokenPosition,
-        EffectController(duration: 0.2, curve: Curves.easeInOut),
+        EffectController(duration: 0.15, curve: Curves.easeInOut),
       ),
     );
 
