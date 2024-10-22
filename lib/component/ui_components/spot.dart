@@ -70,8 +70,8 @@ class Spot extends RectangleComponent {
   }
 
   @override
-  Future<void> onLoad() async {
-    await super.onLoad();
+  void onLoad() {
+    super.onLoad();
     final token = TokenManager().allTokens.first;
     final tokenSizeAdjustmentX = token.size.x * 0.10;
     final tokenSizeAdjustmentY = token.size.x * 0.50;

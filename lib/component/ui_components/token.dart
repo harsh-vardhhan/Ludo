@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
@@ -112,7 +111,7 @@ class Token extends PositionComponent with TapCallbacks {
   }
 
   @override
-  Future<void> onTapDown(TapDownEvent event) async {
+  void onTapDown(TapDownEvent event) async {
     super.onTapDown(event);
 
     final world = parent?.parent;
@@ -137,9 +136,8 @@ class Token extends PositionComponent with TapCallbacks {
             tokenPath: getTokenPath(playerId),
             ludoBoard: ludoBoard);
         // Consider reducing delay or making it conditional
-        await Future.delayed(const Duration(milliseconds: 100));
       } else if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
-        await moveForward(
+        moveForward(
             world: world,
             token: this,
             tokenPath: getTokenPath(playerId),
@@ -151,7 +149,7 @@ class Token extends PositionComponent with TapCallbacks {
 
     // Non-six logic
     if (state == TokenState.onBoard && gameState.canMoveTokenOnBoard) {
-      await moveForward(
+       moveForward(
           world: world,
           token: this,
           tokenPath: getTokenPath(playerId),

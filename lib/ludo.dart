@@ -633,11 +633,10 @@ void applyMoveEffect(World world, Token token, Vector2 targetPosition) async {
   final moveToEffect = MoveToEffect(
     targetPosition,
     EffectController(
-        duration: 0.1, curve: Curves.easeInOut), // Reduced duration
+        duration: 5, curve: Curves.easeInOut), // Reduced duration
   );
 
-  token.add(moveToEffect);
-  await Future.delayed(const Duration(milliseconds: 100)); // Reduced delay
+  token.add(moveToEffect); // Reduced delay
   tokenCollision(world, token);
 }
 
@@ -872,7 +871,7 @@ Vector2 tokenOriginalSize(world) {
   return originalSize;
 }
 
-Future<void> moveForward({
+void moveForward({
   required World world,
   required Token token,
   required List<String> tokenPath,

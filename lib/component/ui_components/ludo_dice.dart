@@ -33,7 +33,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   final Player player;
 
   @override
-  Future<void> onTapDown(TapDownEvent event) async {
+  void onTapDown(TapDownEvent event) async {
     if (!player.enableDice ||
         !player.isCurrentTurn ||
         player != gameState.currentPlayer) {
@@ -78,7 +78,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Handle logic when the player rolls a 6
-  Future<void> _handleSixRoll(
+  void _handleSixRoll(
       World world, LudoBoard ludoBoard, int diceNumber) async {
     player.grantAnotherTurn();
 
@@ -123,7 +123,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Handle logic for non-six dice rolls
-  Future<void> _handleNonSixRoll(
+  void _handleNonSixRoll(
       World world, LudoBoard ludoBoard, int diceNumber) async {
     final tokensOnBoard = player.tokens
         .where((token) => token.state == TokenState.onBoard)
@@ -155,7 +155,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Enable manual selection if multiple tokens can move
-  Future<void> _enableManualTokenSelection(
+  void _enableManualTokenSelection(
       List<Token> tokensInBase, List<Token> tokensOnBoard) {
     player.enableDice = false;
     for (var token in player.tokens) {
@@ -170,7 +170,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
       addTokenTrail(tokensOnBoard);
       gameState.enableMoveOnBoard();
     }
-    return Future.value();
   }
 
   // Move the token forward on the board
