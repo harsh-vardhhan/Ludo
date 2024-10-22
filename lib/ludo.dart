@@ -1050,8 +1050,12 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
       playersWhoNotWon.first.rank = players.length; // Rank last player
       player.rank = playersWhoWon.length; // Set rank for current player
       // Disable dice for all players
-      players.forEach((p) => p.enableDice = false);
-      TokenManager().allTokens.forEach((t) => t.enableToken = false);
+      for (var p in players) {
+        p.enableDice = false;
+      }
+      for (var t in TokenManager().allTokens) {
+        t.enableToken = false;
+      }
       EventBus().emit(OpenPlayerModalEvent());
     } else {
       // Set rank for current player
@@ -1064,7 +1068,9 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
   player.enableDice = true;
 
   // Disable tokens for current player
-  player.tokens.forEach((t) => t.enableToken = false);
+  for (var t in player.tokens) {
+    t.enableToken = false;
+  }
 
   // Reset extra turns if applicable
   if (player.hasRolledThreeConsecutiveSixes()) {
@@ -1074,3 +1080,4 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
   player.grantAnotherTurn();
   return true;
 }
+
