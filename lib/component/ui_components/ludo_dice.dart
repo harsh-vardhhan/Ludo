@@ -12,7 +12,6 @@ import '../../state/game_state.dart';
 import '../../state/player.dart';
 import '../../ludo_board.dart';
 import 'token.dart';
-import '../../state/token_path.dart';
 import '../../ludo.dart';
 
 class LudoDice extends PositionComponent with TapCallbacks {
@@ -21,7 +20,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   static const double innerSizeFactor =
       0.9; // Precomputed factor for inner size
 
-  final gameState = GameState();
+  // final gameState = GameState();
   final double faceSize; // size of the square
   late final double borderRadius; // radius of the curved edges
   late final double innerRectangleWidth; // width of the inner rectangle
@@ -36,16 +35,15 @@ class LudoDice extends PositionComponent with TapCallbacks {
   void onTapDown(TapDownEvent event) async {
     if (!player.enableDice ||
         !player.isCurrentTurn ||
-        player != gameState.currentPlayer) {
+        player != GameState().currentPlayer) {
       return; // Exit if the player cannot roll the dice
     }
     // Disable dice to prevent multiple taps
     player.enableDice = false;
 
     // Roll the dice and update the dice face
-    final int diceNumber = Random().nextInt(6) + 1;
-    gameState.diceNumber = diceNumber;
-    diceFace.updateDiceValue(diceNumber);
+    GameState().diceNumber =  Random().nextInt(6) + 1;
+    diceFace.updateDiceValue(GameState().diceNumber);
 
     FlameAudio.play('dice.mp3');
     // Apply dice rotation effect
@@ -59,8 +57,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
     final ludoBoard = world.children.whereType<LudoBoard>().first;
 
     // Handle dice roll based on the number
-    final handleRoll = diceNumber == 6 ? _handleSixRoll : _handleNonSixRoll;
-    handleRoll(world, ludoBoard, diceNumber);
+    final handleRoll = GameState().diceNumber == 6 ? _handleSixRoll : _handleNonSixRoll;
+    handleRoll(world, ludoBoard, GameState().diceNumber);
   }
 
   // Apply a 360-degree rotation effect to the dice
@@ -83,7 +81,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     player.grantAnotherTurn();
 
     if (player.hasRolledThreeConsecutiveSixes()) {
-      gameState.switchToNextPlayer();
+      GameState().switchToNextPlayer();
       return;
     }
     // Filter tokens once and reuse the lists
@@ -106,7 +104,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
         moveOutOfBase(
           world: world,
           token: allMovableTokens.first,
-          tokenPath: getTokenPath(player.playerId),
+          tokenPath: GameState().getTokenPath(player.playerId),
           ludoBoard: ludoBoard,
         );
       } else if (allMovableTokens.first.state == TokenState.onBoard) {
@@ -117,7 +115,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     } else if (allMovableTokens.length > 1) {
       _enableManualTokenSelection(tokensInBase, tokensOnBoard);
     } else if (allMovableTokens.isEmpty) {
-      gameState.switchToNextPlayer();
+      GameState().switchToNextPlayer();
       return;
     }
   }
@@ -131,7 +129,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     // if no tokens on board, switch to next player
     if (tokensOnBoard.isEmpty) {
-      gameState.switchToNextPlayer();
+      GameState().switchToNextPlayer();
       return;
     }
 
@@ -149,7 +147,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     } else if (movableTokens.length > 1) {
       _enableManualTokenSelection(tokensInBase, tokensOnBoard);
     } else if (movableTokens.isEmpty) {
-      gameState.switchToNextPlayer();
+      GameState().switchToNextPlayer();
       return;
     }
   }
@@ -162,13 +160,13 @@ class LudoDice extends PositionComponent with TapCallbacks {
       token.enableToken = true;
     }
     if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
-      gameState.enableMoveFromBoth();
+      GameState().enableMoveFromBoth();
       addTokenTrail(tokensOnBoard);
     } else if (tokensInBase.isNotEmpty && tokensOnBoard.isEmpty) {
-      gameState.enableMoveFromBase();
+      GameState().enableMoveFromBase();
     } else if (tokensOnBoard.isNotEmpty && tokensInBase.isEmpty) {
       addTokenTrail(tokensOnBoard);
-      gameState.enableMoveOnBoard();
+      GameState().enableMoveOnBoard();
     }
   }
 
@@ -178,7 +176,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     moveForward(
       world: world,
       token: token,
-      tokenPath: getTokenPath(player.playerId),
+      tokenPath: GameState().getTokenPath(player.playerId),
       diceNumber: diceNumber,
       ludoBoard: ludoBoard,
     );

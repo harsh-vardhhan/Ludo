@@ -13,7 +13,6 @@ import 'state/token_manager.dart';
 import 'state/event_bus.dart';
 import 'component/home/home_spot.dart';
 import 'state/game_state.dart';
-import 'state/token_path.dart';
 import 'component/controller/upper_controller.dart';
 import 'component/controller/lower_controller.dart';
 import 'ludo_board.dart';
@@ -241,10 +240,9 @@ class Ludo extends FlameGame
   Future<void> startGame() async {
     await TokenManager().clearTokens();
     await GameState().clearPlayers();
-    final gameState = GameState();
     final ludoBoard = world.children.whereType<LudoBoard>().first;
     final ludoBoardAbsolutePosition = ludoBoard.absolutePosition;
-    gameState.ludoBoardAbsolutePosition = ludoBoardAbsolutePosition;
+    GameState().ludoBoardAbsolutePosition = ludoBoardAbsolutePosition;
 
     for (var team in teams) {
       if (team == 'BP') {
@@ -282,33 +280,33 @@ class Ludo extends FlameGame
           }
 
           const playerId = 'BP';
-          final tokens = TokenManager().getBlueTokens();
+          // final tokens = TokenManager().getBlueTokens();
 
-          if (gameState.players.isEmpty) {
+          if (GameState().players.isEmpty) {
             blinkBlueBase(true);
             Player bluePlayer = Player(
               playerId: playerId,
-              tokens: tokens,
+              tokens: TokenManager().getBlueTokens(),
               isCurrentTurn: true,
               enableDice: true,
             );
-            gameState.players.add(bluePlayer);
-            for (var token in tokens) {
+            GameState().players.add(bluePlayer);
+            for (var token in TokenManager().getBlueTokens()) {
               token.playerId = bluePlayer.playerId;
               token.enableToken = true;
             }
           } else {
             Player bluePlayer = Player(
               playerId: playerId,
-              tokens: tokens,
+              tokens: TokenManager().getBlueTokens(),
             );
-            gameState.players.add(bluePlayer);
-            for (var token in tokens) {
+            GameState().players.add(bluePlayer);
+            for (var token in TokenManager().getBlueTokens()) {
               token.playerId = bluePlayer.playerId;
             }
           }
 
-          final player = gameState.players
+          final player = GameState().players
               .firstWhere((player) => player.playerId == playerId);
 
           // dice for player blue
@@ -362,34 +360,34 @@ class Ludo extends FlameGame
           }
 
           const playerId = 'GP';
-          final tokens = TokenManager().getGreenTokens();
+          // final tokens = TokenManager().getGreenTokens();
 
-          if (gameState.players.isEmpty) {
+          if (GameState().players.isEmpty) {
             blinkGreenBase(true);
             Player greenPlayer = Player(
               playerId: playerId,
-              tokens: tokens,
+              tokens: TokenManager().getGreenTokens(),
               isCurrentTurn: true,
               enableDice: true,
             );
-            gameState.players.add(greenPlayer);
-            for (var token in tokens) {
+            GameState().players.add(greenPlayer);
+            for (var token in TokenManager().getGreenTokens()) {
               token.playerId = greenPlayer.playerId;
               token.enableToken = true;
             }
           } else {
             Player greenPlayer = Player(
               playerId: playerId,
-              tokens: tokens,
+              tokens: TokenManager().getGreenTokens(),
             );
-            gameState.players.add(greenPlayer);
-            for (var token in tokens) {
+            GameState().players.add(greenPlayer);
+            for (var token in TokenManager().getGreenTokens()) {
               token.playerId = greenPlayer.playerId;
               token.enableToken = false;
             }
           }
 
-          final player = gameState.players
+          final player = GameState().players
               .firstWhere((player) => player.playerId == playerId);
 
           // dice for player green
@@ -443,34 +441,34 @@ class Ludo extends FlameGame
           }
 
           const playerId = 'YP';
-          final tokens = TokenManager().getYellowTokens();
+          // final tokens = TokenManager().getYellowTokens();
 
-          if (gameState.players.isEmpty) {
+          if (GameState().players.isEmpty) {
             blinkYellowBase(true);
             Player yellowPlayer = Player(
               playerId: playerId,
-              tokens: tokens,
+              tokens: TokenManager().getYellowTokens(),
               isCurrentTurn: true,
               enableDice: true,
             );
-            gameState.players.add(yellowPlayer);
-            for (var token in tokens) {
+            GameState().players.add(yellowPlayer);
+            for (var token in TokenManager().getYellowTokens()) {
               token.playerId = yellowPlayer.playerId;
               token.enableToken = true;
             }
           } else {
             Player yellowPlayer = Player(
               playerId: playerId,
-              tokens: tokens,
+              tokens: TokenManager().getYellowTokens(),
             );
-            gameState.players.add(yellowPlayer);
-            for (var token in tokens) {
+            GameState().players.add(yellowPlayer);
+            for (var token in TokenManager().getYellowTokens()) {
               token.playerId = yellowPlayer.playerId;
               token.enableToken = false;
             }
           }
 
-          final player = gameState.players
+          final player = GameState().players
               .firstWhere((player) => player.playerId == playerId);
 
           // dice for player yellow
@@ -524,34 +522,34 @@ class Ludo extends FlameGame
           }
 
           const playerId = 'RP';
-          final tokens = TokenManager().getRedTokens();
+          // final tokens = TokenManager().getRedTokens();
 
-          if (gameState.players.isEmpty) {
+          if (GameState().players.isEmpty) {
             blinkRedBase(true);
             Player redPlayer = Player(
               playerId: playerId,
-              tokens: tokens,
+              tokens:  TokenManager().getRedTokens(),
               isCurrentTurn: true,
               enableDice: true,
             );
-            gameState.players.add(redPlayer);
-            for (var token in tokens) {
+            GameState().players.add(redPlayer);
+            for (var token in  TokenManager().getRedTokens()) {
               token.playerId = redPlayer.playerId;
               token.enableToken = true;
             }
           } else {
             Player redPlayer = Player(
               playerId: playerId,
-              tokens: tokens,
+              tokens:  TokenManager().getRedTokens(),
             );
-            gameState.players.add(redPlayer);
-            for (var token in tokens) {
+            GameState().players.add(redPlayer);
+            for (var token in  TokenManager().getRedTokens()) {
               token.playerId = redPlayer.playerId;
               token.enableToken = false;
             }
           }
 
-          final player = gameState.players
+          final player = GameState().players
               .firstWhere((player) => player.playerId == playerId);
 
           // dice for player yellow
@@ -616,33 +614,20 @@ void moveOutOfBase({
   token.positionId = tokenPath.first;
   token.state = TokenState.onBoard;
 
-  // Create an instance of SpotManager
-  SpotManager spotManager = SpotManager();
-
-  // Get the first spot (starting point) from the path
-  Spot spot = spotManager.findSpotById(tokenPath.first);
-
-  // Calculate the target position on the board
-  Vector2 targetPosition = spot.tokenPosition;
-
-  // Apply the movement effect to move the token out of base
-  // applyMoveEffect(world, token, targetPosition);
-
   await _applyEffect(
       token,
-      MoveToEffect(targetPosition,
+      MoveToEffect(SpotManager().findSpotById(tokenPath.first).tokenPosition,
           EffectController(duration: 0.1, curve: Curves.easeInOut)));
 
   tokenCollision(world, token);
 }
 
 void tokenCollision(World world, Token attackerToken) async {
-  final gameState = GameState();
   final ludoBoard = world.children.whereType<LudoBoard>().first;
   final spotId = attackerToken.positionId;
-  final tokens = TokenManager().allTokens;
+  // final tokens = TokenManager().allTokens;
   final tokensOnSpot =
-      tokens.where((token) => token.positionId == spotId).toList();
+      TokenManager().allTokens.where((token) => token.positionId == spotId).toList();
 
   // Initialize the flag to track if any token was attacked
   bool wasTokenAttacked = false;
@@ -660,7 +645,7 @@ void tokenCollision(World world, Token attackerToken) async {
       moveBackward(
         world: world,
         token: token,
-        tokenPath: getTokenPath(token.playerId),
+        tokenPath: GameState().getTokenPath(token.playerId),
         ludoBoard: ludoBoard,
       ).then((_) {
         wasTokenAttacked = true;
@@ -671,13 +656,13 @@ void tokenCollision(World world, Token attackerToken) async {
     await Future.wait(tokensToMove.map((token) => moveBackward(
           world: world,
           token: token,
-          tokenPath: getTokenPath(token.playerId),
+          tokenPath: GameState().getTokenPath(token.playerId),
           ludoBoard: ludoBoard,
         )));
   }
 
   // Grant another turn or switch to next player
-  final player = gameState.players
+  final player = GameState().players
       .firstWhere((player) => player.playerId == attackerToken.playerId);
 
   if (wasTokenAttacked) {
@@ -686,8 +671,8 @@ void tokenCollision(World world, Token attackerToken) async {
     }
     player.grantAnotherTurn();
   } else {
-    if (gameState.diceNumber != 6) {
-      gameState.switchToNextPlayer();
+    if (GameState().diceNumber != 6) {
+      GameState().switchToNextPlayer();
     }
   }
 
@@ -721,11 +706,11 @@ void resizeTokensOnSpot(World world, LudoBoard ludoBoard) {
   };
 
   // Get all tokens
-  final tokens = TokenManager().allTokens;
+  // final tokens = TokenManager().allTokens;
 
   // Group tokens by position ID
   final Map<String, List<Token>> tokensByPositionId = {};
-  for (var token in tokens) {
+  for (var token in TokenManager().allTokens) {
     if (!tokensByPositionId.containsKey(token.positionId)) {
       tokensByPositionId[token.positionId] = [];
     }
@@ -883,8 +868,7 @@ void moveForward({
   List<Vector2> targetPositions = [];
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     String positionId = tokenPath[i];
-    final spot = SpotManager().findSpotById(positionId);
-    targetPositions.add(spot.tokenPosition);
+    targetPositions.add(SpotManager().findSpotById(positionId).tokenPosition);
   }
 
   // Move token to each target position
@@ -1010,13 +994,11 @@ Future<void> moveTokenToBase({
       token.state = TokenState.inBase;
     }
   }
-  final spot = SpotManager().findSpotById(token.positionId);
-  final targetPosition = spot.position;
 
   await _applyEffect(
     token,
     MoveToEffect(
-      targetPosition,
+      SpotManager().findSpotById(token.positionId).position,
       EffectController(duration: 0.03, curve: Curves.easeInOut),
     ),
   );
@@ -1033,8 +1015,8 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
   token.state = TokenState.inHome;
 
   // Cache players from GameState
-  final players = GameState().players;
-  final player = players.firstWhere((p) => p.playerId == token.playerId);
+  // final players = GameState().players;
+  final player = GameState().players.firstWhere((p) => p.playerId == token.playerId);
   player.totalTokensInHome++;
 
   // Handle win condition
@@ -1042,15 +1024,15 @@ Future<bool> checkTokenInHomeAndHandle(Token token) async {
     player.hasWon = true;
 
     // Get winners and non-winners
-    final playersWhoWon = players.where((p) => p.hasWon).toList();
-    final playersWhoNotWon = players.where((p) => !p.hasWon).toList();
+    final playersWhoWon = GameState().players.where((p) => p.hasWon).toList();
+    final playersWhoNotWon = GameState().players.where((p) => !p.hasWon).toList();
 
     // End game condition
-    if (playersWhoWon.length == players.length - 1) {
-      playersWhoNotWon.first.rank = players.length; // Rank last player
+    if (playersWhoWon.length == GameState().players.length - 1) {
+      playersWhoNotWon.first.rank = GameState().players.length; // Rank last player
       player.rank = playersWhoWon.length; // Set rank for current player
       // Disable dice for all players
-      for (var p in players) {
+      for (var p in GameState().players) {
         p.enableDice = false;
       }
       for (var t in TokenManager().allTokens) {

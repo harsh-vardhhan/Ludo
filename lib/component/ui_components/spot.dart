@@ -72,9 +72,8 @@ class Spot extends RectangleComponent {
   @override
   void onLoad() {
     super.onLoad();
-    final token = TokenManager().allTokens.first;
-    final tokenSizeAdjustmentX = token.size.x * 0.10;
-    final tokenSizeAdjustmentY = token.size.x * 0.50;
+    final tokenSizeAdjustmentX = TokenManager().allTokens.first.size.x * 0.10;
+    final tokenSizeAdjustmentY = TokenManager().allTokens.first.size.x * 0.50;
     final spotGlobalPosition = absolutePositionOf(Vector2.zero());
     final ludoBoardGlobalPosition = GameState().ludoBoardAbsolutePosition;
     tokenPosition = Vector2(
