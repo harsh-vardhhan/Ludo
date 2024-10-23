@@ -2,19 +2,18 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class ArrowIconComponent extends PositionComponent {
-  final IconData arrowIcon;
-  final Paint borderPaint;
+  final Paint paint; // Paint for the triangle fill
+  final String point; // Direction to point the triangle
 
   ArrowIconComponent({
-    required IconData icon,
+    required this.point, // Accept the direction as a parameter
     required double size,
-    required Vector2 position, // Make position a required parameter
-    Color borderColor = Colors.black,
-  })  : arrowIcon = icon,
-        borderPaint = Paint()
-          ..color = borderColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0 {
+    required Vector2 position,
+    Color fillColor = Colors.black, // Fill color for the triangle
+  })  : paint = Paint()
+          ..color = fillColor // Use the fill color
+          ..style = PaintingStyle.fill,
+        super() {
     this.size = Vector2.all(size); // Set the size of the component
     this.position = position; // Set the position
   }
@@ -23,31 +22,39 @@ class ArrowIconComponent extends PositionComponent {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Create a TextPainter to render the icon
-    TextPainter textPainter = TextPainter(
-      text: TextSpan(
-        text: String.fromCharCode(arrowIcon.codePoint),
-        style: TextStyle(
-          fontSize: size.x, // Font size for the arrow
-          color: borderPaint.color,
-          fontFamily: arrowIcon.fontFamily, // Use the FontAwesome font
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
+    // Calculate the triangle points
+    final path = Path();
+    path.moveTo(size.x / 2, 0); // Top point
+    path.lineTo(0, size.y); // Bottom left point
+    path.lineTo(size.x, size.y); // Bottom right point
+    path.close(); // Close the path to create the triangle
 
-    // Calculate the offset to center the text within the component
-    double xOffset = (size.x - textPainter.width) / 2;
-    double yOffset = (size.y - textPainter.height) / 2;
-
-    // Center the arrow in the component
+    // Save the canvas state
     canvas.save();
-    canvas.translate(xOffset, yOffset);
 
-    // Draw the arrow icon
-    textPainter.paint(canvas, Offset.zero);
+    // Rotate the canvas based on the specified direction
+    switch (point.toLowerCase()) {
+      case 'north':
+        canvas.rotate(0); // 0 degrees
+        break;
+      case 'south':
+        canvas.rotate(3.14159); // 180 degrees
+        break;
+      case 'east':
+        canvas.rotate(1.5708); // 90 degrees
+        break;
+      case 'west':
+        canvas.rotate(-1.5708); // -90 degrees
+        break;
+      default:
+        // Optional: Handle invalid direction
+        break;
+    }
 
-    // Restore the canvas
+    // Draw the triangle using the fill color
+    canvas.drawPath(path, paint); // Fill the triangle
+
+    // Restore the canvas to its previous state
     canvas.restore();
   }
 

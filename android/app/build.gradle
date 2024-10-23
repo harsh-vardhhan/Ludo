@@ -34,25 +34,6 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-
-    signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-        }
-    }
-
-    buildTypes {
-        release {
-            // Use the release signing config to sign the APK with your keystore.
-            signingConfig signingConfigs.release
-            minifyEnabled false // Set to true if you want to enable code shrinking.
-            shrinkResources false // Set to true if you want to shrink resources.
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
 }
 
 flutter {

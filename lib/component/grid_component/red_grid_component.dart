@@ -29,10 +29,8 @@ class RedGridComponent extends PositionComponent {
     final double sizeX = size.x;
     final double halfSizeX = sizeX / 2;
     final double strokeWidth = sizeX * 0.025;
-    final double starInnerRadius = sizeX * 0.24;
-    final double starOuterRadius = sizeX * 0.48;
-    final double arrowSize = sizeX * 0.90;
-    final Vector2 arrowPosition = Vector2(sizeX * 0.05, sizeX * 0.05);
+    final double arrowSize = sizeX * 0.50;
+    final Vector2 arrowPosition = Vector2(sizeX * 0.75, sizeX * 0.25);
     final TextPaint textRenderer = TextPaint(
       style: TextStyle(
         color: Colors.black,
@@ -51,7 +49,8 @@ class RedGridComponent extends PositionComponent {
 
         var rectangle = Spot(
           uniqueId: uniqueId,
-          position: Vector2(col * (sizeX + columnSpacing), row * (sizeX + spacing)),
+          position:
+              Vector2(col * (sizeX + columnSpacing), row * (sizeX + spacing)),
           size: Vector2.all(sizeX),
           paint: Paint()..color = color,
           children: [
@@ -65,16 +64,16 @@ class RedGridComponent extends PositionComponent {
               children: [
                 if (col == 2 && row == 2)
                   StarComponent(
-                    size: size,
-                    innerRadius: starInnerRadius,
-                    outerRadius: starOuterRadius,
+                    size: size * 0.90,
+                    position: Vector2(size.x * 0.05, size.x * 0.05),
                   ),
                 if (col == 0 && row == 1)
                   ArrowIconComponent(
-                    icon: Icons.east,
-                    size: arrowSize,
+                    point: 'east', // Set direction
+                    size: arrowSize, // Set the desired size
                     position: arrowPosition,
-                    borderColor: Colors.red,
+                    fillColor:
+                        Colors.red, // Set the fill color for the triangle
                   ),
                 if (showId)
                   TextComponent(

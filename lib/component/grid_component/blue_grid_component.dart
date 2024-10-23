@@ -29,15 +29,17 @@ class BlueGridComponent extends PositionComponent {
     double halfSizeX = sizeX / 2;
     double textSize = sizeX * 0.4;
     double strokeWidth = sizeX * 0.025;
-    double arrowSize = sizeX * 0.90;
-    Vector2 arrowPosition = Vector2(sizeX * 0.05, sizeX * 0.05);
+    double arrowSize = sizeX * 0.50;
+    Vector2 arrowPosition = Vector2(sizeX * 0.25, sizeX * 0.2);
 
     // Loop to create 3 columns of 6 squares each
     for (int col = 0; col < numberOfColumns; col++) {
       double colPosition = col * (sizeX + columnSpacing);
       for (int row = 0; row < numberOfRows; row++) {
         double rowPosition = row * (sizeX + spacing);
-        var color = (col == 0 && row == 4 || col == 1 && row < 5) ? Colors.blue : Colors.white;
+        var color = (col == 0 && row == 4 || col == 1 && row < 5)
+            ? Colors.blue
+            : Colors.white;
 
         // Create the unique ID for this block
         String uniqueId = 'B$col$row';
@@ -59,16 +61,16 @@ class BlueGridComponent extends PositionComponent {
               children: [
                 if (col == 2 && row == 3)
                   StarComponent(
-                    size: size,
-                    innerRadius: sizeX * 0.24,
-                    outerRadius: sizeX * 0.48,
+                    size: size * 0.90,
+                    position: Vector2(size.x * 0.05, size.x * 0.05),
                   ),
                 if (col == 1 && row == 5)
                   ArrowIconComponent(
-                    icon: Icons.north,
-                    size: arrowSize,
-                    position: arrowPosition,
-                    borderColor: Colors.blue,
+                    point: 'north', // Set direction
+                    size: arrowSize, // Set the desired size
+                    position: arrowPosition, // Set the desired position
+                    fillColor:
+                        Colors.blue, // Set the fill color for the triangle
                   ),
                 // Add the unique ID as a text label at the center
                 if (showId)

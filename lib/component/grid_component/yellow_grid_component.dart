@@ -31,10 +31,9 @@ class YellowGridComponent extends PositionComponent {
     double halfSizeX = sizeX / 2;
     double halfSizeY = sizeY / 2;
     double strokeWidth = sizeX * 0.025;
-    double starInnerRadius = sizeX * 0.24;
-    double starOuterRadius = sizeX * 0.48;
-    double arrowSize = sizeX * 0.90;
-    Vector2 arrowPosition = Vector2(sizeX * 0.05, sizeX * 0.05);
+
+    double arrowSize = sizeX * 0.50;
+    Vector2 arrowPosition = Vector2(sizeX * 0.25, sizeX * 0.75);
     TextPaint textPaint = TextPaint(
       style: TextStyle(
         color: Colors.black,
@@ -70,16 +69,16 @@ class YellowGridComponent extends PositionComponent {
               children: [
                 if (row == 0 && col == 3)
                   StarComponent(
-                    size: size,
-                    innerRadius: starInnerRadius,
-                    outerRadius: starOuterRadius,
+                    size: size * 0.90,
+                    position: Vector2(size.x * 0.05, size.x * 0.05),
                   ),
                 if (col == 5 && row == 1)
                   ArrowIconComponent(
-                    icon: Icons.west,
-                    size: arrowSize,
+                    point: 'west', // Set direction
+                    size: arrowSize, // Set the desired size
                     position: arrowPosition,
-                    borderColor: Colors.yellow,
+                    fillColor:
+                        Colors.yellow, // Set the fill color for the triangle
                   ),
                 // Add the unique ID as a text label at the center
                 if (showId)

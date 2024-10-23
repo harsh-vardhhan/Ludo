@@ -70,10 +70,6 @@ class Ludo extends FlameGame
       anchor: Anchor.topLeft, // Set anchor to align top-left
     ));
 
-    // Preload audio
-    FlameAudio.audioCache.load('move.mp3');
-    FlameAudio.audioCache.load('dice.mp3');
-
     GameState().ludoBoard = world.children.whereType<LudoBoard>().first;
     final ludoBoard = GameState().ludoBoard as PositionComponent;
     GameState().ludoBoardAbsolutePosition = ludoBoard.absolutePosition;
@@ -861,17 +857,8 @@ Future<void> moveForward({
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
 
-  // Precompute the initial audio play flag
-  bool audioPlayed = false;
-
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     token.positionId = tokenPath[i];
-
-    // Play audio only once per move
-    if (!audioPlayed) {
-      FlameAudio.play('move.mp3');
-      audioPlayed = true;
-    }
 
     // Apply move effect only, remove size effect to reduce load
     await _applyEffect(

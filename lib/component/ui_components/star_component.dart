@@ -3,41 +3,44 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 class StarComponent extends PositionComponent {
-  final double innerRadius; // Instance variable for inner radius
-  final double outerRadius; // Instance variable for outer radius
   final Paint borderPaint;
+  final Paint dropletFillPaint; // Paint for filling the droplet
 
   // Constructor that initializes the size, innerRadius, and outerRadius
   StarComponent({
-    required Vector2 size,
-    required this.innerRadius, // Inner radius passed during component creation
-    required this.outerRadius, // Outer radius passed during component creation
-    Color borderColor = Colors.black,
-  }) : borderPaint = Paint()
-          ..color = borderColor
+    required Vector2 position, // Initial position of the token
+    required Vector2 size, // Size of the token
+    Color borderColor = Colors.black, // Default border color
+    Color dropletFillColor = Colors.white, // Default droplet fill color
+  })  : borderPaint = Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = size.x * 0.035 {
-    this.size = size; // Set the size
-  }
+          ..strokeWidth = size.x * 0.04
+          ..color = borderColor,
+        dropletFillPaint = Paint()
+          ..style = PaintingStyle.fill
+          ..color = dropletFillColor,
+        super(position: position, size: size);
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Create the star shape using the provided inner and outer radius
-    Path starPath = createStarPath(innerRadius, outerRadius);
+    // Define the radius of the outer circle
+    final outerRadius = size.x / 2;
+    // Define the radius of the smaller inner circle
+    final smallerCircleRadius =
+        outerRadius / 1.7; // Radius of the smaller circle
 
-    // Center the star in the component's bounding box
-    canvas.save();
-    canvas.translate(size.x / 2, size.y / 2);
+    // Define the center of the circles
+    final center = Offset(size.x / 2, size.y / 2);
 
-    // Draw the star with transparent fill and black border
-    Paint fillPaint = Paint()..color = Colors.transparent;
-    canvas.drawPath(starPath, fillPaint);
-    canvas.drawPath(starPath, borderPaint); // Black border
+    // Draw the outer circle with white fill
+    canvas.drawCircle(center, outerRadius,
+        Paint()..color = Colors.white); // Draw outer circle
+    canvas.drawCircle(center, outerRadius, borderPaint); // Draw border
 
-    // Restore the canvas to its original state
-    canvas.restore();
+    // Draw the smaller inner circle with the specified innerCircleColor
+    canvas.drawCircle(center, smallerCircleRadius, borderPaint);
   }
 
   /// Creates a star shape with the specified inner and outer radius.

@@ -30,10 +30,8 @@ class GreenGridComponent extends PositionComponent {
     double halfSizeX = sizeX / 2;
     double textFontSize = sizeX * 0.4;
     double strokeWidth = sizeX * 0.025;
-    double arrowSize = sizeX * 0.90;
-    double arrowPositionOffset = sizeX * 0.05;
-    double starInnerRadius = sizeX * 0.24;
-    double starOuterRadius = sizeX * 0.48;
+    double arrowSize = sizeX * 0.50;
+    double arrowPositionOffset = sizeX * 0.75;
 
     // Loop to create 3 columns of 6 squares each
     for (int col = 0; col < numberOfColumns; col++) {
@@ -63,16 +61,16 @@ class GreenGridComponent extends PositionComponent {
               children: [
                 if (col == 0 && row == 2)
                   StarComponent(
-                    size: size,
-                    innerRadius: starInnerRadius,
-                    outerRadius: starOuterRadius,
+                    size: size * 0.90,
+                    position: Vector2(size.x * 0.05, size.x * 0.05),
                   ),
                 if (col == 1 && row == 0)
                   ArrowIconComponent(
-                    icon: Icons.south,
-                    size: arrowSize,
-                    position: Vector2(arrowPositionOffset, arrowPositionOffset),
-                    borderColor: Colors.green,
+                    point: 'south', // Set direction
+                    size: arrowSize, // Set the desired size
+                    position: Vector2(arrowPositionOffset, arrowPositionOffset), // Set the desired position
+                    fillColor:
+                        Colors.green, // Set the fill color for the triangle
                   ),
                 // Add the unique ID as a text label at the center
                 if (showId)

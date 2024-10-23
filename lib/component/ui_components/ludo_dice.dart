@@ -45,7 +45,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
     GameState().diceNumber =  Random().nextInt(6) + 1;
     diceFace.updateDiceValue(GameState().diceNumber);
 
-    FlameAudio.play('dice.mp3');
     // Apply dice rotation effect
     _applyDiceRollEffect();
 
