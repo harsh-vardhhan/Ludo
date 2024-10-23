@@ -110,7 +110,6 @@ class Ludo extends FlameGame
   }
 
   void blinkRedBase(bool shouldBlink) {
-
     final childrenOfLudoBoard = GameState().ludoBoard?.children.toList();
     final child = childrenOfLudoBoard![0];
     final home = child.children.toList();
@@ -856,19 +855,39 @@ Future<void> moveForward({
   // get all spots
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
+  final originalSize = tokenOriginalSize(world).clone();
+  final largeSize =
+      (Vector2(originalSize.x * 1.30, originalSize.y * 1.30)).clone();
 
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     token.positionId = tokenPath[i];
 
-    // Apply move effect only, remove size effect to reduce load
+    await Future.wait([
+      _applyEffect(
+        token,
+        SizeEffect.to(
+          largeSize,
+          EffectController(duration: 0.1),
+        ),
+      ),
+      _applyEffect(
+        token,
+        MoveToEffect(
+          SpotManager()
+              .getSpots()
+              .firstWhere((spot) => spot.uniqueId == token.positionId)
+              .tokenPosition,
+          EffectController(duration: 0.1, curve: Curves.easeInOut),
+        ),
+      ),
+    ]);
+
+    // Restore token to original size
     await _applyEffect(
       token,
-      MoveToEffect(
-        SpotManager()
-            .getSpots()
-            .firstWhere((spot) => spot.uniqueId == token.positionId)
-            .tokenPosition,
-        EffectController(duration: 0.15, curve: Curves.easeInOut),
+      SizeEffect.to(
+        originalSize,
+        EffectController(duration: 0.1),
       ),
     );
   }
