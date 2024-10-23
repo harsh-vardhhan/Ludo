@@ -30,6 +30,15 @@ class LudoDice extends PositionComponent with TapCallbacks {
   late final DiceFaceComponent diceFace; // The dice face showing dots
 
   final Player player;
+  late AudioPool diceSound;
+
+  @override
+  Future<void> onLoad() async {
+    super.onLoad();
+
+    // Preload the audio pool for the dice sound
+    diceSound = await FlameAudio.createPool('dice.mp3', maxPlayers: 3);
+  }
 
   @override
   void onTapDown(TapDownEvent event) async {
@@ -45,6 +54,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     GameState().diceNumber =  Random().nextInt(6) + 1;
     diceFace.updateDiceValue(GameState().diceNumber);
 
+     diceSound.start();
     // Apply dice rotation effect
     _applyDiceRollEffect();
 
