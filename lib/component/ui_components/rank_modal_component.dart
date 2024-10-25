@@ -9,6 +9,7 @@ import '../../main.dart';
 class RankModalComponent extends PositionComponent with TapCallbacks {
   final List<Player> players;
   final BuildContext context;
+  late PositionComponent _closeButton;
 
   RankModalComponent({
     required this.players,
@@ -139,21 +140,18 @@ class RankModalComponent extends PositionComponent with TapCallbacks {
     final buttonX = (size.x - buttonWidth) / 2;
     final buttonY = size.y - buttonHeight - 20; // 20 pixels from the bottom
 
-    // Create the button as a PositionComponent
-    final button = PositionComponent(
+    _closeButton = PositionComponent(
       size: Vector2(buttonWidth, buttonHeight),
       position: Vector2(buttonX, buttonY),
     );
 
-    // Set the background color of the button
-    button.add(
+    _closeButton.add(
       RectangleComponent(
         size: Vector2(buttonWidth, buttonHeight),
-        paint: Paint()..color = Colors.yellow, // Button color
+        paint: Paint()..color = Colors.yellow,
       ),
     );
 
-    // Add the text to the button
     final buttonText = TextComponent(
       text: 'Go to lobby',
       textRenderer: TextPaint(
@@ -165,23 +163,26 @@ class RankModalComponent extends PositionComponent with TapCallbacks {
       ),
     );
 
-    // Set the position of the buttonText after its declaration
     buttonText.position = Vector2(
       buttonWidth / 2 - buttonText.width / 2,
       buttonHeight / 2 - buttonText.height / 2,
-    ); // Center the text in the button
+    );
 
-    // Add the button and text components
-    button.add(buttonText);
-    add(button);
+    _closeButton.add(buttonText);
+    add(_closeButton);
   }
 
   @override
   void onTapDown(TapDownEvent event) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FirstScreen()),
-    );
+    Offset tapPosition = Offset(event.localPosition.x, event.localPosition.y);
+
+    // Check if the tap is within the button's bounds
+    if (_closeButton.toRect().contains(tapPosition)) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FirstScreen()),
+      );
+    }
   }
 
   void closeModal() {
