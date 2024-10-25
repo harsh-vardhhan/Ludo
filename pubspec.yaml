@@ -30,4 +30,4 @@ flutter:
 
 flutter_icons:
   android: true
-  image_path: "assets/icon/app_icon.png"
+  image_path: "assets/icon/app_icon.jpg"
