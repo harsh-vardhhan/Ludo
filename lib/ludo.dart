@@ -634,17 +634,6 @@ void tokenCollision(World world, Token attackerToken) async {
         .where((token) => token.playerId != attackerToken.playerId)
         .toList();
 
-    for (var token in tokensToMove) {
-      moveBackward(
-        world: world,
-        token: token,
-        tokenPath: GameState().getTokenPath(token.playerId),
-        ludoBoard: GameState().ludoBoard as PositionComponent,
-      ).then((_) {
-        wasTokenAttacked = true;
-      });
-    }
-
     // Wait for all movements to complete
     await Future.wait(tokensToMove.map((token) => moveBackward(
           world: world,
@@ -652,6 +641,7 @@ void tokenCollision(World world, Token attackerToken) async {
           tokenPath: GameState().getTokenPath(token.playerId),
           ludoBoard: GameState().ludoBoard as PositionComponent,
         )));
+    wasTokenAttacked = true;
   }
 
   // Grant another turn or switch to next player
@@ -772,16 +762,8 @@ Future<void> moveBackward({
   // Preload audio to avoid delays during playback
   bool audioPlayed = false;
 
-  // Precompute target positions
-  List<Vector2> targetPositions = [];
   for (int i = currentIndex; i >= finalIndex; i--) {
-    String positionId = tokenPath[i];
-    final spot = SpotManager().findSpotById(positionId);
-    targetPositions.add(spot.tokenPosition);
-  }
-
-  for (int i = 0; i < targetPositions.length; i++) {
-    token.positionId = tokenPath[currentIndex - i];
+    token.positionId = tokenPath[i];
 
     if (!audioPlayed) {
       FlameAudio.play('move.mp3');
@@ -791,13 +773,13 @@ Future<void> moveBackward({
     await _applyEffect(
       token,
       MoveToEffect(
-        targetPositions[i],
-        EffectController(duration: 0.03, curve: Curves.easeInOut),
+        SpotManager()
+            .getSpots()
+            .firstWhere((spot) => spot.uniqueId == token.positionId)
+            .tokenPosition,
+        EffectController(duration: 0.1, curve: Curves.easeInOut),
       ),
     );
-
-    // Optional: Increase delay duration or remove it
-    // await Future.delayed(const Duration(milliseconds: 30));
   }
 
   if (token.playerId == 'BP') {
