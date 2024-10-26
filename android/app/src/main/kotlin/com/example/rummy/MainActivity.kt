@@ -1,4 +1,4 @@
-package com.example.Ludo
+package com.trakbit.ludozone
 
 import io.flutter.embedding.android.FlutterActivity
 

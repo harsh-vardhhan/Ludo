@@ -5,27 +5,26 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+// Load the keystore properties
 def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file("key.properties")
-
+def keystorePropertiesFile = file("../../key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+} else {
+    throw new GradleException("key.properties file not found")
 }
 
 android {
-    namespace = "com.example.Ludo"
+    namespace = "com.trakbit.ludozone"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
     }
-
     defaultConfig {
         // Specify your unique Application ID.
         applicationId = "com.trakbit.ludozone"
@@ -33,6 +32,19 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
     }
 }
 
