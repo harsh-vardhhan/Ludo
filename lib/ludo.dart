@@ -17,6 +17,7 @@ import 'component/controller/upper_controller.dart';
 import 'component/controller/lower_controller.dart';
 import 'ludo_board.dart';
 import 'component/ui_components/token.dart';
+import 'component/ui_components/display_token.dart';
 import 'component/ui_components/spot.dart';
 import 'component/ui_components/ludo_dice.dart';
 import 'component/ui_components/rank_modal_component.dart';
@@ -310,6 +311,17 @@ class Ludo extends FlameGame
               .children
               .whereType<RectangleComponent>()
               .first;
+
+          final leftToken = lowerControllerComponents[1]
+              .children
+              .whereType<PositionComponent>()
+              .first;
+
+          leftToken.add(DisplayToken(
+              position: Vector2(size.x * 0.04, 0),
+              size: size * 0.10,
+              innerCircleColor: Colors.blue));
+
           final leftDiceContainer =
               leftDice.children.whereType<RectangleComponent>().first;
 
@@ -392,6 +404,17 @@ class Ludo extends FlameGame
               .children
               .whereType<RectangleComponent>()
               .first;
+
+          final rightToken = upperControllerComponents[3]
+              .children
+              .whereType<PositionComponent>()
+              .first;
+
+          rightToken.add(DisplayToken(
+              position: Vector2(size.x * 0.04, 0),
+              size: size * 0.10,
+              innerCircleColor: Colors.green));
+
           final rightDiceContainer =
               rightDice.children.whereType<RectangleComponent>().first;
 
@@ -474,6 +497,17 @@ class Ludo extends FlameGame
               .children
               .whereType<RectangleComponent>()
               .first;
+
+          final rightToken = lowerControllerComponents[3]
+              .children
+              .whereType<PositionComponent>()
+              .first;
+
+          rightToken.add(DisplayToken(
+              position: Vector2(size.x * 0.04, 0),
+              size: size * 0.10,
+              innerCircleColor: Colors.yellow));
+
           final rightDiceContainer =
               rightDice.children.whereType<RectangleComponent>().first;
 
@@ -556,6 +590,17 @@ class Ludo extends FlameGame
               .children
               .whereType<RectangleComponent>()
               .first;
+
+          final leftToken = upperControllerComponents[1]
+              .children
+              .whereType<PositionComponent>()
+              .first;
+
+          leftToken.add(DisplayToken(
+              position: Vector2(size.x * 0.04, 0),
+              size: size * 0.10,
+              innerCircleColor: Colors.red));
+
           final rightDiceContainer =
               leftDice.children.whereType<RectangleComponent>().first;
           rightDiceContainer.add(LudoDice(
