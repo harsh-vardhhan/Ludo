@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo/state/game_state.dart';
 import '../ui_components/spot.dart'; // Replace with the actual path to your Spot component
 import '../ui_components/arrow_icon_component.dart'; // Replace with the actual path to ArrowIconComponent
 import '../ui_components/star_component.dart'; // Replace with the actual path to StarComponent
@@ -38,7 +39,7 @@ class GreenGridComponent extends PositionComponent {
       for (int row = 0; row < numberOfRows; row++) {
         var color = Colors.white;
         if (row > 0 && col == 1 || row == 1 && col == 2) {
-          color = Colors.green;
+          color = GameState().green;
         }
 
         // Create the unique ID for this block
@@ -57,7 +58,7 @@ class GreenGridComponent extends PositionComponent {
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
                 ..strokeWidth = strokeWidth // Set border width
-                ..color = Colors.black, // Set border color to black
+                ..color = const Color(0xFF606676), // Set border color to black
               children: [
                 if (col == 0 && row == 2)
                   StarComponent(
@@ -70,7 +71,7 @@ class GreenGridComponent extends PositionComponent {
                     size: arrowSize, // Set the desired size
                     position: Vector2(arrowPositionOffset, arrowPositionOffset), // Set the desired position
                     fillColor:
-                        Colors.green, // Set the fill color for the triangle
+                        GameState().green, // Set the fill color for the triangle
                   ),
                 // Add the unique ID as a text label at the center
                 if (showId)

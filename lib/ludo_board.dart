@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo/state/game_state.dart';
 // user files
 import 'component/grid_component/red_grid_component.dart';
 import 'component/grid_component/yellow_grid_component.dart';
@@ -35,8 +36,8 @@ class LudoBoard extends PositionComponent {
         children: [
           Home(
             size: longDimension,
-            paint: Paint()..color = Colors.red,
-            homeSpotColor: Paint()..color = Colors.red,
+            paint: Paint()..color = GameState().red,
+            homeSpotColor: Paint()..color = GameState().red,
           )
         ]);
 
@@ -54,8 +55,8 @@ class LudoBoard extends PositionComponent {
         children: [
           Home(
             size: longDimension,
-            paint: Paint()..color = Colors.green,
-            homeSpotColor: Paint()..color = Colors.green,
+            paint: Paint()..color = GameState().green,
+            homeSpotColor: Paint()..color = GameState().green,
           )
         ]);
 
@@ -85,8 +86,8 @@ class LudoBoard extends PositionComponent {
         children: [
           Home(
             size: longDimension,
-            paint: Paint()..color = Colors.blue,
-            homeSpotColor: Paint()..color = Colors.blue,
+            paint: Paint()..color =GameState().blue,
+            homeSpotColor: Paint()..color = GameState().blue,
           )
         ]);
 
@@ -104,8 +105,8 @@ class LudoBoard extends PositionComponent {
         children: [
           Home(
             size: longDimension,
-            paint: Paint()..color = Colors.primaries[12],
-            homeSpotColor: Paint()..color = Colors.primaries[12],
+            paint: Paint()..color = GameState().yellow,
+            homeSpotColor: Paint()..color = GameState().yellow,
           )
         ]);
 
@@ -176,25 +177,25 @@ class DiagonalRectangleComponent extends PositionComponent {
       uniqueId: 'RF',
       position: centerRedTriangle - Vector2(rectWidth / 2, rectHeight / 2),
       size: Vector2(rectWidth, rectHeight),
-      paint: Paint()..color = Colors.red,
+      paint: Paint()..color = GameState().red,
     );
     yellowSpot = Spot(
       uniqueId: 'YF',
       position: centerYellowTriangle - Vector2(rectWidth / 2, rectHeight / 2),
       size: Vector2(rectWidth, rectHeight),
-      paint: Paint()..color = Colors.yellow,
+      paint: Paint()..color = GameState().yellow,
     );
     blueSpot = Spot(
       uniqueId: 'BF',
       position: centerBlueTriangle - Vector2(rectWidth / 2, rectHeight / 2),
       size: Vector2(rectWidth, rectHeight),
-      paint: Paint()..color = Colors.blue,
+      paint: Paint()..color = GameState().blue,
     );
     greenSpot = Spot(
       uniqueId: 'GF',
       position: centerGreenTriangle - Vector2(rectWidth / 2, rectHeight / 2),
       size: Vector2(rectWidth, rectHeight),
-      paint: Paint()..color = Colors.green,
+      paint: Paint()..color = GameState().green,
     );
 
     // Add all Spot instances at once
@@ -217,10 +218,10 @@ class DiagonalRectangleComponent extends PositionComponent {
         (topLeft.dx + bottomRight.dx) / 2, (topLeft.dy + bottomRight.dy) / 2);
 
     // Define paints for filling the triangles with colors
-    Paint yellowPaint = Paint()..color = Colors.yellow;
-    Paint redPaint = Paint()..color = Colors.red;
-    Paint bluePaint = Paint()..color = Colors.blue;
-    Paint greenPaint = Paint()..color = Colors.green;
+    Paint yellowPaint = Paint()..color = GameState().yellow;
+    Paint redPaint = Paint()..color = GameState().red;
+    Paint bluePaint = Paint()..color = GameState().blue;
+    Paint greenPaint = Paint()..color = GameState().green;
 
     // Define a black paint for the triangle borders
     Paint borderPaint = Paint()

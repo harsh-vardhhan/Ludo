@@ -120,7 +120,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _redBlinkEffect ??= ColorEffect(
-      const Color(0xFFFF8A8A),
+      Colors.red,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -130,7 +130,7 @@ class Ludo extends FlameGame
     );
 
     _redStaticEffect ??= ColorEffect(
-      Colors.red,
+      GameState().red,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -161,7 +161,7 @@ class Ludo extends FlameGame
     );
 
     _yellowStaticEffect ??= ColorEffect(
-      Colors.yellow,
+      GameState().yellow,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -182,7 +182,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _blueBlinkEffect ??= ColorEffect(
-      const Color(0xFF4FC3F7),
+      Colors.blue,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -192,7 +192,7 @@ class Ludo extends FlameGame
     );
 
     _blueStaticEffect ??= ColorEffect(
-      Colors.blue,
+      GameState().blue,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -213,7 +213,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _greenBlinkEffect ??= ColorEffect(
-      Colors.lightGreen,
+      Colors.green,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -223,7 +223,7 @@ class Ludo extends FlameGame
     );
 
     _greenStaticEffect ??= ColorEffect(
-      Colors.green,
+      GameState().green,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -320,7 +320,7 @@ class Ludo extends FlameGame
               .first;
 
           leftToken.add(DisplayToken(
-              position: Vector2(size.x * 0.04, 0),
+              position: Vector2(size.x * 0.04, - size.x * 0.01),
               size: size * 0.10,
               innerCircleColor: Colors.blue));
 
@@ -947,7 +947,7 @@ void clearTokenTrail(Token token) {
       case 'B13':
       case 'B14':
       case 'BF':
-        resetColor = Colors.blue;
+        resetColor = GameState().blue;
         break;
       case 'G21':
       case 'G11':
@@ -956,7 +956,7 @@ void clearTokenTrail(Token token) {
       case 'G14':
       case 'G15':
       case 'GF':
-        resetColor = Colors.green;
+        resetColor = GameState().green;
         break;
       case 'Y42':
       case 'Y41':
@@ -965,7 +965,7 @@ void clearTokenTrail(Token token) {
       case 'Y11':
       case 'Y01':
       case 'YF':
-        resetColor = Colors.yellow;
+        resetColor = GameState().yellow;
         break;
       case 'R10':
       case 'R11':
@@ -974,7 +974,7 @@ void clearTokenTrail(Token token) {
       case 'R41':
       case 'R51':
       case 'RF':
-        resetColor = Colors.red;
+        resetColor = GameState().red;
         break;
       default:
         resetColor = Colors.white;

@@ -2,6 +2,7 @@
 
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo/state/game_state.dart';
 import '../ui_components/spot.dart'; // Replace with the actual path to your Spot component
 import '../ui_components/arrow_icon_component.dart'; // Replace with the actual path to ArrowIconComponent
 import '../ui_components/star_component.dart'; // Replace with the actual path to StarComponent
@@ -42,7 +43,7 @@ class RedGridComponent extends PositionComponent {
       for (int row = 0; row < numberOfRows; row++) {
         var color = Colors.white;
         if (row == 0 && col == 1 || row == 1 && col > 0) {
-          color = Colors.red;
+          color = GameState().red;
         }
 
         String uniqueId = 'R$col$row';
@@ -60,7 +61,7 @@ class RedGridComponent extends PositionComponent {
                 ..color = Colors.transparent
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = strokeWidth
-                ..color = Colors.black,
+                ..color = const Color(0xFF606676),
               children: [
                 if (col == 2 && row == 2)
                   StarComponent(
@@ -73,7 +74,7 @@ class RedGridComponent extends PositionComponent {
                     size: arrowSize, // Set the desired size
                     position: arrowPosition,
                     fillColor:
-                        Colors.red, // Set the fill color for the triangle
+                        GameState().red, // Set the fill color for the triangle
                   ),
                 if (showId)
                   TextComponent(

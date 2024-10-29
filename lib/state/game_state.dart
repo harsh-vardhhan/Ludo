@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
 
 import 'player.dart';
 import 'event_bus.dart';
@@ -9,6 +10,8 @@ class GameState {
 
   // Singleton instance
   static final GameState _instance = GameState._();
+
+
 
   List<int> diceChances =
       List.filled(3, 0, growable: false); // Track consecutive 6s
@@ -22,6 +25,11 @@ class GameState {
 
   Vector2 ludoBoardAbsolutePosition = Vector2.zero();
   Component? ludoBoard;
+
+  final red = const Color(0xFFFF6969);
+  final green = const Color(0xFF88C273);
+  final blue = const Color(0xFFA2D2DF);
+  final yellow  = const Color(0xFFFFDC7F);
 
   // Factory method to access the instance
   factory GameState() {

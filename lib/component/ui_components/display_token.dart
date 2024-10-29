@@ -39,17 +39,25 @@ class DisplayToken extends PositionComponent with TapCallbacks {
     final outerRadius = size.x / 2;
     // Define the radius of the smaller inner circle
     final smallerCircleRadius =
-        outerRadius / 1.7; // Radius of the smaller circle
+        outerRadius / 3; // Radius of the smaller circle
 
     // Define the center of the circles
     final center = Offset(size.x / 2, size.y / 2);
+    final centerShadow = Offset(size.x / 2, size.y / 1.7);
+    final tokenShadow = Offset(size.x / 2, size.y / 1.6);
 
     // Draw the outer circle with white fill
-    canvas.drawCircle(center, outerRadius,
-        Paint()..color = Colors.white); // Draw outer circle
-    canvas.drawCircle(center, outerRadius, borderPaint); // Draw border
+    canvas.drawCircle(tokenShadow, outerRadius,
+     Paint()..color = const Color(0xFF3C3D37).withOpacity(0.8));
+     
+    canvas.drawCircle(centerShadow, outerRadius,
+     Paint()..color = const Color(0xFF5AB2FF)); // Draw outer circle
+
+    canvas.drawCircle(center, outerRadius, Paint()..color = const Color(0xFFA0DEFF)); // Draw border
 
     // Draw the smaller inner circle with the specified innerCircleColor
-    canvas.drawCircle(center, smallerCircleRadius, fillPaint);
+    canvas.drawCircle(center, smallerCircleRadius,  Paint()..color = Colors.white);
   }
+
+
 }
