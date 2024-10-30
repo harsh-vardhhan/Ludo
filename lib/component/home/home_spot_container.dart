@@ -45,7 +45,7 @@ class HomeSpotContainer extends RectangleComponent {
   String _getColorCode(Paint paint) {
     Color color = paint.color;
     switch (color.value) {
-      case 0xFFF95454:
+      case 0xFFD32F2F:
         return 'R';
       case 0xFF41B06E:
         return 'G';

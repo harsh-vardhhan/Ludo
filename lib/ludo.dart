@@ -17,7 +17,6 @@ import 'component/controller/upper_controller.dart';
 import 'component/controller/lower_controller.dart';
 import 'ludo_board.dart';
 import 'component/ui_components/token.dart';
-import 'component/ui_components/display_token.dart';
 import 'component/ui_components/spot.dart';
 import 'component/ui_components/ludo_dice.dart';
 import 'component/ui_components/rank_modal_component.dart';
@@ -118,7 +117,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _redBlinkEffect ??= ColorEffect(
-      Colors.red,
+      Colors.redAccent,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -180,7 +179,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _blueBlinkEffect ??= ColorEffect(
-      Colors.blue,
+      Colors.lightBlueAccent,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -211,7 +210,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _greenBlinkEffect ??= ColorEffect(
-      Colors.green,
+      Colors.lightGreenAccent,
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -313,17 +312,13 @@ class Ludo extends FlameGame
               .children
               .whereType<RectangleComponent>()
               .first;
-
+         
+           /*
           final leftToken = lowerControllerComponents[1]
               .children
               .whereType<PositionComponent>()
               .first;
-
-          leftToken.add(DisplayToken(
-              position: Vector2(size.x * 0.04, -size.x * 0.01),
-              size: size * 0.10,
-              sideColor: const Color(0xFF0D92F4),
-              topColor: const Color(0xFF77CDFF)));
+          */
 
           final leftDiceContainer =
               leftDice.children.whereType<RectangleComponent>().first;
@@ -358,8 +353,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.sideColor = const Color(0xFF0D92F4);
-            token.topColor = const Color(0xFF77CDFF);
+            token.sideColor = const Color(0xFF15B392);
+            token.topColor = const Color(0xFF54C392);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -409,16 +404,12 @@ class Ludo extends FlameGame
               .whereType<RectangleComponent>()
               .first;
 
+           /*
           final rightToken = upperControllerComponents[3]
               .children
               .whereType<PositionComponent>()
               .first;
-
-          rightToken.add(DisplayToken(
-              position: Vector2(size.x * 0.04, -size.x * 0.01),
-              size: size * 0.10,
-              sideColor: const Color(0xFF0D92F4),
-              topColor: const Color(0xFF77CDFF)));
+          */
 
           final rightDiceContainer =
               rightDice.children.whereType<RectangleComponent>().first;
@@ -453,8 +444,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.sideColor = const Color(0xFF0D92F4);
-            token.topColor = const Color(0xFF77CDFF);
+            token.sideColor = const Color(0xFFED9455);
+            token.topColor = const Color(0xFFFFBB70);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -504,16 +495,12 @@ class Ludo extends FlameGame
               .whereType<RectangleComponent>()
               .first;
 
+          /*
           final rightToken = lowerControllerComponents[3]
               .children
               .whereType<PositionComponent>()
               .first;
-
-          rightToken.add(DisplayToken(
-              position: Vector2(size.x * 0.04, -size.x * 0.01),
-              size: size * 0.10,
-              sideColor: const Color(0xFF0D92F4),
-              topColor: const Color(0xFF77CDFF)));
+          */
 
           final rightDiceContainer =
               rightDice.children.whereType<RectangleComponent>().first;
@@ -548,8 +535,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.sideColor = const Color(0xFF0D92F4);
-            token.topColor = const Color(0xFF77CDFF);
+            token.sideColor = const Color(0xFFC62E2E);
+            token.topColor = const Color(0xFFF95454);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -599,16 +586,12 @@ class Ludo extends FlameGame
               .whereType<RectangleComponent>()
               .first;
 
+          /*
           final leftToken = upperControllerComponents[1]
               .children
               .whereType<PositionComponent>()
               .first;
-
-          leftToken.add(DisplayToken(
-              position: Vector2(size.x * 0.04, -size.x * 0.01),
-              size: size * 0.10,
-              sideColor: const Color(0xFF0D92F4),
-              topColor: const Color(0xFF77CDFF)));
+          */
 
           final rightDiceContainer =
               leftDice.children.whereType<RectangleComponent>().first;

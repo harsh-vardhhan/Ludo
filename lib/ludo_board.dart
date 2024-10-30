@@ -225,9 +225,9 @@ class DiagonalRectangleComponent extends PositionComponent {
 
     // Define a black paint for the triangle borders
     Paint borderPaint = Paint()
-      ..color = Colors.black
+      ..color = const Color(0xFFFFFFFF)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 2.6;
 
     // Draw the triangles and borders
     _drawTriangle(canvas, redPaint, borderPaint, topLeft, center, bottomLeft);
@@ -243,8 +243,8 @@ class DiagonalRectangleComponent extends PositionComponent {
     Path triangle = Path()
       ..moveTo(p1.dx, p1.dy)
       ..lineTo(p2.dx, p2.dy)
-      ..lineTo(p3.dx, p3.dy)
-      ..close();
+      ..lineTo(p3.dx, p3.dy);
+      // ..close();
     canvas.drawPath(triangle, fillPaint);
     canvas.drawPath(triangle, borderPaint);
   }
