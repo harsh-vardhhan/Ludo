@@ -715,27 +715,11 @@ void tokenCollision(World world, Token attackerToken) async {
 }
 
 void resizeTokensOnSpot(World world) {
-  // Precompute values
-  final homeSpot = getHomeSpot(world, 6)
-      .whereType<HomeSpot>()
-      .firstWhere((spot) => spot.uniqueId == 'B1');
-  final Vector2 originalSize =
-      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-
-  // Precompute size factors and position increments
-  final sizeFactors = {
-    1: 1.0,
-    2: 0.70,
-    3: 0.50,
-  };
   final positionIncrements = {
     1: 0,
     2: 10,
     3: 5,
   };
-
-  // Get all tokens
-  // final tokens = TokenManager().allTokens;
 
   // Group tokens by position ID
   final Map<String, List<Token>> tokensByPositionId = {};
@@ -751,13 +735,11 @@ void resizeTokensOnSpot(World world) {
     final spot = SpotManager().findSpotById(positionId);
 
     // Compute size factor and position increment
-    // final sizeFactor = sizeFactors[tokenList.length] ?? 0.50;
     final positionIncrement = positionIncrements[tokenList.length] ?? 5;
 
     // Resize and reposition tokens
     for (var i = 0; i < tokenList.length; i++) {
       final token = tokenList[i];
-      // token.size = originalSize * sizeFactor;
       if (token.state == TokenState.inBase) {
         token.position = spot.position;
       } else if (token.state == TokenState.onBoard ||
