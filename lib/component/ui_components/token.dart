@@ -68,7 +68,7 @@ class Token extends PositionComponent with TapCallbacks {
     // Define the center of the circles
     final center = Offset(size.x / 2, size.y / 2);
     final centerShadow = Offset(size.x / 2, size.y / 1.7);
-    final tokenShadow = Offset(size.x / 2, size.y / 1.6);
+    final tokenShadow = Offset(size.x / 2, size.y / 1.5);
 
     // Draw the outer circle with white fill
     canvas.drawCircle(tokenShadow, outerRadius,

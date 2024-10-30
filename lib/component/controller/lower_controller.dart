@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../../ludo.dart';
+import '../../state/game_state.dart';
 
 // user files
 import 'controller_block.dart';
@@ -20,7 +21,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     final leftToken = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
         position: Vector2(2.2, innerWidth * 0.05), // Sticks to the left
-        paint: Paint()..color = const Color(0xFFA0DEFF),
+        paint: Paint()..color = GameState().blue,
         children: [
           ControllerBlock(
               transparentRight: true,
@@ -38,7 +39,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     final leftDice = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight),
         position: Vector2(innerWidth * 0.4, 0), // Sticks to the left
-        paint: Paint()..color = const Color(0xFFA0DEFF),
+        paint: Paint()..color = GameState().blue,
         children: [
           RectangleComponent(
               size: Vector2(innerWidth * 0.4, innerHeight),
@@ -57,7 +58,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     final rightDice = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight),
         position: Vector2(width - innerWidth * 0.8, 0), // Sticks to the right
-        paint: Paint()..color = const Color(0xFFFCDE70),
+        paint: Paint()..color = GameState().yellow,
         children: [
           RectangleComponent(
               size: Vector2(innerWidth * 0.4, innerHeight),
@@ -75,7 +76,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     final rightToken = RectangleComponent(
         size: Vector2(innerWidth * 0.4, innerHeight * 0.8),
         position: Vector2(width - innerWidth * 0.4 - 2.5, innerWidth * 0.05),
-        paint: Paint()..color = const Color(0xFFFCDE70),
+        paint: Paint()..color = GameState().yellow,
         children: [
           ControllerBlock(
               transparentLeft: true,
