@@ -55,7 +55,8 @@ class TokenManager {
           positionId: entry.value,
           position: Vector2(100, 100), // Adjust position
           size: Vector2(50, 50), // Adjust size
-          innerCircleColor: Colors.transparent);
+          topColor: Colors.transparent,
+          sideColor: Colors.transparent);
       allTokens.add(token);
       SpotManager().addSpot(Spot(
           uniqueId: entry.value,

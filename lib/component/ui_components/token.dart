@@ -17,43 +17,25 @@ class Token extends PositionComponent with TapCallbacks {
   bool enableToken; // Store the enableToken state directly
   String positionId; // Mandatory position ID for the token
   TokenState state; // Current state of the token
-  // final gameState = GameState();
 
-  final Paint borderPaint; // Paint for the token's border
-  final Paint fillPaint; // Paint for filling the token
-  final Paint dropletFillPaint; // Paint for filling the droplet
+  Color topColor;
+  Color sideColor;
 
   Token({
     required this.tokenId, // Mandatory unique ID for the token
     required this.positionId, // Mandatory position ID for the token
     required Vector2 position, // Initial position of the token
     required Vector2 size, // Size of the token
-    required Color innerCircleColor, // Mandatory inner fill color
     required this.playerId, // Initialize playerId
     this.enableToken = false, // Initialize enableToken
-    Color borderColor = Colors.black, // Default border color
-    Color dropletFillColor = Colors.white, // Default droplet fill color
     this.state = TokenState.inBase, // Default state
-  })  : borderPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = size.x * 0.04
-          ..color = borderColor,
-        fillPaint = Paint()
-          ..style = PaintingStyle.fill
-          ..color = innerCircleColor,
-        dropletFillPaint = Paint()
-          ..style = PaintingStyle.fill
-          ..color = dropletFillColor,
-        super(position: position, size: size);
+    required this.topColor,
+    required this.sideColor,
+  }) : super(position: position, size: size);
 
   bool isInBase() => state == TokenState.inBase;
   bool isOnBoard() => state == TokenState.onBoard;
   bool isInHome() => state == TokenState.inHome;
-
-  // Setter for innerCircleColor, updates the fillPaint color
-  set innerCircleColor(Color color) {
-    fillPaint.color = color; // Update the paint color when the color changes
-  }
 
   @override
   void render(Canvas canvas) {
@@ -74,10 +56,10 @@ class Token extends PositionComponent with TapCallbacks {
     canvas.drawCircle(tokenShadow, outerRadius,
         Paint()..color = const Color(0xFF3C3D37).withOpacity(0.6));
     canvas.drawCircle(centerShadow, outerRadius,
-        Paint()..color = const Color(0xFF0D92F4)); // Draw outer circle
+        Paint()..color = sideColor); // Draw outer circle
 
-    canvas.drawCircle(center, outerRadius,
-        Paint()..color = const Color(0xFF77CDFF)); // Draw border
+    canvas.drawCircle(
+        center, outerRadius, Paint()..color = topColor); // Draw border
 
     canvas.drawCircle(smallerCircleShadow, smallerCircleDepth,
         Paint()..color = const Color(0xFF3C3D37).withOpacity(0.7));

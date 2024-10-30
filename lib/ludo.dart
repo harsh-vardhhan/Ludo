@@ -263,7 +263,9 @@ class Ludo extends FlameGame
                   GameState().ludoBoardAbsolutePosition.y,
             );
             // update token position
-            token.innerCircleColor = Colors.blue;
+            token.sideColor = const Color(0xFF0D92F4);
+            token.topColor = const Color(0xFF77CDFF);
+
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -318,9 +320,10 @@ class Ludo extends FlameGame
               .first;
 
           leftToken.add(DisplayToken(
-              position: Vector2(size.x * 0.04, - size.x * 0.01),
+              position: Vector2(size.x * 0.04, -size.x * 0.01),
               size: size * 0.10,
-              innerCircleColor: Colors.blue));
+              sideColor: const Color(0xFF0D92F4),
+              topColor: const Color(0xFF77CDFF)));
 
           final leftDiceContainer =
               leftDice.children.whereType<RectangleComponent>().first;
@@ -355,7 +358,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.innerCircleColor = Colors.green;
+            token.sideColor = const Color(0xFF0D92F4);
+            token.topColor = const Color(0xFF77CDFF);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -411,9 +415,10 @@ class Ludo extends FlameGame
               .first;
 
           rightToken.add(DisplayToken(
-              position: Vector2(size.x * 0.04, 0),
+              position: Vector2(size.x * 0.04, -size.x * 0.01),
               size: size * 0.10,
-              innerCircleColor: Colors.green));
+              sideColor: const Color(0xFF0D92F4),
+              topColor: const Color(0xFF77CDFF)));
 
           final rightDiceContainer =
               rightDice.children.whereType<RectangleComponent>().first;
@@ -448,7 +453,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.innerCircleColor = Colors.yellow;
+            token.sideColor = const Color(0xFF0D92F4);
+            token.topColor = const Color(0xFF77CDFF);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -504,9 +510,10 @@ class Ludo extends FlameGame
               .first;
 
           rightToken.add(DisplayToken(
-              position: Vector2(size.x * 0.04, 0),
+              position: Vector2(size.x * 0.04, -size.x * 0.01),
               size: size * 0.10,
-              innerCircleColor: Colors.yellow));
+              sideColor: const Color(0xFF0D92F4),
+              topColor: const Color(0xFF77CDFF)));
 
           final rightDiceContainer =
               rightDice.children.whereType<RectangleComponent>().first;
@@ -541,7 +548,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.innerCircleColor = Colors.red;
+            token.sideColor = const Color(0xFF0D92F4);
+            token.topColor = const Color(0xFF77CDFF);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -597,9 +605,10 @@ class Ludo extends FlameGame
               .first;
 
           leftToken.add(DisplayToken(
-              position: Vector2(size.x * 0.04, 0),
+              position: Vector2(size.x * 0.04, -size.x * 0.01),
               size: size * 0.10,
-              innerCircleColor: Colors.red));
+              sideColor: const Color(0xFF0D92F4),
+              topColor: const Color(0xFF77CDFF)));
 
           final rightDiceContainer =
               leftDice.children.whereType<RectangleComponent>().first;
@@ -856,19 +865,19 @@ Future<void> moveForward({
 
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     token.positionId = tokenPath[i];
-      await _applyEffect(
-        token,
-        MoveToEffect(
-          SpotManager()
-              .getSpots()
-              .firstWhere((spot) => spot.uniqueId == token.positionId)
-              .tokenPosition,
-          EffectController(duration: 0.12, curve: Curves.easeInOut),
-        ),
-      );
+    await _applyEffect(
+      token,
+      MoveToEffect(
+        SpotManager()
+            .getSpots()
+            .firstWhere((spot) => spot.uniqueId == token.positionId)
+            .tokenPosition,
+        EffectController(duration: 0.12, curve: Curves.easeInOut),
+      ),
+    );
 
-      // Add a small delay to reduce CPU strain and smooth the animation
-      Future.delayed(const Duration(milliseconds: 120));
+    // Add a small delay to reduce CPU strain and smooth the animation
+    Future.delayed(const Duration(milliseconds: 120));
   }
 
   // if token is in home
