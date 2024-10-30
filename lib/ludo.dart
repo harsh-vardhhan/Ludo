@@ -66,12 +66,10 @@ class Ludo extends FlameGame
         width: width,
         height: width * 0.20));
 
-    /*
     add(FpsTextComponent(
       position: Vector2(10, 10), // Adjust position as needed
       anchor: Anchor.topLeft, // Set anchor to align top-left
     ));
-    */
 
     GameState().ludoBoard = world.children.whereType<LudoBoard>().first;
     final ludoBoard = GameState().ludoBoard as PositionComponent;
@@ -753,13 +751,13 @@ void resizeTokensOnSpot(World world) {
     final spot = SpotManager().findSpotById(positionId);
 
     // Compute size factor and position increment
-    final sizeFactor = sizeFactors[tokenList.length] ?? 0.50;
+    // final sizeFactor = sizeFactors[tokenList.length] ?? 0.50;
     final positionIncrement = positionIncrements[tokenList.length] ?? 5;
 
     // Resize and reposition tokens
     for (var i = 0; i < tokenList.length; i++) {
       final token = tokenList[i];
-      token.size = originalSize * sizeFactor;
+      // token.size = originalSize * sizeFactor;
       if (token.state == TokenState.inBase) {
         token.position = spot.position;
       } else if (token.state == TokenState.onBoard ||
@@ -864,17 +862,6 @@ Future<void> moveBackward({
   }
 }
 
-Vector2 tokenOriginalSize(world) {
-  final homeSpot = getHomeSpot(world, 6)
-      .whereType<HomeSpot>()
-      .firstWhere((spot) => spot.uniqueId == 'B1');
-
-  // Step 1: Store original size and position of tokens based on homeSpot
-  final Vector2 originalSize =
-      Vector2(homeSpot.size.x * 0.80, homeSpot.size.x * 1.05);
-  return originalSize;
-}
-
 Future<void> moveForward({
   required World world,
   required Token token,
@@ -884,41 +871,22 @@ Future<void> moveForward({
   // get all spots
   final currentIndex = tokenPath.indexOf(token.positionId);
   final finalIndex = currentIndex + diceNumber;
-  final originalSize = tokenOriginalSize(world).clone();
-  final largeSize =
-      (Vector2(originalSize.x * 1.30, originalSize.y * 1.30)).clone();
 
   for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
     token.positionId = tokenPath[i];
-
-    await Future.wait([
-      _applyEffect(
-        token,
-        SizeEffect.to(
-          largeSize,
-          EffectController(duration: 0.1),
-        ),
-      ),
-      _applyEffect(
+      await _applyEffect(
         token,
         MoveToEffect(
           SpotManager()
               .getSpots()
               .firstWhere((spot) => spot.uniqueId == token.positionId)
               .tokenPosition,
-          EffectController(duration: 0.1, curve: Curves.easeInOut),
+          EffectController(duration: 0.12, curve: Curves.easeInOut),
         ),
-      ),
-    ]);
+      );
 
-    // Restore token to original size
-    await _applyEffect(
-      token,
-      SizeEffect.to(
-        originalSize,
-        EffectController(duration: 0.1),
-      ),
-    );
+      // Add a small delay to reduce CPU strain and smooth the animation
+      Future.delayed(const Duration(milliseconds: 120));
   }
 
   // if token is in home

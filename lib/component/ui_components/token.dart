@@ -62,25 +62,26 @@ class Token extends PositionComponent with TapCallbacks {
     // Define the radius of the outer circle
     final outerRadius = size.x / 2;
     // Define the radius of the smaller inner circle
-    final smallerCircleRadius =
-        outerRadius / 3; // Radius of the smaller circle
+    final smallerCircle = outerRadius / 1.8; // Radius of the smaller circle
+    final smallerCircleDepth = smallerCircle * 0.90;
 
     // Define the center of the circles
     final center = Offset(size.x / 2, size.y / 2);
-    final centerShadow = Offset(size.x / 2, size.y / 1.7);
+    final centerShadow = Offset(size.x / 2, size.y / 1.65);
     final tokenShadow = Offset(size.x / 2, size.y / 1.5);
+    final smallerCircleShadow = Offset(size.x / 2, size.y / 1.75);
 
-    // Draw the outer circle with white fill
     canvas.drawCircle(tokenShadow, outerRadius,
-     Paint()..color = const Color(0xFF3C3D37).withOpacity(0.8));
-     
+        Paint()..color = const Color(0xFF3C3D37).withOpacity(0.6));
     canvas.drawCircle(centerShadow, outerRadius,
-     Paint()..color = const Color(0xFF5AB2FF)); // Draw outer circle
+        Paint()..color = const Color(0xFF5AB2FF)); // Draw outer circle
 
-    canvas.drawCircle(center, outerRadius, Paint()..color = const Color(0xFFA0DEFF)); // Draw border
+    canvas.drawCircle(center, outerRadius,
+        Paint()..color = const Color(0xFFA0DEFF)); // Draw border
 
-    // Draw the smaller inner circle with the specified innerCircleColor
-    canvas.drawCircle(center, smallerCircleRadius,  Paint()..color = Colors.white);
+    canvas.drawCircle(smallerCircleShadow, smallerCircleDepth,
+        Paint()..color = const Color(0xFF3C3D37).withOpacity(0.7));
+    canvas.drawCircle(center, smallerCircle, Paint()..color = Colors.white);
   }
 
   @override
@@ -107,7 +108,8 @@ class Token extends PositionComponent with TapCallbacks {
             token: this,
             tokenPath: GameState().getTokenPath(playerId));
         // Consider reducing delay or making it conditional
-      } else if (state == TokenState.onBoard && GameState().canMoveTokenOnBoard) {
+      } else if (state == TokenState.onBoard &&
+          GameState().canMoveTokenOnBoard) {
         moveForward(
             world: world,
             token: this,
@@ -119,7 +121,7 @@ class Token extends PositionComponent with TapCallbacks {
 
     // Non-six logic
     if (state == TokenState.onBoard && GameState().canMoveTokenOnBoard) {
-       moveForward(
+      moveForward(
           world: world,
           token: this,
           tokenPath: GameState().getTokenPath(playerId),
