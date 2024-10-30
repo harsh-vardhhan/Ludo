@@ -62,7 +62,7 @@ class Token extends PositionComponent with TapCallbacks {
     // Define the radius of the outer circle
     final outerRadius = size.x / 2;
     // Define the radius of the smaller inner circle
-    final smallerCircle = outerRadius / 1.8; // Radius of the smaller circle
+    final smallerCircle = outerRadius / 2.5; // Radius of the smaller circle
     final smallerCircleDepth = smallerCircle * 0.90;
 
     // Define the center of the circles
@@ -74,10 +74,10 @@ class Token extends PositionComponent with TapCallbacks {
     canvas.drawCircle(tokenShadow, outerRadius,
         Paint()..color = const Color(0xFF3C3D37).withOpacity(0.6));
     canvas.drawCircle(centerShadow, outerRadius,
-        Paint()..color = const Color(0xFF5AB2FF)); // Draw outer circle
+        Paint()..color = const Color(0xFF0D92F4)); // Draw outer circle
 
     canvas.drawCircle(center, outerRadius,
-        Paint()..color = const Color(0xFFA0DEFF)); // Draw border
+        Paint()..color = const Color(0xFF77CDFF)); // Draw border
 
     canvas.drawCircle(smallerCircleShadow, smallerCircleDepth,
         Paint()..color = const Color(0xFF3C3D37).withOpacity(0.7));
