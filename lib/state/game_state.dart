@@ -26,7 +26,7 @@ class GameState {
   Vector2 ludoBoardAbsolutePosition = Vector2.zero();
   Component? ludoBoard;
 
-  final red = const Color(0xFFD32F2F);
+  final red = const Color(0xFFda4444);
   final green = const Color(0xFF41B06E);
   final blue = const Color(0xFF0D92F4);
   final yellow  = const Color(0xFFF3C623);

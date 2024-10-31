@@ -117,7 +117,7 @@ class Ludo extends FlameGame
 
     // Initialize effects if they haven't been created yet
     _redBlinkEffect ??= ColorEffect(
-      Colors.redAccent,
+      const Color(0xffa3333d),
       EffectController(
         duration: 0.2,
         reverseDuration: 0.2,
@@ -353,8 +353,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.sideColor = const Color(0xFF15B392);
-            token.topColor = const Color(0xFF54C392);
+            token.sideColor = const Color(0xFF54C392);
+            token.topColor = const Color(0xFF73EC8B);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -535,8 +535,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.sideColor = const Color(0xFFC62E2E);
-            token.topColor = const Color(0xFFF95454);
+            token.sideColor = const Color(0xFFFF6969);
+            token.topColor = const Color(0xFFFFAAAA);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -671,6 +671,10 @@ void tokenCollision(World world, Token attackerToken) async {
         .where((token) => token.playerId != attackerToken.playerId)
         .toList();
 
+    if (tokensToMove.isNotEmpty) {
+      wasTokenAttacked = true;
+    }
+
     // Wait for all movements to complete
     await Future.wait(tokensToMove.map((token) => moveBackward(
           world: world,
@@ -678,7 +682,6 @@ void tokenCollision(World world, Token attackerToken) async {
           tokenPath: GameState().getTokenPath(token.playerId),
           ludoBoard: GameState().ludoBoard as PositionComponent,
         )));
-    wasTokenAttacked = true;
   }
 
   // Grant another turn or switch to next player
