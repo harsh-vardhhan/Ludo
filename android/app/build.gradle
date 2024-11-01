@@ -1,3 +1,16 @@
+// Add buildscript block before plugins
+buildscript {
+    ext.kotlin_version = "1.8.0"  // Set the required version
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:7.4.0'  // Make sure this version is compatible
+    }
+}
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -26,7 +39,6 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8
     }
     defaultConfig {
-        // Specify your unique Application ID.
         applicationId = "com.trakbit.ludozone"
         minSdkVersion 21
         targetSdk = flutter.targetSdkVersion

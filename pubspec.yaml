@@ -3,29 +3,24 @@ description: "ludo board game"
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+5
+version: 1.0.0+6
 
 environment:
   sdk: ^3.5.0
+  flutter: ^3.24.4
 
 dependencies:
   flutter:
     sdk: flutter
-  flame: ^1.18.0
-  flame_audio: ^2.10.3
+  flame: ^1.21.0
+  flame_audio: ^2.10.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
-  flutter_launcher_icons: ^0.9.2
 
 flutter:
   uses-material-design: true
   assets:
     - assets/audio/move.mp3
     - assets/audio/dice.mp3
-
-flutter_icons:
-  android: true
-  image_path: "assets/icon/app_icon.jpg"
