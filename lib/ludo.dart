@@ -65,10 +65,10 @@ class Ludo extends FlameGame
         width: width,
         height: width * 0.20));
 
-    add(FpsTextComponent(
-      position: Vector2(10, 10), // Adjust position as needed
-      anchor: Anchor.topLeft, // Set anchor to align top-left
-    ));
+    // add(FpsTextComponent(
+    //   position: Vector2(10, 10), // Adjust position as needed
+    //   anchor: Anchor.topLeft, // Set anchor to align top-left
+    // ));
 
     GameState().ludoBoard = world.children.whereType<LudoBoard>().first;
     final ludoBoard = GameState().ludoBoard as PositionComponent;
@@ -535,8 +535,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.sideColor = const Color(0xFFff4d6d);
-            token.topColor = const Color(0xFFff758f);
+            token.sideColor = const Color(0xff780000);
+            token.topColor = const Color(0xffFF5B5B);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
