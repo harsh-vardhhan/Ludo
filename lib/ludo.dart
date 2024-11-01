@@ -444,8 +444,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.sideColor = const Color(0xFFED9455);
-            token.topColor = const Color(0xFFFFBB70);
+            token.sideColor = const Color(0xffc9a227);
+            token.topColor = const Color(0xffFFDF5B);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,
@@ -535,8 +535,8 @@ class Ludo extends FlameGame
                   ludoBoardPosition.y,
             );
             // update token position
-            token.sideColor = const Color(0xFFFF6969);
-            token.topColor = const Color(0xFFFFAAAA);
+            token.sideColor = const Color(0xFFff4d6d);
+            token.topColor = const Color(0xFFff758f);
             token.position = spot.position;
             token.size = Vector2(
               homeSpot.size.x * tokenSizeFactorX,

@@ -26,10 +26,10 @@ class GameState {
   Vector2 ludoBoardAbsolutePosition = Vector2.zero();
   Component? ludoBoard;
 
-  final red = const Color(0xFFda4444);
+  final red = const Color(0xFFc9184a);
   final green = const Color(0xFF41B06E);
   final blue = const Color(0xFF0D92F4);
-  final yellow  = const Color(0xFFF3C623);
+  final yellow  = const Color(0xFFFFD966 );
 
   // Factory method to access the instance
   factory GameState() {
