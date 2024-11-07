@@ -7,7 +7,7 @@ class HomeSpot extends CircleComponent {
     ..color = Colors.transparent // Keep interior transparent
     ..style = PaintingStyle.stroke // Set to stroke for the border
     ..strokeWidth = 1.0 // Set border width
-    ..color = Colors.black; // Set border color to black
+    ..color =Colors.transparent; // Set border color to black
 
   HomeSpot({
     required double radius,

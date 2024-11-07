@@ -19,7 +19,7 @@ class Home extends RectangleComponent {
                 ..color = Colors.transparent
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 1.0
-                ..color = Colors.black,
+                ..color =Colors.transparent,
             ),
             HomePlate(
               size: size / 1.5,

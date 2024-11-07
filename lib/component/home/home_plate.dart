@@ -14,14 +14,13 @@ class HomePlate extends RectangleComponent {
           // First paint object for the fill (white color)
           paint: Paint()..color = Colors.white,
           children: [
-            // Define border as a separate child component for the stroke
             RectangleComponent(
               size: Vector2.all(size),
               paint: Paint()
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
-                ..strokeWidth = 1.0 // Set border width
-                ..color = Colors.black, // Set border color to black
+                ..strokeWidth =4 // Set border width
+                ..color = Colors.black.withOpacity(0.2), // Set border color to black
             ),
             HomeSpotContainer(
               size: size / 1.5,
