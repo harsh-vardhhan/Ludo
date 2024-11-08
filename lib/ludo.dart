@@ -13,6 +13,7 @@ import 'state/token_manager.dart';
 import 'state/event_bus.dart';
 import 'component/home/home_spot.dart';
 import 'state/game_state.dart';
+import 'state/audio_manager.dart';
 import 'component/controller/upper_controller.dart';
 import 'component/controller/lower_controller.dart';
 import 'ludo_board.dart';
@@ -65,10 +66,10 @@ class Ludo extends FlameGame
         width: width,
         height: width * 0.20));
 
-    // add(FpsTextComponent(
-    //   position: Vector2(10, 10), // Adjust position as needed
-    //   anchor: Anchor.topLeft, // Set anchor to align top-left
-    // ));
+    add(FpsTextComponent(
+      position: Vector2(10, 10), // Adjust position as needed
+      anchor: Anchor.topLeft, // Set anchor to align top-left
+    ));
 
     GameState().ludoBoard = world.children.whereType<LudoBoard>().first;
     final ludoBoard = GameState().ludoBoard as PositionComponent;
@@ -342,6 +343,9 @@ class Ludo extends FlameGame
   Future<void> startGame() async {
     await TokenManager().clearTokens();
     await GameState().clearPlayers();
+
+
+    AudioManager.initialize();
 
     for (var team in teams) {
       if (team == 'BP') {

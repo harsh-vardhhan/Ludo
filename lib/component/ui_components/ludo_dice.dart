@@ -5,10 +5,10 @@ import 'package:flame/events.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/geometry.dart';
-import 'package:flame_audio/flame_audio.dart';
 // user files
 import 'dice_face_component.dart';
 import '../../state/game_state.dart';
+import '../../state/audio_manager.dart';
 import '../../state/player.dart';
 import '../../ludo_board.dart';
 import 'token.dart';
@@ -30,15 +30,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
   late final DiceFaceComponent diceFace; // The dice face showing dots
 
   final Player player;
-  late AudioPool diceSound;
 
-  @override
-  Future<void> onLoad() async {
-    super.onLoad();
-
-    // Preload the audio pool for the dice sound
-    diceSound = await FlameAudio.createPool('dice.mp3', maxPlayers: 3);
+  void playSound() async {
+    await AudioManager.playDiceSound();
   }
+  
 
   @override
   void onTapDown(TapDownEvent event) async {
@@ -54,7 +50,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     GameState().diceNumber =  Random().nextInt(6) + 1;
     diceFace.updateDiceValue(GameState().diceNumber);
 
-     diceSound.start();
+    playSound();
     // Apply dice rotation effect
     _applyDiceRollEffect();
 
