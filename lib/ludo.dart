@@ -136,8 +136,37 @@ class Ludo extends FlameGame
       ),
     );
 
+    // dice for player red
+    final upperController = world.children.whereType<UpperController>().first;
+    final upperControllerComponents = upperController.children.toList();
+    final leftDice = upperControllerComponents[0]
+        .children
+        .whereType<RectangleComponent>()
+        .first;
+
+    final rightDiceContainer =
+        leftDice.children.whereType<RectangleComponent>().first;
+
     // Add the appropriate effect based on shouldBlink
     homePlate.add(shouldBlink ? _redBlinkEffect! : _redStaticEffect!);
+
+    if (shouldBlink) {
+      final ludoDice =
+          rightDiceContainer.children.whereType<LudoDice>().firstOrNull;
+      if (ludoDice == null) {
+        if (GameState().players.isNotEmpty) {
+          rightDiceContainer.add(LudoDice(
+            player: GameState().players[GameState().currentPlayerIndex],
+            faceSize: leftDice.size.x * 0.70,
+          ));
+        }
+      }
+    } else {
+      final ludoDice = rightDiceContainer.children.whereType<LudoDice>().firstOrNull;
+      if (ludoDice != null) {
+        rightDiceContainer.remove(ludoDice);
+      }
+    }
   }
 
   void blinkYellowBase(bool shouldBlink) {
@@ -167,8 +196,30 @@ class Ludo extends FlameGame
       ),
     );
 
+    final lowerController = world.children.whereType<LowerController>().first;
+    final lowerControllerComponents = lowerController.children.toList();
+    final rightDice = lowerControllerComponents[2]
+        .children
+        .whereType<RectangleComponent>()
+        .first;
+
+    final rightDiceContainer =
+        rightDice.children.whereType<RectangleComponent>().first;
+
     // Add the appropriate effect based on shouldBlink
     homePlate.add(shouldBlink ? _yellowBlinkEffect! : _yellowStaticEffect!);
+
+    if (shouldBlink) {
+      rightDiceContainer.add(LudoDice(
+        player: GameState().players[GameState().currentPlayerIndex],
+        faceSize: rightDice.size.x * 0.70,
+      ));
+    } else {
+      final ludoDice = rightDiceContainer.children.whereType<LudoDice>().firstOrNull;
+      if (ludoDice != null) {
+        rightDiceContainer.remove(ludoDice);
+      }
+    }
   }
 
   void blinkBlueBase(bool shouldBlink) {
@@ -198,8 +249,39 @@ class Ludo extends FlameGame
       ),
     );
 
+    // dice for player blue
+    final lowerController = world.children.whereType<LowerController>().first;
+    final lowerControllerComponents = lowerController.children.toList();
+    final leftDice = lowerControllerComponents[0]
+        .children
+        .whereType<RectangleComponent>()
+        .first;
+
+    final leftDiceContainer =
+        leftDice.children.whereType<RectangleComponent>().first;
+
     // Add the appropriate effect based on shouldBlink
     homePlate.add(shouldBlink ? _blueBlinkEffect! : _blueStaticEffect!);
+
+    if (shouldBlink) {
+      final ludoDice =
+          leftDiceContainer.children.whereType<LudoDice>().firstOrNull;
+      print(leftDiceContainer);
+      print(ludoDice);
+      if (ludoDice == null) {
+        if (GameState().players.isNotEmpty) {
+          leftDiceContainer.add(LudoDice(
+            player: GameState().players[GameState().currentPlayerIndex],
+            faceSize: leftDice.size.x * 0.70,
+          ));
+        }
+      }
+    } else {
+      final ludoDice = leftDiceContainer.children.whereType<LudoDice>().firstOrNull;
+      if (ludoDice != null) {
+        leftDiceContainer.remove(ludoDice);
+      }
+    }
   }
 
   void blinkGreenBase(bool shouldBlink) {
@@ -229,8 +311,32 @@ class Ludo extends FlameGame
       ),
     );
 
+    // dice for player green
+    final upperController = world.children.whereType<UpperController>().first;
+    final upperControllerComponents = upperController.children.toList();
+    final rightDice = upperControllerComponents[2]
+        .children
+        .whereType<RectangleComponent>()
+        .first;
+
+    final rightDiceContainer =
+        rightDice.children.whereType<RectangleComponent>().first;
+
     // Add the appropriate effect based on shouldBlink
     homePlate.add(shouldBlink ? _greenBlinkEffect! : _greenStaticEffect!);
+
+    if (shouldBlink) {
+      rightDiceContainer.add(LudoDice(
+        player: GameState().players[GameState().currentPlayerIndex],
+        faceSize: rightDice.size.x * 0.70,
+      ));
+    } else {
+      final ludoDice =
+          rightDiceContainer.children.whereType<LudoDice>().firstOrNull;
+      if (ludoDice != null) {
+        rightDiceContainer.remove(ludoDice);
+      }
+    }
   }
 
   Future<void> startGame() async {
@@ -289,6 +395,28 @@ class Ludo extends FlameGame
               token.playerId = bluePlayer.playerId;
               token.enableToken = true;
             }
+
+            addDice() {
+              // dice for player blue
+              final lowerController =
+                  world.children.whereType<LowerController>().first;
+              final lowerControllerComponents =
+                  lowerController.children.toList();
+              final leftDice = lowerControllerComponents[0]
+                  .children
+                  .whereType<RectangleComponent>()
+                  .first;
+
+              final leftDiceContainer =
+                  leftDice.children.whereType<RectangleComponent>().first;
+
+              leftDiceContainer.add(LudoDice(
+                player: bluePlayer,
+                faceSize: leftDice.size.x * 0.70,
+              ));
+            }
+
+            addDice();
           } else {
             Player bluePlayer = Player(
               playerId: playerId,
@@ -299,34 +427,6 @@ class Ludo extends FlameGame
               token.playerId = bluePlayer.playerId;
             }
           }
-
-          final player = GameState()
-              .players
-              .firstWhere((player) => player.playerId == playerId);
-
-          // dice for player blue
-          final lowerController =
-              world.children.whereType<LowerController>().first;
-          final lowerControllerComponents = lowerController.children.toList();
-          final leftDice = lowerControllerComponents[0]
-              .children
-              .whereType<RectangleComponent>()
-              .first;
-         
-           /*
-          final leftToken = lowerControllerComponents[1]
-              .children
-              .whereType<PositionComponent>()
-              .first;
-          */
-
-          final leftDiceContainer =
-              leftDice.children.whereType<RectangleComponent>().first;
-
-          leftDiceContainer.add(LudoDice(
-            player: player,
-            faceSize: leftDice.size.x * 0.70,
-          ));
         }
       } else if (team == 'GP') {
         if (TokenManager().getGreenTokens().isEmpty) {
@@ -390,34 +490,6 @@ class Ludo extends FlameGame
               token.enableToken = false;
             }
           }
-
-          final player = GameState()
-              .players
-              .firstWhere((player) => player.playerId == playerId);
-
-          // dice for player green
-          final upperController =
-              world.children.whereType<UpperController>().first;
-          final upperControllerComponents = upperController.children.toList();
-          final rightDice = upperControllerComponents[2]
-              .children
-              .whereType<RectangleComponent>()
-              .first;
-
-           /*
-          final rightToken = upperControllerComponents[3]
-              .children
-              .whereType<PositionComponent>()
-              .first;
-          */
-
-          final rightDiceContainer =
-              rightDice.children.whereType<RectangleComponent>().first;
-
-          rightDiceContainer.add(LudoDice(
-            player: player,
-            faceSize: rightDice.size.x * 0.70,
-          ));
         }
       } else if (team == 'YP') {
         if (TokenManager().getYellowTokens().isEmpty) {
@@ -470,6 +542,27 @@ class Ludo extends FlameGame
               token.playerId = yellowPlayer.playerId;
               token.enableToken = true;
             }
+            addDice() {
+              // dice for player yellow
+              final lowerController =
+                  world.children.whereType<LowerController>().first;
+              final lowerControllerComponents =
+                  lowerController.children.toList();
+              final rightDice = lowerControllerComponents[2]
+                  .children
+                  .whereType<RectangleComponent>()
+                  .first;
+
+              final rightDiceContainer =
+                  rightDice.children.whereType<RectangleComponent>().first;
+
+              rightDiceContainer.add(LudoDice(
+                player: yellowPlayer,
+                faceSize: rightDice.size.x * 0.70,
+              ));
+            }
+
+            addDice();
           } else {
             Player yellowPlayer = Player(
               playerId: playerId,
@@ -481,34 +574,6 @@ class Ludo extends FlameGame
               token.enableToken = false;
             }
           }
-
-          final player = GameState()
-              .players
-              .firstWhere((player) => player.playerId == playerId);
-
-          // dice for player yellow
-          final lowerController =
-              world.children.whereType<LowerController>().first;
-          final lowerControllerComponents = lowerController.children.toList();
-          final rightDice = lowerControllerComponents[2]
-              .children
-              .whereType<RectangleComponent>()
-              .first;
-
-          /*
-          final rightToken = lowerControllerComponents[3]
-              .children
-              .whereType<PositionComponent>()
-              .first;
-          */
-
-          final rightDiceContainer =
-              rightDice.children.whereType<RectangleComponent>().first;
-
-          rightDiceContainer.add(LudoDice(
-            player: player,
-            faceSize: rightDice.size.x * 0.70,
-          ));
         }
       } else if (team == 'RP') {
         if (TokenManager().getRedTokens().isEmpty) {
@@ -561,6 +626,27 @@ class Ludo extends FlameGame
               token.playerId = redPlayer.playerId;
               token.enableToken = true;
             }
+
+            addDice() {
+              // dice for player red
+              final upperController =
+                  world.children.whereType<UpperController>().first;
+              final upperControllerComponents =
+                  upperController.children.toList();
+              final leftDice = upperControllerComponents[0]
+                  .children
+                  .whereType<RectangleComponent>()
+                  .first;
+
+              final rightDiceContainer =
+                  leftDice.children.whereType<RectangleComponent>().first;
+              rightDiceContainer.add(LudoDice(
+                player: redPlayer,
+                faceSize: leftDice.size.x * 0.70,
+              ));
+            }
+
+            addDice();
           } else {
             Player redPlayer = Player(
               playerId: playerId,
@@ -572,33 +658,6 @@ class Ludo extends FlameGame
               token.enableToken = false;
             }
           }
-
-          final player = GameState()
-              .players
-              .firstWhere((player) => player.playerId == playerId);
-
-          // dice for player yellow
-          final upperController =
-              world.children.whereType<UpperController>().first;
-          final upperControllerComponents = upperController.children.toList();
-          final leftDice = upperControllerComponents[0]
-              .children
-              .whereType<RectangleComponent>()
-              .first;
-
-          /*
-          final leftToken = upperControllerComponents[1]
-              .children
-              .whereType<PositionComponent>()
-              .first;
-          */
-
-          final rightDiceContainer =
-              leftDice.children.whereType<RectangleComponent>().first;
-          rightDiceContainer.add(LudoDice(
-            player: player,
-            faceSize: leftDice.size.x * 0.70,
-          ));
         }
       }
     }
