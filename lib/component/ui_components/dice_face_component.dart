@@ -14,7 +14,7 @@ class DiceFaceComponent extends PositionComponent {
     required this.faceSize,
     required this.diceValue,
   }) {
-    dotSize = faceSize * 0.1; // Adjust dot size
+    dotSize = faceSize * 0.09; // Adjust dot size
     spacing = faceSize * 0.3; // Spacing between dots
     size = Vector2.all(faceSize);
 
@@ -64,7 +64,7 @@ class DiceFaceComponent extends PositionComponent {
     super.render(canvas);
 
     // Draw the dice face background
-    final paint = Paint()..color = Colors.white;
+    final paint = Paint()..color = Colors.transparent;
     final rect = Rect.fromLTWH(0, 0, size.x, size.y);
     canvas.drawRect(rect, paint);
 

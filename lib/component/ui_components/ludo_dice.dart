@@ -34,7 +34,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
   void playSound() async {
     await AudioManager.playDiceSound();
   }
-  
 
   @override
   void onTapDown(TapDownEvent event) async {
@@ -47,7 +46,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     player.enableDice = false;
 
     // Roll the dice and update the dice face
-    GameState().diceNumber =  Random().nextInt(6) + 1;
+    GameState().diceNumber = Random().nextInt(6) + 1;
     diceFace.updateDiceValue(GameState().diceNumber);
 
     playSound();
@@ -59,10 +58,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
     final world = parent?.parent?.parent?.parent?.parent;
     if (world is! World) return; // Ensure the world is available
 
-
     // Handle dice roll based on the number
-    final handleRoll = GameState().diceNumber == 6 ? _handleSixRoll : _handleNonSixRoll;
-    handleRoll(world, GameState().ludoBoard as LudoBoard, GameState().diceNumber);
+    final handleRoll =
+        GameState().diceNumber == 6 ? _handleSixRoll : _handleNonSixRoll;
+    handleRoll(
+        world, GameState().ludoBoard as LudoBoard, GameState().diceNumber);
   }
 
   // Apply a 360-degree rotation effect to the dice
@@ -80,8 +80,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Handle logic when the player rolls a 6
-  void _handleSixRoll(
-      World world, LudoBoard ludoBoard, int diceNumber) {
+  void _handleSixRoll(World world, LudoBoard ludoBoard, int diceNumber) {
     player.grantAnotherTurn();
 
     if (player.hasRolledThreeConsecutiveSixes()) {
@@ -124,8 +123,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
   }
 
   // Handle logic for non-six dice rolls
-  void _handleNonSixRoll(
-      World world, LudoBoard ludoBoard, int diceNumber) {
+  void _handleNonSixRoll(World world, LudoBoard ludoBoard, int diceNumber) {
     final tokensOnBoard = player.tokens
         .where((token) => token.state == TokenState.onBoard)
         .toList();
@@ -210,10 +208,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
     diceFace = DiceFaceComponent(faceSize: innerWidth, diceValue: 6);
 
     // Initialize the inner rectangle component
-    innerRectangle = RectangleComponent(
+    final innerRectangle = RoundedRectangle(
       size: innerSize,
       position: innerPosition,
       paint: Paint()..color = Colors.white,
+      borderRadius: 15.0, // Customize corner radius
       children: [diceFace],
     );
 
@@ -227,7 +226,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     // Create paint for the square
     final paint = Paint()
-      ..color = Colors.white
+      ..color = Color(0xFFD6D6D6)
       ..style = PaintingStyle.fill;
 
     // Define the rounded rectangle
@@ -237,5 +236,26 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     // Draw the rounded rectangle
     canvas.drawRRect(rrect, paint);
+  }
+}
+
+class RoundedRectangle extends PositionComponent {
+  final Paint paint;
+  final double borderRadius;
+
+  RoundedRectangle({
+    required Vector2 size,
+    required this.paint,
+    this.borderRadius = 10.0, // Default corner radius
+    super.position,
+    super.children,
+  }) : super(size: size);
+
+  @override
+  void render(Canvas canvas) {
+    final rect = Rect.fromLTWH(0, 0, size.x, size.y);
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
+    canvas.drawRRect(rrect, paint);
+    super.render(canvas);
   }
 }
