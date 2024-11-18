@@ -813,17 +813,23 @@ void resizeTokensOnSpot(World world) {
 
 void addTokenTrail(List<Token> tokensInBase, List<Token> tokensOnBoard) {
 
+  var trailingTokens = [];
+
   for (var token in tokensOnBoard) {
     if (!token.spaceToMove()) {
       continue;
     }
-    token.drawCircleAroundToken();
+    trailingTokens.add(token);
   }
 
   if(GameState().diceNumber == 6) {
     for  (var token in tokensInBase) {
-        token.drawCircleAroundToken();
+      trailingTokens.add(token);
     }
+  }
+
+  for (var token in trailingTokens) {
+    token.enableCircleAnimation();
   }
 }
 
@@ -936,7 +942,7 @@ Future<void> moveForward({
 void clearTokenTrail() {
   final tokens = TokenManager().allTokens;
   for (var token in tokens) {
-    token.hideCircleAroundToken();
+    token.disableCircleAnimation();
   }
 }
 

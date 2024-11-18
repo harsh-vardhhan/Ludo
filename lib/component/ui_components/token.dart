@@ -1,8 +1,10 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo/state/token_manager.dart';
 import '../../state/game_state.dart';
 import '../../ludo.dart';
+import 'package:flame/effects.dart';
 
 // Enum to define token states
 enum TokenState {
@@ -20,7 +22,10 @@ class Token extends PositionComponent with TapCallbacks {
 
   Color topColor;
   Color sideColor;
-  bool _shouldDrawCircle = false; // Flag to control circle rendering
+
+  bool _shouldDrawCircle = false; // Flag to control circle rendering and animation
+  double _circleScale = 1.0;
+  Timer? _circleAnimationTimer; //
 
   Token({
     required this.tokenId, // Mandatory unique ID for the token
@@ -75,31 +80,52 @@ class Token extends PositionComponent with TapCallbacks {
   }
 
   void _renderCircleAroundToken(Canvas canvas) {
-    // Radius for the outer circle surrounding the token
-    final surroundingCircleRadius =
-        size.x / 2 * 2; // Slightly larger than the token
+    final center = Offset(size.x / 2, size.y / 1.8);
 
-    // Center position of the circle
-    final center = Offset(size.x / 2, size.y / 2);
-
-    // Circle's paint style
     final paint = Paint()
-      ..color = Colors.black.withOpacity(0.5) // Blue color with transparency
-      ..style = PaintingStyle.stroke // Stroke for an outline
-      ..strokeWidth = 3.0; // Thickness of the circle outline
+      ..color = Colors.black.withOpacity(0.4) // Blue color with transparency
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8;
 
-    // Draw the circle around the token
-    canvas.drawCircle(center, surroundingCircleRadius, paint);
+    // Scale the circle based on _circleScale
+    final scaledRadius = (size.x / 2) * _circleScale;
+    canvas.drawCircle(center, scaledRadius, paint);
   }
 
-  // Public method to enable the circle rendering
-  void drawCircleAroundToken() {
+  // Enable circle rendering and animation
+  void enableCircleAnimation() {
+    if (_shouldDrawCircle) return; // Already active, do nothing
+
     _shouldDrawCircle = true;
+
+    // Start a timer to simulate the scale effect
+    _circleAnimationTimer = Timer(
+      0.070, // Frame interval
+      onTick: () {
+        _circleScale += 0.05; // Increase scale
+        if (_circleScale >= 2) {
+          _circleScale = 1.0; // Reset scale
+        }
+      },
+      repeat: true,
+    )..start();
   }
 
-  // Public method to disable the circle rendering
-  void hideCircleAroundToken() {
+  // Disable circle rendering and animation
+  void disableCircleAnimation() {
     _shouldDrawCircle = false;
+
+    // Stop the animation timer
+    _circleAnimationTimer?.stop();
+    _circleAnimationTimer = null;
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    // Update the timer for the animation
+    _circleAnimationTimer?.update(dt);
   }
 
   @override
@@ -117,6 +143,11 @@ class Token extends PositionComponent with TapCallbacks {
     enableToken = false;
 
     if (GameState().currentPlayer.playerId != playerId) return;
+
+    final tokens = TokenManager().allTokens;
+    for (var token in tokens) {
+      token.disableCircleAnimation();
+    }
 
     if (GameState().diceNumber == 6) {
       // Handle movement logic
