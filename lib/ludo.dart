@@ -811,28 +811,18 @@ void resizeTokensOnSpot(World world) {
   });
 }
 
-void addTokenTrail(List<Token> tokensOnBoard) {
-  SpotManager spotManager = SpotManager();
-  final colorMap = {
-    'B': const Color(0xFFB7E0FF), // Blue color
-    'G': const Color(0xFFB6FFA1), // Green color
-    'Y': const Color(0xFFFEFFA7), // Yellow color
-    'R': const Color(0xFFFF8A8A), // Red color
-  };
+void addTokenTrail(List<Token> tokensInBase, List<Token> tokensOnBoard) {
 
   for (var token in tokensOnBoard) {
     if (!token.spaceToMove()) {
       continue;
     }
+    token.drawCircleAroundToken();
+  }
 
-    final colorPrefix =
-        token.tokenId.substring(0, 1); // Get the first character
-    final color = colorMap[colorPrefix];
-
-    // Set the color if it's determined
-    if (color != null) {
-      spotManager.findSpotById(token.positionId).paint.color =
-          color; // Assuming 'spot' has a 'paint' property
+  if(GameState().diceNumber == 6) {
+    for  (var token in tokensInBase) {
+        token.drawCircleAroundToken();
     }
   }
 }
@@ -940,58 +930,13 @@ Future<void> moveForward({
     tokenCollision(world, token);
   }
 
-  clearTokenTrail(token);
+  clearTokenTrail();
 }
 
-void clearTokenTrail(Token token) {
-  final spots = SpotManager().getSpots();
-
-  for (var spot in spots) {
-    // Determine the color to reset based on uniqueId
-    Color resetColor;
-    switch (spot.uniqueId) {
-      case 'B04':
-      case 'B10':
-      case 'B11':
-      case 'B12':
-      case 'B13':
-      case 'B14':
-      case 'BF':
-        resetColor = GameState().blue;
-        break;
-      case 'G21':
-      case 'G11':
-      case 'G12':
-      case 'G13':
-      case 'G14':
-      case 'G15':
-      case 'GF':
-        resetColor = GameState().green;
-        break;
-      case 'Y42':
-      case 'Y41':
-      case 'Y31':
-      case 'Y21':
-      case 'Y11':
-      case 'Y01':
-      case 'YF':
-        resetColor = GameState().yellow;
-        break;
-      case 'R10':
-      case 'R11':
-      case 'R21':
-      case 'R31':
-      case 'R41':
-      case 'R51':
-      case 'RF':
-        resetColor = GameState().red;
-        break;
-      default:
-        resetColor = Colors.white;
-    }
-
-    // Set the color directly
-    spot.paint.color = resetColor; // Assuming 'spot' has a 'paint' property
+void clearTokenTrail() {
+  final tokens = TokenManager().allTokens;
+  for (var token in tokens) {
+    token.hideCircleAroundToken();
   }
 }
 

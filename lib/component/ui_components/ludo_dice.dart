@@ -162,11 +162,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
     }
     if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
       GameState().enableMoveFromBoth();
-      addTokenTrail(tokensOnBoard);
+      addTokenTrail(tokensInBase, tokensOnBoard);
     } else if (tokensInBase.isNotEmpty) {
       GameState().enableMoveFromBase();
     } else if (tokensOnBoard.isNotEmpty) {
-      addTokenTrail(tokensOnBoard);
+      addTokenTrail(tokensInBase, tokensOnBoard);
       GameState().enableMoveOnBoard();
     }
   }

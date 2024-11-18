@@ -20,6 +20,7 @@ class Token extends PositionComponent with TapCallbacks {
 
   Color topColor;
   Color sideColor;
+  bool _shouldDrawCircle = false; // Flag to control circle rendering
 
   Token({
     required this.tokenId, // Mandatory unique ID for the token
@@ -43,7 +44,8 @@ class Token extends PositionComponent with TapCallbacks {
 
     // Define the radius of the outer circle
     final outerRadius = size.x / 2;
-    final sideOuterRadius = size.x/1.9;
+    final sideOuterRadius = size.x / 1.9;
+
     // Define the radius of the smaller inner circle
     final smallerCircle = outerRadius / 2.5; // Radius of the smaller circle
     final smallerCircleDepth = smallerCircle * 0.90;
@@ -65,6 +67,39 @@ class Token extends PositionComponent with TapCallbacks {
     canvas.drawCircle(smallerCircleShadow, smallerCircleDepth,
         Paint()..color = const Color(0xFF3C3D37).withOpacity(0.7));
     canvas.drawCircle(center, smallerCircle, Paint()..color = Colors.white);
+
+    // Conditionally render the circle around the token
+    if (_shouldDrawCircle) {
+      _renderCircleAroundToken(canvas);
+    }
+  }
+
+  void _renderCircleAroundToken(Canvas canvas) {
+    // Radius for the outer circle surrounding the token
+    final surroundingCircleRadius =
+        size.x / 2 * 2; // Slightly larger than the token
+
+    // Center position of the circle
+    final center = Offset(size.x / 2, size.y / 2);
+
+    // Circle's paint style
+    final paint = Paint()
+      ..color = Colors.black.withOpacity(0.5) // Blue color with transparency
+      ..style = PaintingStyle.stroke // Stroke for an outline
+      ..strokeWidth = 3.0; // Thickness of the circle outline
+
+    // Draw the circle around the token
+    canvas.drawCircle(center, surroundingCircleRadius, paint);
+  }
+
+  // Public method to enable the circle rendering
+  void drawCircleAroundToken() {
+    _shouldDrawCircle = true;
+  }
+
+  // Public method to disable the circle rendering
+  void hideCircleAroundToken() {
+    _shouldDrawCircle = false;
   }
 
   @override
