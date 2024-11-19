@@ -22,7 +22,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
         ),
         rightArrow = RectangleComponent(
           size: Vector2(width * 0.45 * 0.3, height * 0.8),
-          position: Vector2(width * 0.45 * 1.135, width * 0.45 * 0.05),
+          position: Vector2(width * 0.45  * 0.975, width * 0.45 * 0.05),
           paint: Paint()..color = Colors.transparent,
         ),
         super(
@@ -138,7 +138,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
       paint: Paint()
         ..color = Colors.green
         ..style = PaintingStyle.fill,
-      position: Vector2(pointerX, pointerY - 2.5),
+      position: Vector2(pointerX, pointerY ),
     );
 
     if (playerId == 'BP') {
@@ -157,7 +157,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     } else if (playerId == 'YP') {
       rightPointer.add(
         MoveByEffect(
-          Vector2((size.x * 0.20) * 0.1, 0), // Move along the x-axis
+          Vector2((size.x * (-0.20)) * 0.1, 0), // Move along the x-axis
           EffectController(
             duration: 0.2, // Takes 0.2 seconds to complete
             reverseDuration: 0.2, // Move back in 0.2 seconds
