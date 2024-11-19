@@ -11,6 +11,7 @@ import '../../state/game_state.dart';
 import '../../state/audio_manager.dart';
 import '../../state/player.dart';
 import '../../ludo_board.dart';
+import '../controller/lower_controller.dart';
 import 'token.dart';
 import '../../ludo.dart';
 
@@ -42,7 +43,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
         player != GameState().currentPlayer) {
       return; // Exit if the player cannot roll the dice
     }
+
     // Disable dice to prevent multiple taps
+    final world = parent?.parent?.parent?.parent?.parent;
+    final lowerController = world?.children.whereType<LowerController>().first;
+    lowerController?.hidePointer(player.playerId);
     player.enableDice = false;
 
     // Roll the dice and update the dice face
@@ -55,7 +60,6 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     await Future.delayed(const Duration(milliseconds: 300));
 
-    final world = parent?.parent?.parent?.parent?.parent;
     if (world is! World) return; // Ensure the world is available
 
     // Handle dice roll based on the number
@@ -115,7 +119,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
       }
       return;
     } else if (allMovableTokens.length > 1) {
-      _enableManualTokenSelection(tokensInBase, tokensOnBoard);
+      _enableManualTokenSelection(world, tokensInBase, tokensOnBoard);
     } else if (allMovableTokens.isEmpty) {
       GameState().switchToNextPlayer();
       return;
@@ -146,7 +150,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
           world, ludoBoard, diceNumber, movableTokens.first);
       return;
     } else if (movableTokens.length > 1) {
-      _enableManualTokenSelection(tokensInBase, tokensOnBoard);
+      _enableManualTokenSelection(world, tokensInBase, tokensOnBoard);
     } else if (movableTokens.isEmpty) {
       GameState().switchToNextPlayer();
       return;
@@ -155,8 +159,11 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
   // Enable manual selection if multiple tokens can move
   void _enableManualTokenSelection(
-      List<Token> tokensInBase, List<Token> tokensOnBoard) {
+      World world, List<Token> tokensInBase, List<Token> tokensOnBoard) {
+    final lowerController = world.children.whereType<LowerController>().first;
+    lowerController.hidePointer(player.playerId);
     player.enableDice = false;
+
     for (var token in player.tokens) {
       token.enableToken = true;
     }

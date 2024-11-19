@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:ludo/state/token_manager.dart';
 import '../../state/game_state.dart';
 import '../../ludo.dart';
-import 'package:flame/effects.dart';
 
 // Enum to define token states
 enum TokenState {
@@ -147,6 +146,7 @@ class Token extends PositionComponent with TapCallbacks {
     final tokens = TokenManager().allTokens;
     for (var token in tokens) {
       token.disableCircleAnimation();
+      token.enableToken = false;
     }
 
     if (GameState().diceNumber == 6) {
