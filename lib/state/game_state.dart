@@ -11,8 +11,6 @@ class GameState {
   // Singleton instance
   static final GameState _instance = GameState._();
 
-
-
   List<int> diceChances =
       List.filled(3, 0, growable: false); // Track consecutive 6s
   var diceNumber = 5;
@@ -29,7 +27,7 @@ class GameState {
   final red = const Color(0xffFF5B5B);
   final green = const Color(0xFF41B06E);
   final blue = const Color(0xFF0D92F4);
-  final yellow  = const Color(0xFFFFD966 );
+  final yellow = const Color(0xFFFFD966);
 
   // Factory method to access the instance
   factory GameState() {
@@ -56,10 +54,15 @@ class GameState {
     canMoveTokenOnBoard = false;
   }
 
+  void hidePointer() {
+    EventBus().emit(SwitchPointerEvent());
+  }
+
   void switchToNextPlayer() {
     var current = currentPlayer;
     current.isCurrentTurn = false;
     current.enableDice = false;
+    EventBus().emit(SwitchPointerEvent());
     current.resetExtraTurns();
 
     // Loop to find the next player who hasn't won

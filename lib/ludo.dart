@@ -81,6 +81,10 @@ class Ludo extends FlameGame
       showPlayerModal();
     });
 
+    EventBus().on<SwitchPointerEvent>((event) {
+      switchOffPointer();
+    });
+
     EventBus().on<BlinkGreenBaseEvent>((event) {
       blinkGreenBase(true);
       blinkBlueBase(false);
@@ -110,6 +114,12 @@ class Ludo extends FlameGame
     });
 
     await startGame();
+  }
+
+  void switchOffPointer() {
+    final player = GameState().players[GameState().currentPlayerIndex];
+    final lowerController = world.children.whereType<LowerController>().first;
+    lowerController.hidePointer(player.playerId);
   }
 
   void blinkRedBase(bool shouldBlink) {
@@ -221,12 +231,10 @@ class Ludo extends FlameGame
       ));
       lowerController.showPointer(player.playerId);
     } else {
-      final player = GameState().players[GameState().currentPlayerIndex];
       final ludoDice =
           rightDiceContainer.children.whereType<LudoDice>().firstOrNull;
       if (ludoDice != null) {
         rightDiceContainer.remove(ludoDice);
-        lowerController.showPointer(player.playerId);
       }
     }
   }
@@ -290,8 +298,6 @@ class Ludo extends FlameGame
           leftDiceContainer.children.whereType<LudoDice>().firstOrNull;
       if (ludoDice != null) {
         leftDiceContainer.remove(ludoDice);
-        final player = GameState().players[GameState().currentPlayerIndex];
-        lowerController.hidePointer(player.playerId);
       }
     }
   }
@@ -429,7 +435,6 @@ class Ludo extends FlameGame
                 player: bluePlayer,
                 faceSize: leftDice.size.x * 0.70,
               ));
-
               lowerController.showPointer(bluePlayer.playerId);
             }
 
@@ -777,8 +782,12 @@ void tokenCollision(World world, Token attackerToken) async {
   }
 
   player.enableDice = true;
-  final lowerController = world.children.whereType<LowerController>().first;
-  lowerController.showPointer(player.playerId);
+
+  if (GameState().diceNumber == 6) {
+    final lowerController = world.children.whereType<LowerController>().first;
+    lowerController.showPointer(player.playerId);
+  }
+
   for (var token in player.tokens) {
     token.enableToken = false;
   }
@@ -947,8 +956,8 @@ Future<void> moveForward({
   } else {
     tokenCollision(world, token);
   }
-
   clearTokenTrail();
+  GameState().hidePointer();
 }
 
 void clearTokenTrail() {
@@ -1036,8 +1045,7 @@ Future<bool> checkTokenInHomeAndHandle(Token token, World world) async {
   }
 
   // Grant another turn if not all tokens are home
-  final lowerController = world.children.whereType<LowerController>().first;
-  lowerController.hidePointer(player.playerId);
+  GameState().hidePointer();
   player.enableDice = true;
 
   // Disable tokens for current player

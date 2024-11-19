@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/effects.dart';
+import 'package:ludo/state/token_manager.dart';
 import '../../ludo.dart';
 import '../../state/game_state.dart';
 
@@ -22,7 +23,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
         ),
         rightArrow = RectangleComponent(
           size: Vector2(width * 0.45 * 0.3, height * 0.8),
-          position: Vector2(width * 0.45  * 0.975, width * 0.45 * 0.05),
+          position: Vector2(width * 0.45 * 0.975, width * 0.45 * 0.05),
           paint: Paint()..color = Colors.transparent,
         ),
         super(
@@ -123,25 +124,15 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     final pointerX = size.x * 0.05;
     final pointerY = (size.x * 0.20) * 0.2;
 
-    final leftPointer = DicePointer(
-      direction: PointerDirection.left,
-      size: 30, // Triangle bounding box size
-      paint: Paint()
-        ..color = Colors.green
-        ..style = PaintingStyle.fill,
-      position: Vector2(pointerX, pointerY),
-    );
-
-    final rightPointer = DicePointer(
-      direction: PointerDirection.right,
-      size: 30, // Triangle bounding box size
-      paint: Paint()
-        ..color = Colors.green
-        ..style = PaintingStyle.fill,
-      position: Vector2(pointerX, pointerY ),
-    );
-
     if (playerId == 'BP') {
+      final leftPointer = DicePointer(
+        direction: PointerDirection.left,
+        size: 30, // Triangle bounding box size
+        paint: Paint()
+          ..color = Colors.green
+          ..style = PaintingStyle.fill,
+        position: Vector2(pointerX, pointerY),
+      );
       // Add movement effect to the pointer
       leftPointer.add(
         MoveByEffect(
@@ -155,9 +146,17 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
       );
       leftArrow.add(leftPointer);
     } else if (playerId == 'YP') {
+      final rightPointer = DicePointer(
+        direction: PointerDirection.right,
+        size: 30, // Triangle bounding box size
+        paint: Paint()
+          ..color = Colors.green
+          ..style = PaintingStyle.fill,
+        position: Vector2(pointerX, pointerY),
+      );
       rightPointer.add(
         MoveByEffect(
-          Vector2((size.x * (-0.20)) * 0.1, 0), // Move along the x-axis
+          Vector2((size.x * 0.20) * 0.1, 0), // Move along the x-axis
           EffectController(
             duration: 0.2, // Takes 0.2 seconds to complete
             reverseDuration: 0.2, // Move back in 0.2 seconds

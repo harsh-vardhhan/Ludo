@@ -1,3 +1,5 @@
+class SwitchPointerEvent {}
+
 class BlinkGreenBaseEvent {}
 
 class BlinkBlueBaseEvent {}

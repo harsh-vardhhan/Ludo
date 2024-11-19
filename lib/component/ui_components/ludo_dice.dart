@@ -46,8 +46,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
 
     // Disable dice to prevent multiple taps
     final world = parent?.parent?.parent?.parent?.parent;
-    final lowerController = world?.children.whereType<LowerController>().first;
-    lowerController?.hidePointer(player.playerId);
+    GameState().hidePointer();
     player.enableDice = false;
 
     // Roll the dice and update the dice face
@@ -160,8 +159,8 @@ class LudoDice extends PositionComponent with TapCallbacks {
   // Enable manual selection if multiple tokens can move
   void _enableManualTokenSelection(
       World world, List<Token> tokensInBase, List<Token> tokensOnBoard) {
-    final lowerController = world.children.whereType<LowerController>().first;
-    lowerController.hidePointer(player.playerId);
+
+    GameState().hidePointer();
     player.enableDice = false;
 
     for (var token in player.tokens) {
