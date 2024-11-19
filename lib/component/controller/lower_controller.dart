@@ -1,9 +1,9 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/effects.dart';
-import 'package:ludo/state/token_manager.dart';
 import '../../ludo.dart';
 import '../../state/game_state.dart';
+import '../../component/ui_components/dice_pointer.dart';
 
 // user files
 import 'controller_block.dart';
@@ -119,7 +119,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     this.position = position ?? Vector2.zero();
   }
 
-  /// Displays a `DicePointer` with a movement effect on the `leftArrow` component
+  // Displays a `DicePointer` with a movement effect on the `leftArrow` component
   void showPointer(String playerId) {
     final pointerX = size.x * 0.05;
     final pointerY = (size.x * 0.20) * 0.2;
@@ -183,39 +183,3 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
   }
 }
 
-enum PointerDirection { left, right }
-
-class DicePointer extends PositionComponent {
-  final Paint paint;
-  final PointerDirection direction;
-
-  DicePointer({
-    required double size,
-    required this.paint,
-    required this.direction,
-    Vector2? position,
-  }) : super(size: Vector2.all(size), position: position);
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-
-    final path = Path();
-
-    if (direction == PointerDirection.left) {
-      path
-        ..moveTo(size.x, 0) // Right corner
-        ..lineTo(0, size.y / 2) // Left corner (new "top")
-        ..lineTo(size.x, size.y) // Bottom corner
-        ..close();
-    } else if (direction == PointerDirection.right) {
-      path
-        ..moveTo(0, 0) // Left corner
-        ..lineTo(size.x, size.y / 2) // Right corner (new "top")
-        ..lineTo(0, size.y) // Bottom corner
-        ..close();
-    }
-
-    canvas.drawPath(path, paint);
-  }
-}
