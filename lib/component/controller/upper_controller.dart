@@ -119,7 +119,7 @@ class UpperController extends RectangleComponent with HasGameReference<Ludo> {
     if (playerId == 'RP') {
       final leftPointer = DicePointer(
         direction: PointerDirection.left,
-        size: 30, // Triangle bounding box size
+        size: size.x * 0.07, // Triangle bounding box size
         paint: Paint()
           ..color = Colors.green
           ..style = PaintingStyle.fill,
@@ -140,7 +140,7 @@ class UpperController extends RectangleComponent with HasGameReference<Ludo> {
     } else if (playerId == 'GP') {
       final rightPointer = DicePointer(
         direction: PointerDirection.right,
-        size: 30, // Triangle bounding box size
+        size: size.x * 0.07, // Triangle bounding box size
         paint: Paint()
           ..color = Colors.green
           ..style = PaintingStyle.fill,
