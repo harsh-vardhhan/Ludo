@@ -29,7 +29,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.trakbit.ludozone"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35  // Override Flutter's default to target API 35
     ndkVersion = flutter.ndkVersion
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -41,7 +41,7 @@ android {
     defaultConfig {
         applicationId = "com.trakbit.ludozone"
         minSdkVersion 21
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 35  // Override Flutter's default to target API 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
