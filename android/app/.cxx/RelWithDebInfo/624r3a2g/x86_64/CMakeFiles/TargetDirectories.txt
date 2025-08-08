@@ -1,0 +1,2 @@
+/Users/harshvardhan/Documents/GitHub/Ludo/android/app/.cxx/RelWithDebInfo/624r3a2g/x86_64/CMakeFiles/edit_cache.dir
+/Users/harshvardhan/Documents/GitHub/Ludo/android/app/.cxx/RelWithDebInfo/624r3a2g/x86_64/CMakeFiles/rebuild_cache.dir
