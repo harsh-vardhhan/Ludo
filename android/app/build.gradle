@@ -1,15 +1,4 @@
-// Add buildscript block before plugins
-buildscript {
-    ext.kotlin_version = "1.8.0"  // Set the required version
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:7.4.0'  // Make sure this version is compatible
-    }
-}
+// android/app/build.gradle
 
 plugins {
     id "com.android.application"
