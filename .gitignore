@@ -1,32 +1,108 @@
-# Dart and Flutter
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
 .dart_tool/
-.packages
 .flutter-plugins
 .flutter-plugins-dependencies
-build/
+.packages
+.pub-cache/
+.pub/
+/build/
 
-# IDEs
-.vscode/
-.idea/
-*.iml
+# Symbolication related
+app.*.symbols
 
-# Dependency lock file
-# Uncomment the next line if you're developing a library package
-# pubspec.lock
+# Obfuscation related
+app.*.map.json
 
-# Documentation
-doc/api/
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Web related
+/web/build/
+
+# macOS related
+/macos/build/
+
+# Windows related
+/windows/build/
+
+# Linux related
+/linux/build/
+
+# Native code artifacts (exclude from Git but keep Android platform)
+/android/app/src/main/cpp/
+/android/app/src/main/jniLibs/
+/android/.gradle/
+/android/app/.cxx/
+/android/build/
+/android/gradle/
+/android/gradlew*
+/android/local.properties
+/android/key.properties
+
+# iOS native code (if you have iOS)
+/ios/Classes/
+/ios/Pods/
+/ios/build/
+/ios/*.xcworkspace/
+/ios/*.xcodeproj/
+
+# Native library files
+**/*.so
+**/*.a
+**/*.dylib
+**/*.dll
+**/*.lib
+
+# CMake and native build files
+**/CMakeCache.txt
+**/CMakeFiles/
+**/cmake_install.cmake
+**/Makefile
 
 # Environment variables
 .env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# JavaScript generated files
-*.dart.js
-*.info.json
-*.js
-*.js_
-*.js.deps
-*.js.map
+# Generated files
+*.g.dart
+*.freezed.dart
+*.gr.dart
+*.config.dart
 
-# macOS
-.DS_Store
+# Coverage
+coverage/
+lcov.info
+
+# Temporary files
+*.tmp
+*.temp
