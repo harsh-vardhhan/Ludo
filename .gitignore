@@ -66,6 +66,15 @@ app.*.map.json
 /android/local.properties
 /android/key.properties
 
+# CMake build artifacts (these should NEVER be in Git)
+**/.cxx/
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/Makefile
+**/*.cmake
+!**/CMakeLists.txt
+
 # iOS native code (if you have iOS)
 /ios/Classes/
 /ios/Pods/

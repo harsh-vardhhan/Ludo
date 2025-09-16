@@ -1,1 +1,0 @@
-/Users/harshvardhan/Documents/GitHub/Ludo/build/app/intermediates/cxx/RelWithDebInfo/624r3a2g/obj/armeabi-v7a

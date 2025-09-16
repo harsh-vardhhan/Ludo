@@ -1,2 +1,0 @@
-/Users/harshvardhan/Documents/GitHub/Ludo/android/app/.cxx/Debug/1525x1e2/armeabi-v7a/CMakeFiles/edit_cache.dir
-/Users/harshvardhan/Documents/GitHub/Ludo/android/app/.cxx/Debug/1525x1e2/armeabi-v7a/CMakeFiles/rebuild_cache.dir
