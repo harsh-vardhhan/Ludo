@@ -4,7 +4,6 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 
 import '../../state/player.dart';
-import '../../main.dart';
 
 class RankModalComponent extends PositionComponent with TapCallbacks {
   final List<Player> players;
