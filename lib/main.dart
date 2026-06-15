@@ -420,3 +420,5 @@ class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
     size = Vector2(game.width, game.height);
   }
 }
+
+// CI Trigger
