@@ -18,3 +18,20 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
+subprojects {
+    def setNdk = {
+        if (hasProperty("android")) {
+            android {
+                ndkVersion = "27.1.12297006"
+            }
+        }
+    }
+    if (state.executed) {
+        setNdk()
+    } else {
+        afterEvaluate {
+            setNdk()
+        }
+    }
+}

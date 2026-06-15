@@ -19,7 +19,7 @@ if (hasKeyProperties) {
 android {
     namespace = "com.trakbit.ludozone"
     compileSdk = 35  // Override Flutter's default to target API 35
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.1.12297006"
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
