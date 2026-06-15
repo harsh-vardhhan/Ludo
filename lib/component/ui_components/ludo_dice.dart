@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/effects.dart';
@@ -10,8 +9,6 @@ import 'dice_face_component.dart';
 import '../../state/game_state.dart';
 import '../../state/audio_manager.dart';
 import '../../state/player.dart';
-import '../../ludo_board.dart';
-import 'token.dart';
 import '../../ludo.dart';
 
 class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
@@ -49,8 +46,8 @@ class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Lud
     player.enableDice = false;
 
     // Roll the dice and update the dice face
-    GameState().diceNumber = Random().nextInt(6) + 1;
-    diceFace.updateDiceValue(GameState().diceNumber);
+    final rolledNumber = GameState().rollDice();
+    diceFace.updateDiceValue(rolledNumber);
 
     playSound();
     // Apply dice rotation effect
@@ -58,11 +55,8 @@ class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Lud
 
     await Future.delayed(const Duration(milliseconds: 300));
 
-    // Handle dice roll based on the number
-    final handleRoll =
-        GameState().diceNumber == 6 ? _handleSixRoll : _handleNonSixRoll;
-    handleRoll(
-        world, GameState().ludoBoard as LudoBoard, GameState().diceNumber);
+    // Resolve the roll logic on the GameState controller
+    GameState().resolveDiceRoll(world);
   }
 
   // Apply a 360-degree rotation effect to the dice
@@ -77,113 +71,6 @@ class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Lud
       ),
     );
     return Future.value();
-  }
-
-  // Handle logic when the player rolls a 6
-  void _handleSixRoll(World world, LudoBoard ludoBoard, int diceNumber) {
-    player.grantAnotherTurn();
-
-    if (player.hasRolledThreeConsecutiveSixes()) {
-      GameState().switchToNextPlayer();
-      return;
-    }
-    // Filter tokens once and reuse the lists
-    final tokensInBase = player.tokens
-        .where((token) => token.state == TokenState.inBase)
-        .toList();
-
-    final tokensOnBoard = player.tokens
-        .where((token) => token.state == TokenState.onBoard)
-        .toList();
-
-    final movableTokens =
-        tokensOnBoard.where((token) => token.spaceToMove()).toList();
-
-    final allMovableTokens = [...movableTokens, ...tokensInBase];
-
-    // if only one token can move, move it
-    if (allMovableTokens.length == 1) {
-      if (allMovableTokens.first.state == TokenState.inBase) {
-        moveOutOfBase(
-          world: world,
-          token: allMovableTokens.first,
-          tokenPath: GameState().getTokenPath(player.playerId),
-        );
-      } else if (allMovableTokens.first.state == TokenState.onBoard) {
-        _moveForwardSingleToken(
-            world, ludoBoard, diceNumber, allMovableTokens.first);
-      }
-      return;
-    } else if (allMovableTokens.length > 1) {
-      _enableManualTokenSelection(world, tokensInBase, tokensOnBoard);
-    } else if (allMovableTokens.isEmpty) {
-      GameState().switchToNextPlayer();
-      return;
-    }
-  }
-
-  // Handle logic for non-six dice rolls
-  void _handleNonSixRoll(World world, LudoBoard ludoBoard, int diceNumber) {
-    final tokensOnBoard = player.tokens
-        .where((token) => token.state == TokenState.onBoard)
-        .toList();
-
-    // if no tokens on board, switch to next player
-    if (tokensOnBoard.isEmpty) {
-      GameState().switchToNextPlayer();
-      return;
-    }
-
-    final movableTokens =
-        tokensOnBoard.where((token) => token.spaceToMove()).toList();
-    final tokensInBase = player.tokens
-        .where((token) => token.state == TokenState.inBase)
-        .toList();
-
-    // if only one token can move, move it
-    if (movableTokens.length == 1) {
-      _moveForwardSingleToken(
-          world, ludoBoard, diceNumber, movableTokens.first);
-      return;
-    } else if (movableTokens.length > 1) {
-      _enableManualTokenSelection(world, tokensInBase, tokensOnBoard);
-    } else if (movableTokens.isEmpty) {
-      GameState().switchToNextPlayer();
-      return;
-    }
-  }
-
-  // Enable manual selection if multiple tokens can move
-  void _enableManualTokenSelection(
-      World world, List<Token> tokensInBase, List<Token> tokensOnBoard) {
-
-    GameState().hidePointer();
-    player.enableDice = false;
-
-    for (var token in player.tokens) {
-      token.enableToken = true;
-    }
-    if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
-      GameState().enableMoveFromBoth();
-      addTokenTrail(tokensInBase, tokensOnBoard);
-    } else if (tokensInBase.isNotEmpty) {
-      GameState().enableMoveFromBase();
-      addTokenTrail(tokensInBase, tokensOnBoard);
-    } else if (tokensOnBoard.isNotEmpty) {
-      addTokenTrail(tokensInBase, tokensOnBoard);
-      GameState().enableMoveOnBoard();
-    }
-  }
-
-  // Move the token forward on the board
-  void _moveForwardSingleToken(
-      World world, LudoBoard ludoBoard, int diceNumber, Token token) {
-    moveForward(
-      world: world,
-      token: token,
-      tokenPath: GameState().getTokenPath(player.playerId),
-      diceNumber: diceNumber,
-    );
   }
 
   LudoDice({required this.faceSize, required this.player}) {
@@ -230,7 +117,7 @@ class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Lud
 
     // Create paint for the square
     final paint = Paint()
-      ..color = Color(0xFFD6D6D6)
+      ..color = const Color(0xFFD6D6D6)
       ..style = PaintingStyle.fill;
 
     // Define the rounded rectangle

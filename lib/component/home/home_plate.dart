@@ -21,7 +21,7 @@ class HomePlate extends RectangleComponent {
                 ..color = Colors.transparent // Keep interior transparent
                 ..style = PaintingStyle.stroke // Set style to stroke
                 ..strokeWidth =4 // Set border width
-                ..color = Colors.black.withOpacity(0.2), // Set border color to black
+                ..color = Colors.black.withValues(alpha: 0.2), // Set border color to black
             ),
             HomeSpotContainer(
               size: size / 1.5,

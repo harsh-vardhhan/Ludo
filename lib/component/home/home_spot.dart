@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo/state/home_spot_manager.dart';
 
 class HomeSpot extends CircleComponent {
   final String uniqueId;
@@ -24,5 +25,7 @@ class HomeSpot extends CircleComponent {
               paint: borderPaint, // Reuse static border paint
             ),
           ],
-        );
+        ) {
+    HomeSpotManager().addHomeSpot(this);
+  }
 }
