@@ -11,8 +11,8 @@ class DicePointer extends PositionComponent {
     required double size,
     required this.paint,
     required this.direction,
-    Vector2? position,
-  }) : super(size: Vector2.all(size), position: position);
+    super.position,
+  }) : super(size: Vector2.all(size));
 
   @override
   void render(Canvas canvas) {

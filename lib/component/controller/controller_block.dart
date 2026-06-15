@@ -16,7 +16,7 @@ class ControllerBlock extends PositionComponent {
     this.transparentLeft = false,
     List<Component>? children, // Optional child components
   })  : strokePaint = Paint()
-          ..color = paint.color.withOpacity(1.0)
+          ..color = paint.color.withValues(alpha: 1.0)
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWidth,
         super(
@@ -30,7 +30,7 @@ class ControllerBlock extends PositionComponent {
     // Draw the filled rectangle
     final rect = Rect.fromLTWH(0, 0, size.x, size.y);
     canvas.drawRect(rect,
-        Paint()..color = strokePaint.color.withOpacity(0)); // Transparent fill
+        Paint()..color = strokePaint.color.withValues(alpha: 0.0)); // Transparent fill
 
     // Stroke paint for sides
     final transparentStrokePaint = Paint()

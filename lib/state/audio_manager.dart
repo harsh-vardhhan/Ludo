@@ -4,12 +4,10 @@ class AudioManager {
   static AudioPool? _diceSoundPool;
 
   static Future<void> initialize() async {
-    if (_diceSoundPool == null) {
-      _diceSoundPool = await AudioPool.createFromAsset(
-        path: 'audio/dice.mp3',
-        maxPlayers: 3,
-      );
-    }
+    _diceSoundPool ??= await AudioPool.createFromAsset(
+      path: 'audio/dice.mp3',
+      maxPlayers: 3,
+    );
   }
 
   static Future<StopFunction> playDiceSound({double volume = 1.0}) async {

@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/token_manager.dart';
 import '../../state/game_state.dart';
 import '../../ludo.dart';
 
@@ -61,7 +60,7 @@ class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> 
     final smallerCircleShadow = Offset(size.x / 2, size.y / 1.75);
 
     canvas.drawCircle(tokenShadow, outerRadius,
-        Paint()..color = const Color(0xFF3C3D37).withOpacity(0.6));
+        Paint()..color = const Color(0xFF3C3D37).withValues(alpha: 0.6));
     canvas.drawCircle(centerShadow, sideOuterRadius,
         Paint()..color = sideColor); // Draw outer circle
 
@@ -69,7 +68,7 @@ class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> 
         center, outerRadius, Paint()..color = topColor); // Draw border
 
     canvas.drawCircle(smallerCircleShadow, smallerCircleDepth,
-        Paint()..color = const Color(0xFF3C3D37).withOpacity(0.7));
+        Paint()..color = const Color(0xFF3C3D37).withValues(alpha: 0.7));
     canvas.drawCircle(center, smallerCircle, Paint()..color = Colors.white);
 
     // Conditionally render the circle around the token
@@ -82,7 +81,7 @@ class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> 
     final center = Offset(size.x / 2, size.y / 1.8);
 
     final paint = Paint()
-      ..color = Colors.black.withOpacity(0.4) // Blue color with transparency
+      ..color = Colors.black.withValues(alpha: 0.4) // Blue color with transparency
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.8;
 
@@ -128,53 +127,9 @@ class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> 
   }
 
   @override
-  void onTapDown(TapDownEvent event) async {
+  void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
-
-    final world = game.world;
-
-    if (!spaceToMove() ||
-        !enableToken ||
-        (isInBase() && GameState().diceNumber != 6) ||
-        isInHome()) return;
-
-    enableToken = false;
-
-    if (GameState().currentPlayer.playerId != playerId) return;
-
-    final tokens = TokenManager().allTokens;
-    for (var token in tokens) {
-      token.disableCircleAnimation();
-      token.enableToken = false;
-    }
-
-    if (GameState().diceNumber == 6) {
-      // Handle movement logic
-      if (state == TokenState.inBase && GameState().canMoveTokenFromBase) {
-        moveOutOfBase(
-            world: world,
-            token: this,
-            tokenPath: GameState().getTokenPath(playerId));
-        // Consider reducing delay or making it conditional
-      } else if (state == TokenState.onBoard &&
-          GameState().canMoveTokenOnBoard) {
-        moveForward(
-            world: world,
-            token: this,
-            tokenPath: GameState().getTokenPath(playerId),
-            diceNumber: GameState().diceNumber);
-      }
-      return;
-    }
-
-    // Non-six logic
-    if (state == TokenState.onBoard && GameState().canMoveTokenOnBoard) {
-      moveForward(
-          world: world,
-          token: this,
-          tokenPath: GameState().getTokenPath(playerId),
-          diceNumber: GameState().diceNumber);
-    }
+    GameState().handleTokenTap(game.world, this);
   }
 
   bool spaceToMove() {
