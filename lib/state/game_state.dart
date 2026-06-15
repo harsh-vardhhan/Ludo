@@ -11,6 +11,7 @@ import 'package:ludo/component/controller/lower_controller.dart';
 import 'package:ludo/component/controller/upper_controller.dart';
 
 import 'player.dart';
+import 'player_team.dart';
 import 'event_bus.dart';
 
 class GameState {
@@ -90,16 +91,16 @@ class GameState {
 
     // Emit events based on the next player's ID
     switch (nextPlayer.playerId) {
-      case 'GP':
+      case PlayerTeam.green:
         EventBus().emit(BlinkGreenBaseEvent());
         break;
-      case 'BP':
+      case PlayerTeam.blue:
         EventBus().emit(BlinkBlueBaseEvent());
         break;
-      case 'RP':
+      case PlayerTeam.red:
         EventBus().emit(BlinkRedBaseEvent());
         break;
-      case 'YP':
+      case PlayerTeam.yellow:
         EventBus().emit(BlinkYellowBaseEvent());
         break;
     }
@@ -356,14 +357,14 @@ class GameState {
     'YF',
   ];
 
-  final Map<String, List<String>> tokenPaths = {
-    'BP': blueTokenPath,
-    'GP': greenTokenPath,
-    'RP': redTokenPath,
-    'YP': yellowTokenPath,
+  final Map<PlayerTeam, List<String>> tokenPaths = {
+    PlayerTeam.blue: blueTokenPath,
+    PlayerTeam.green: greenTokenPath,
+    PlayerTeam.red: redTokenPath,
+    PlayerTeam.yellow: yellowTokenPath,
   };
 
-  List<String> getTokenPath(String playerId) {
+  List<String> getTokenPath(PlayerTeam playerId) {
     return tokenPaths[playerId] ?? [];
   }
 
@@ -531,7 +532,7 @@ class GameState {
       );
     }
 
-    if (token.playerId == 'BP') {
+    if (token.playerId == PlayerTeam.blue) {
       await moveTokenToBase(
         world: world,
         token: token,
@@ -539,7 +540,7 @@ class GameState {
         homeSpotIndex: 6,
         ludoBoard: ludoBoard,
       );
-    } else if (token.playerId == 'GP') {
+    } else if (token.playerId == PlayerTeam.green) {
       await moveTokenToBase(
         world: world,
         token: token,
@@ -547,7 +548,7 @@ class GameState {
         homeSpotIndex: 2,
         ludoBoard: ludoBoard,
       );
-    } else if (token.playerId == 'RP') {
+    } else if (token.playerId == PlayerTeam.red) {
       await moveTokenToBase(
         world: world,
         token: token,
@@ -555,7 +556,7 @@ class GameState {
         homeSpotIndex: 0,
         ludoBoard: ludoBoard,
       );
-    } else if (token.playerId == 'YP') {
+    } else if (token.playerId == PlayerTeam.yellow) {
       await moveTokenToBase(
         world: world,
         token: token,

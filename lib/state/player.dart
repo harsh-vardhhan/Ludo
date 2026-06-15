@@ -1,7 +1,8 @@
+import 'player_team.dart';
 import '../component/ui_components/token.dart';
 
 class Player {
-  String playerId;
+  PlayerTeam playerId;
   List<Token> tokens; // Tokens belonging to the player
   bool isCurrentTurn; // Is it the player's turn right now?
   int rank; // Player's current score

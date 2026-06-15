@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo/state/player_team.dart';
 import '../../state/game_state.dart';
 import '../../ludo.dart';
 
@@ -13,7 +14,7 @@ enum TokenState {
 
 class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
   final String tokenId; // Mandatory unique ID for the token
-  String playerId; // Store only the player ID
+  PlayerTeam playerId; // Store only the player ID
   bool enableToken; // Store the enableToken state directly
   String positionId; // Mandatory position ID for the token
   TokenState state; // Current state of the token

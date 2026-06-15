@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 // user files
 
 import 'ludo.dart';
+import 'state/player_team.dart';
 
 void main() {
   runApp(const MyApp());
@@ -110,7 +111,7 @@ class FirstScreenState extends State<FirstScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const GameApp(
-                              selectedTeams: ['BP', 'RP', 'GP', 'YP']),
+                              selectedTeams: [PlayerTeam.blue, PlayerTeam.red, PlayerTeam.green, PlayerTeam.yellow]),
                         ),
                       );
                     }, // Button is disabled if no selection
@@ -136,7 +137,7 @@ class SecondScreen extends StatefulWidget {
 }
 
 class SecondScreenState extends State<SecondScreen> {
-  List<String> selectedTeams = [];
+  List<PlayerTeam> selectedTeams = [];
   int? selectedOption; // New state variable to track selected radio option
 
   @override
@@ -177,7 +178,7 @@ class SecondScreenState extends State<SecondScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const GameApp(
-                                      selectedTeams: ['BP', 'GP']),
+                                      selectedTeams: [PlayerTeam.blue, PlayerTeam.green]),
                                 ),
                               );
                             }, // Empty onPressed action
@@ -224,7 +225,7 @@ class SecondScreenState extends State<SecondScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const GameApp(
-                                      selectedTeams: ['RP', 'YP']),
+                                      selectedTeams: [PlayerTeam.red, PlayerTeam.yellow]),
                                 ),
                               );
                             },
@@ -281,7 +282,7 @@ class SecondScreenState extends State<SecondScreen> {
 }
 
 class GameApp extends StatefulWidget {
-  final List<String> selectedTeams;
+  final List<PlayerTeam> selectedTeams;
 
   const GameApp({super.key, required this.selectedTeams});
 

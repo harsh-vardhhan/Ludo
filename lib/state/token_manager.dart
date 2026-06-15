@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo/state/player_team.dart';
 import '../component/ui_components/token.dart';
 import '../component/ui_components/spot.dart';
 
@@ -48,8 +49,19 @@ class TokenManager {
 
   void initializeTokens(Map<String, String> tokenToHomeSpotMap) {
     for (var entry in tokenToHomeSpotMap.entries) {
+      PlayerTeam team;
+      if (entry.key.startsWith('B')) {
+        team = PlayerTeam.blue;
+      } else if (entry.key.startsWith('G')) {
+        team = PlayerTeam.green;
+      } else if (entry.key.startsWith('R')) {
+        team = PlayerTeam.red;
+      } else {
+        team = PlayerTeam.yellow;
+      }
+
       final token = Token(
-          playerId: 'ID',
+          playerId: team,
           enableToken: false,
           tokenId: entry.key,
           positionId: entry.value,

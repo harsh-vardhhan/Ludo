@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/effects.dart';
+import 'package:ludo/state/player_team.dart';
 import '../../ludo.dart';
 import '../../state/game_state.dart';
 import '../../component/ui_components/dice_pointer.dart';
@@ -20,12 +21,12 @@ class UpperController extends RectangleComponent with HasGameReference<Ludo> {
           position: Vector2(width * 0.45 * 0.8, width * 0.45 * 0.05),
           paint: Paint()..color = Colors.transparent,
         ),
-        rightArrow = RectangleComponent(
+      rightArrow = RectangleComponent(
           size: Vector2(width * 0.45 * 0.3, height * 0.8),
           position: Vector2(width * 0.45 * 0.975, width * 0.45 * 0.05),
           paint: Paint()..color = Colors.transparent,
         ),
-        super(
+      super(
           size: Vector2(width, height),
           paint: Paint()..color = Colors.transparent, // Adjust color as needed
         ) {
@@ -111,12 +112,12 @@ class UpperController extends RectangleComponent with HasGameReference<Ludo> {
         Vector2.zero(); // Default to (0, 0) if no position is provided
   }
 
-    // Displays a `DicePointer` with a movement effect on the `leftArrow` component
-  void showPointer(String playerId) {
+  // Displays a `DicePointer` with a movement effect on the `leftArrow` component
+  void showPointer(PlayerTeam playerId) {
     final pointerX = size.x * 0.05;
     final pointerY = (size.x * 0.20) * 0.2;
 
-    if (playerId == 'RP') {
+    if (playerId == PlayerTeam.red) {
       final leftPointer = DicePointer(
         direction: PointerDirection.left,
         size: size.x * 0.07, // Triangle bounding box size
@@ -137,7 +138,7 @@ class UpperController extends RectangleComponent with HasGameReference<Ludo> {
         ),
       );
       leftArrow.add(leftPointer);
-    } else if (playerId == 'GP') {
+    } else if (playerId == PlayerTeam.green) {
       final rightPointer = DicePointer(
         direction: PointerDirection.right,
         size: size.x * 0.07, // Triangle bounding box size
@@ -160,13 +161,13 @@ class UpperController extends RectangleComponent with HasGameReference<Ludo> {
     }
   }
 
-  void hidePointer(String playerId) {
-    if (playerId == 'RP') {
+  void hidePointer(PlayerTeam playerId) {
+    if (playerId == PlayerTeam.red) {
       final pointer = leftArrow.children.whereType<DicePointer>().firstOrNull;
       if (pointer != null) {
         leftArrow.remove(pointer);
       }
-    } else if (playerId == 'GP') {
+    } else if (playerId == PlayerTeam.green) {
       final pointer = rightArrow.children.whereType<DicePointer>().firstOrNull;
       if (pointer != null) {
         rightArrow.remove(pointer);

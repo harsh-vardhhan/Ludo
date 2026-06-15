@@ -19,10 +19,11 @@ import 'component/ui_components/spot.dart';
 import 'component/ui_components/ludo_dice.dart';
 import 'component/ui_components/rank_modal_component.dart';
 import 'state/home_spot_manager.dart';
+import 'state/player_team.dart';
 
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
-  List<String> teams;
+  List<PlayerTeam> teams;
   final BuildContext context;
 
   // Add an unnamed constructor
@@ -369,7 +370,7 @@ class Ludo extends FlameGame
     AudioManager.initialize();
 
     for (var team in teams) {
-      if (team == 'BP') {
+      if (team == PlayerTeam.blue) {
         if (TokenManager().getBlueTokens().isEmpty) {
           TokenManager().initializeTokens(TokenManager().blueTokensBase);
 
@@ -402,7 +403,7 @@ class Ludo extends FlameGame
             GameState().ludoBoard?.add(token);
           }
 
-          const playerId = 'BP';
+          const playerId = PlayerTeam.blue;
           // final tokens = TokenManager().getBlueTokens();
 
           if (GameState().players.isEmpty) {
@@ -452,7 +453,7 @@ class Ludo extends FlameGame
             }
           }
         }
-      } else if (team == 'GP') {
+      } else if (team == PlayerTeam.green) {
         if (TokenManager().getGreenTokens().isEmpty) {
           TokenManager().initializeTokens(TokenManager().greenTokensBase);
 
@@ -485,7 +486,7 @@ class Ludo extends FlameGame
             GameState().ludoBoard?.add(token);
           }
 
-          const playerId = 'GP';
+          const playerId = PlayerTeam.green;
           // final tokens = TokenManager().getGreenTokens();
 
           if (GameState().players.isEmpty) {
@@ -513,7 +514,7 @@ class Ludo extends FlameGame
             }
           }
         }
-      } else if (team == 'YP') {
+      } else if (team == PlayerTeam.yellow) {
         if (TokenManager().getYellowTokens().isEmpty) {
           TokenManager().initializeTokens(TokenManager().yellowTokensBase);
 
@@ -546,7 +547,7 @@ class Ludo extends FlameGame
             GameState().ludoBoard?.add(token);
           }
 
-          const playerId = 'YP';
+          const playerId = PlayerTeam.yellow;
           // final tokens = TokenManager().getYellowTokens();
 
           if (GameState().players.isEmpty) {
@@ -595,7 +596,7 @@ class Ludo extends FlameGame
             }
           }
         }
-      } else if (team == 'RP') {
+      } else if (team == PlayerTeam.red) {
         if (TokenManager().getRedTokens().isEmpty) {
           TokenManager().initializeTokens(TokenManager().redTokensBase);
 
@@ -628,7 +629,7 @@ class Ludo extends FlameGame
             GameState().ludoBoard?.add(token);
           }
 
-          const playerId = 'RP';
+          const playerId = PlayerTeam.red;
           // final tokens = TokenManager().getRedTokens();
 
           if (GameState().players.isEmpty) {

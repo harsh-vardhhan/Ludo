@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/effects.dart';
+import 'package:ludo/state/player_team.dart';
 import '../../ludo.dart';
 import '../../state/game_state.dart';
 import '../../component/ui_components/dice_pointer.dart';
@@ -120,11 +121,11 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
   }
 
   // Displays a `DicePointer` with a movement effect on the `leftArrow` component
-  void showPointer(String playerId) {
+  void showPointer(PlayerTeam playerId) {
     final pointerX = size.x * 0.05;
     final pointerY = (size.x * 0.20) * 0.2;
 
-    if (playerId == 'BP') {
+    if (playerId == PlayerTeam.blue) {
       final leftPointer = DicePointer(
         direction: PointerDirection.left,
         size: size.x * 0.07, // Triangle bounding box size
@@ -145,7 +146,7 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
         ),
       );
       leftArrow.add(leftPointer);
-    } else if (playerId == 'YP') {
+    } else if (playerId == PlayerTeam.yellow) {
       final rightPointer = DicePointer(
         direction: PointerDirection.right,
         size: size.x * 0.07, // Triangle bounding box size
@@ -168,13 +169,13 @@ class LowerController extends RectangleComponent with HasGameReference<Ludo> {
     }
   }
 
-  void hidePointer(String playerId) {
-    if (playerId == 'BP') {
+  void hidePointer(PlayerTeam playerId) {
+    if (playerId == PlayerTeam.blue) {
       final pointer = leftArrow.children.whereType<DicePointer>().firstOrNull;
       if (pointer != null) {
         leftArrow.remove(pointer);
       }
-    } else if (playerId == 'YP') {
+    } else if (playerId == PlayerTeam.yellow) {
       final pointer = rightArrow.children.whereType<DicePointer>().firstOrNull;
       if (pointer != null) {
         rightArrow.remove(pointer);
