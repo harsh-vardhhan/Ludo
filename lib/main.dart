@@ -356,12 +356,7 @@ class _GameAppState extends State<GameApp> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FirstScreen(),
-                  ),
-                );
+                Navigator.of(context).popUntil((route) => route.isFirst);
               },
               child: const Text('Yes'),
             ),

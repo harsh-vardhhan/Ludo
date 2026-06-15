@@ -12,7 +12,7 @@ enum TokenState {
   inHome,
 }
 
-class Token extends PositionComponent with TapCallbacks {
+class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
   final String tokenId; // Mandatory unique ID for the token
   String playerId; // Store only the player ID
   bool enableToken; // Store the enableToken state directly
@@ -131,11 +131,10 @@ class Token extends PositionComponent with TapCallbacks {
   void onTapDown(TapDownEvent event) async {
     super.onTapDown(event);
 
-    final world = parent?.parent;
+    final world = game.world;
 
     if (!spaceToMove() ||
         !enableToken ||
-        world is! World ||
         (isInBase() && GameState().diceNumber != 6) ||
         isInHome()) return;
 

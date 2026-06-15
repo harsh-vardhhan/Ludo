@@ -178,10 +178,7 @@ class RankModalComponent extends PositionComponent with TapCallbacks {
 
     // Check if the tap is within the button's bounds
     if (_closeButton.toRect().contains(tapPosition)) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const FirstScreen()),
-      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 

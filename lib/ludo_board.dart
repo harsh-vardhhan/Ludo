@@ -38,6 +38,7 @@ class LudoBoard extends PositionComponent {
             size: longDimension,
             paint: Paint()..color = GameState().red,
             homeSpotColor: Paint()..color = GameState().red,
+            teamCode: 'R',
           )
         ]);
 
@@ -57,6 +58,7 @@ class LudoBoard extends PositionComponent {
             size: longDimension,
             paint: Paint()..color = GameState().green,
             homeSpotColor: Paint()..color = GameState().green,
+            teamCode: 'G',
           )
         ]);
 
@@ -88,6 +90,7 @@ class LudoBoard extends PositionComponent {
             size: longDimension,
             paint: Paint()..color =GameState().blue,
             homeSpotColor: Paint()..color = GameState().blue,
+            teamCode: 'B',
           )
         ]);
 
@@ -107,6 +110,7 @@ class LudoBoard extends PositionComponent {
             size: longDimension,
             paint: Paint()..color = GameState().yellow,
             homeSpotColor: Paint()..color = GameState().yellow,
+            teamCode: 'Y',
           )
         ]);
 

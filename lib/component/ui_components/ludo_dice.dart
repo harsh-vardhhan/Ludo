@@ -15,7 +15,7 @@ import '../controller/lower_controller.dart';
 import 'token.dart';
 import '../../ludo.dart';
 
-class LudoDice extends PositionComponent with TapCallbacks {
+class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
   static const double borderRadiusFactor =
       0.2; // Precomputed factor for border radius
   static const double innerSizeFactor =
@@ -45,7 +45,7 @@ class LudoDice extends PositionComponent with TapCallbacks {
     }
 
     // Disable dice to prevent multiple taps
-    final world = parent?.parent?.parent?.parent?.parent;
+    final world = game.world;
     GameState().hidePointer();
     player.enableDice = false;
 

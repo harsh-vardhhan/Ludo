@@ -8,6 +8,7 @@ class HomePlate extends RectangleComponent {
     required double size,
     required Vector2 position,
     required Paint homeSpotColor,
+    required String teamCode,
   }) : super(
           size: Vector2.all(size),
           position: position,
@@ -27,6 +28,7 @@ class HomePlate extends RectangleComponent {
               position: position / 1.5,
               homeSpotColor: homeSpotColor,
               radius: size / 8,
+              teamCode: teamCode,
             ),
           ],
         );
