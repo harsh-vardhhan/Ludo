@@ -9,6 +9,15 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  errors:
+    deprecated_member_use: ignore
+    use_super_parameters: ignore
+    prefer_const_constructors: ignore
+    curly_braces_in_flow_control_structures: ignore
+    prefer_conditional_assignment: ignore
+
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

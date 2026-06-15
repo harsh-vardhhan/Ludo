@@ -11,7 +11,6 @@ import '../../state/game_state.dart';
 import '../../state/audio_manager.dart';
 import '../../state/player.dart';
 import '../../ludo_board.dart';
-import '../controller/lower_controller.dart';
 import 'token.dart';
 import '../../ludo.dart';
 
@@ -58,8 +57,6 @@ class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Lud
     _applyDiceRollEffect();
 
     await Future.delayed(const Duration(milliseconds: 300));
-
-    if (world is! World) return; // Ensure the world is available
 
     // Handle dice roll based on the number
     final handleRoll =
