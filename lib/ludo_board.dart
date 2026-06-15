@@ -2,10 +2,8 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:ludo/state/game_state.dart';
 // user files
-import 'component/grid_component/red_grid_component.dart';
-import 'component/grid_component/yellow_grid_component.dart';
-import 'component/grid_component/blue_grid_component.dart';
-import 'component/grid_component/green_grid_component.dart';
+import 'component/grid_component/ludo_grid_component.dart';
+import 'state/player_team.dart';
 import 'component/home/home.dart';
 import 'component/ui_components/spot.dart';
 
@@ -46,7 +44,7 @@ class LudoBoard extends PositionComponent {
         size: Vector2(shortDimension, longDimension),
         position:
             Vector2(longDimension + horizontalSpacing, rowOne * longDimension),
-        children: [GreenGridComponent(size: shortDimension * 0.3333)]);
+        children: [LudoGridComponent(team: PlayerTeam.green, cellSize: shortDimension * 0.3333)]);
 
     final thirdComponent = RectangleComponent(
         size: Vector2(longDimension, longDimension),
@@ -65,7 +63,7 @@ class LudoBoard extends PositionComponent {
     final fourthComponent = RectangleComponent(
         size: Vector2(longDimension, shortDimension),
         position: Vector2(0, rowTwo * longDimension),
-        children: [RedGridComponent(size: longDimension * 0.1666)]);
+        children: [LudoGridComponent(team: PlayerTeam.red, cellSize: longDimension * 0.1666)]);
 
     final fifthComponent = RectangleComponent(
         size: Vector2(shortDimension, shortDimension),
@@ -80,7 +78,7 @@ class LudoBoard extends PositionComponent {
         position: Vector2(
             longDimension + shortDimension + 2 * horizontalSpacing,
             rowTwo * longDimension),
-        children: [YellowGridComponent(size: longDimension * 0.1666)]);
+        children: [LudoGridComponent(team: PlayerTeam.yellow, cellSize: longDimension * 0.1666)]);
 
     final seventhComponent = RectangleComponent(
         size: Vector2(longDimension, longDimension),
@@ -98,7 +96,7 @@ class LudoBoard extends PositionComponent {
         size: Vector2(shortDimension, longDimension),
         position: Vector2(
             longDimension + horizontalSpacing, longDimension + shortDimension),
-        children: [BlueGridComponent(size: shortDimension * 0.3333)]);
+        children: [LudoGridComponent(team: PlayerTeam.blue, cellSize: shortDimension * 0.3333)]);
 
     final ninthComponent = RectangleComponent(
         size: Vector2(longDimension, longDimension),
