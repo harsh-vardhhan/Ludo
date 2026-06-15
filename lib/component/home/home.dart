@@ -7,6 +7,7 @@ class Home extends RectangleComponent {
     required double size,
     required Paint? paint,
     required Paint homeSpotColor,
+    required String teamCode,
     List<Component>? children,
   }) : super(
           size: Vector2.all(size),
@@ -25,6 +26,7 @@ class Home extends RectangleComponent {
               size: size / 1.5,
               position: Vector2.all(size / 2 - size / 3), // Simplified center calculation
               homeSpotColor: homeSpotColor,
+              teamCode: teamCode,
             ),
           ],
         );
