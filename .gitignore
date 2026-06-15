@@ -65,6 +65,7 @@ app.*.map.json
 /android/gradlew*
 /android/local.properties
 /android/key.properties
+/key.properties
 
 # CMake build artifacts (these should NEVER be in Git)
 **/.cxx/
