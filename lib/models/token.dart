@@ -1,5 +1,4 @@
 import 'package:ludo/models/player_team.dart';
-import 'package:ludo/managers/game_state.dart';
 
 enum TokenState {
   inBase,
@@ -26,10 +25,9 @@ class Token {
   bool isOnBoard() => state == TokenState.onBoard;
   bool isInHome() => state == TokenState.inHome;
 
-  bool spaceToMove() {
-    final tokenPath = GameState().getTokenPath(playerId);
+  bool spaceToMove(List<String> tokenPath, int diceNumber) {
     final index = tokenPath.indexOf(positionId);
-    final newIndex = index + GameState().diceNumber;
+    final newIndex = index + diceNumber;
 
     return newIndex < tokenPath.length;
   }

@@ -1,8 +1,12 @@
+import 'dart:async';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:ludo/models/token.dart';
 import 'package:ludo/managers/game_state.dart';
+import 'package:ludo/managers/audio_manager.dart';
+import 'package:ludo/components/board/spot.dart';
 import 'package:ludo/ludo.dart';
 
 class TokenComponent extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
@@ -13,6 +17,89 @@ class TokenComponent extends PositionComponent with TapCallbacks, HasGameReferen
   bool _shouldDrawCircle = false; // Flag to control circle rendering and animation
   double _circleScale = 1.0;
   Timer? _circleAnimationTimer;
+
+  Future<void> _applyEffect(Effect effect) {
+    final completer = Completer<void>();
+    effect.onComplete = completer.complete;
+    add(effect);
+    return completer.future;
+  }
+
+  Future<void> animateToSpot(String spotId) async {
+    await _applyEffect(
+      MoveToEffect(
+        Spot.findSpotById(spotId).tokenPosition,
+        EffectController(duration: 0.1, curve: Curves.easeInOut),
+      ),
+    );
+  }
+
+  Future<void> animatePath(List<String> tokenPath, int fromIndex, int toIndex) async {
+    final originalSize = size.clone();
+
+    for (int i = fromIndex; i <= toIndex && i < tokenPath.length; i++) {
+      token.positionId = tokenPath[i];
+
+      await AudioManager.playMoveSound();
+
+      // Apply size increase effect
+      await _applyEffect(
+        SizeEffect.to(
+          Vector2(originalSize.x * 1.30, originalSize.y * 1.30),
+          EffectController(duration: 0.05),
+        ),
+      );
+
+      // Move the token to the target position
+      await _applyEffect(
+        MoveToEffect(
+          Spot.findSpotById(tokenPath[i]).tokenPosition,
+          EffectController(duration: 0.05, curve: Curves.easeInOut),
+        ),
+      );
+
+      // Restore token to original size
+      await _applyEffect(
+        SizeEffect.to(
+          originalSize,
+          EffectController(duration: 0.05),
+        ),
+      );
+
+      // Add a small delay to reduce CPU strain and smooth the animation
+      await Future.delayed(const Duration(milliseconds: 120));
+    }
+  }
+
+  Future<void> animatePathBackward(List<String> tokenPath, int fromIndex, int toIndex) async {
+    bool audioPlayed = false;
+
+    for (int i = fromIndex; i >= toIndex && i >= 0; i--) {
+      token.positionId = tokenPath[i];
+
+      if (!audioPlayed) {
+        await AudioManager.playMoveSound();
+        audioPlayed = true;
+      }
+
+      await _applyEffect(
+        MoveToEffect(
+          Spot.findSpotById(tokenPath[i]).tokenPosition,
+          EffectController(duration: 0.1, curve: Curves.easeInOut),
+        ),
+      );
+    }
+  }
+
+  Future<void> animateToBase(String baseSpotId) async {
+    await _applyEffect(
+      MoveToEffect(
+        Spot.findSpotById(baseSpotId).position,
+        EffectController(duration: 0.03, curve: Curves.easeInOut),
+      ),
+    );
+    await Future.delayed(const Duration(milliseconds: 30));
+  }
 
   TokenComponent({
     required this.token,
