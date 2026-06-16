@@ -573,6 +573,7 @@ class GameApp extends StatefulWidget {
 
 class _GameAppState extends State<GameApp> {
   Ludo? game;
+  bool _canExit = false;
 
   @override
   void initState() {
@@ -585,8 +586,9 @@ class _GameAppState extends State<GameApp> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return PopScope(
-      canPop: false,
+      canPop: _canExit,
       onPopInvokedWithResult: (didPop, dynamic) {
+        if (didPop) return;
         _showExitConfirmationDialog();
       },
       child: MaterialApp(
@@ -677,7 +679,7 @@ class _GameAppState extends State<GameApp> {
   void _showExitConfirmationDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           backgroundColor: const Color(0xFF1E293B).withValues(alpha: 0.9),
           shape: RoundedRectangleBorder(
@@ -706,7 +708,7 @@ class _GameAppState extends State<GameApp> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Dismiss the dialog
+                Navigator.of(dialogContext).pop(); // Dismiss the dialog
               },
               child: Text(
                 'No',
@@ -726,6 +728,10 @@ class _GameAppState extends State<GameApp> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
               onPressed: () {
+                setState(() {
+                  _canExit = true;
+                });
+                Navigator.of(dialogContext).pop(); // Dismiss dialog
                 Navigator.of(context).popUntil((route) => route.isFirst);
               },
               child: const Text(

@@ -22,7 +22,7 @@ class GameState {
   // Singleton instance
   static final GameState _instance = GameState._();
 
-  late final Ludo game;
+  late Ludo game;
   static const List<String> safeSpots = [
     'B04',
     'B23',
@@ -34,7 +34,7 @@ class GameState {
     'Y42'
   ];
 
-  late final LudoLayoutConfig layoutConfig;
+  late LudoLayoutConfig layoutConfig;
   LudoGameState state = LudoGameState.needRoll;
 
   final Map<String, TokenComponent> _tokenComponentMap = {};
