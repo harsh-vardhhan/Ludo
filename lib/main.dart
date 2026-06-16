@@ -1,11 +1,11 @@
 library;
 
 import 'dart:async';
+import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-// user files
 
 import 'package:ludo/ludo.dart';
 import 'package:ludo/models/player_team.dart';
@@ -25,6 +25,335 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+// ----------------------------------------------------
+// UI Styles & Custom Widgets
+// ----------------------------------------------------
+
+class AmbientBackground extends StatelessWidget {
+  final Widget child;
+
+  const AmbientBackground({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Main dark gradient background
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF0F172A), // Deep Slate 900
+                Color(0xFF1E293B), // Slate 800
+                Color(0xFF0F172A),
+              ],
+            ),
+          ),
+        ),
+        // Top-right soft glow blob
+        Positioned(
+          top: -80,
+          right: -80,
+          child: Container(
+            width: 280,
+            height: 280,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.blue.withValues(alpha: 0.08),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+        ),
+        // Bottom-left soft glow blob
+        Positioned(
+          bottom: -100,
+          left: -100,
+          child: Container(
+            width: 320,
+            height: 320,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.amber.withValues(alpha: 0.06),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 100.0, sigmaY: 100.0),
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
+class GlassmorphicContainer extends StatelessWidget {
+  final Widget child;
+  final double borderRadius;
+  final double padding;
+
+  const GlassmorphicContainer({
+    super.key,
+    required this.child,
+    this.borderRadius = 24.0,
+    this.padding = 28.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
+        child: Container(
+          padding: EdgeInsets.all(padding),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.12),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 32,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class ScaleOnTapButton extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  final List<Color> gradientColors;
+  final Color borderColor;
+
+  const ScaleOnTapButton({
+    super.key,
+    required this.child,
+    required this.onTap,
+    required this.gradientColors,
+    required this.borderColor,
+  });
+
+  @override
+  State<ScaleOnTapButton> createState() => _ScaleOnTapButtonState();
+}
+
+class _ScaleOnTapButtonState extends State<ScaleOnTapButton> with SingleTickerProviderStateMixin {
+  late double _scale;
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      lowerBound: 0.0,
+      upperBound: 0.04,
+    )..addListener(() {
+        setState(() {});
+      });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _scale = 1 - _controller.value;
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _controller.reverse(),
+      child: Transform.scale(
+        scale: _scale,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: widget.gradientColors,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: widget.borderColor,
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: widget.gradientColors.first.withValues(alpha: 0.2),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
+          alignment: Alignment.center,
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
+class PremiumLudoTitle extends StatelessWidget {
+  const PremiumLudoTitle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'LUDO ZONE',
+          style: TextStyle(
+            fontSize: 34,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 3,
+            foreground: Paint()
+              ..shader = const LinearGradient(
+                colors: [
+                  Color(0xFFFFD700), // Pure Gold
+                  Color(0xFFFFA500), // Vibrant Orange
+                ],
+              ).createShader(const Rect.fromLTWH(0, 0, 300, 70)),
+            shadows: [
+              Shadow(
+                color: Colors.black.withValues(alpha: 0.6),
+                offset: const Offset(0, 4),
+                blurRadius: 8,
+              ),
+              Shadow(
+                color: Colors.orange.withValues(alpha: 0.25),
+                offset: const Offset(0, 0),
+                blurRadius: 16,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'CHOOSE BATTLE MODE',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.5,
+            color: Colors.white.withValues(alpha: 0.4),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class MatchupCard extends StatelessWidget {
+  final PlayerTeam team1;
+  final PlayerTeam team2;
+  final VoidCallback onTap;
+
+  const MatchupCard({
+    super.key,
+    required this.team1,
+    required this.team2,
+    required this.onTap,
+  });
+
+  Color _getTeamColor(PlayerTeam team) {
+    switch (team) {
+      case PlayerTeam.blue:
+        return const Color(0xFF0D92F4);
+      case PlayerTeam.green:
+        return const Color(0xFF41B06E);
+      case PlayerTeam.red:
+        return const Color(0xFFFF5B5B);
+      case PlayerTeam.yellow:
+        return const Color(0xFFFFD966);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color1 = _getTeamColor(team1);
+    final color2 = _getTeamColor(team2);
+
+    return ScaleOnTapButton(
+      gradientColors: [
+        Colors.white.withValues(alpha: 0.08),
+        Colors.white.withValues(alpha: 0.03),
+      ],
+      borderColor: Colors.white.withValues(alpha: 0.12),
+      onTap: onTap,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              TokenDisplay(color: color1),
+              const SizedBox(width: 14),
+              Text(
+                team1.name.toUpperCase(),
+                style: TextStyle(
+                  color: color1,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 15,
+                  letterSpacing: 1.1,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            'VS',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.35),
+              fontWeight: FontWeight.w900,
+              fontStyle: FontStyle.italic,
+              fontSize: 15,
+            ),
+          ),
+          Row(
+            children: [
+              Text(
+                team2.name.toUpperCase(),
+                style: TextStyle(
+                  color: color2,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 15,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const SizedBox(width: 14),
+              TokenDisplay(color: color2),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------
+// Screens
+// ----------------------------------------------------
 
 class FirstScreen extends StatefulWidget {
   const FirstScreen({super.key, this.selectedPlayerCount});
@@ -46,79 +375,84 @@ class FirstScreenState extends State<FirstScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xff002fa7),
-              Color(0xff002fa7),
-            ],
-          ),
-        ),
-        child: Center(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.9,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Select Number of Players',
-                  style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Colors.yellow, // Set button color to yellow
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(20.0)), // Set border radius
+      body: AmbientBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: GlassmorphicContainer(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const PremiumLudoTitle(),
+                    const SizedBox(height: 48),
+                    ScaleOnTapButton(
+                      gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)], // Gold to Bronze
+                      borderColor: const Color(0xFFFBBF24).withValues(alpha: 0.5),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SecondScreen(selectedPlayerCount: 2),
+                          ),
+                        );
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.people, color: Colors.white, size: 22),
+                          SizedBox(width: 12),
+                          Text(
+                            '2 PLAYER GAME',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const SecondScreen(selectedPlayerCount: 2),
-                        ),
-                      );
-                    }, // Button is disabled if no selection
-                    child: const Text('2 player game'),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Colors.yellow, // Set button color to yellow
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(20.0)), // Set border radius
+                    const SizedBox(height: 20),
+                    ScaleOnTapButton(
+                      gradientColors: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)], // Blue to Deep Blue
+                      borderColor: const Color(0xFF60A5FA).withValues(alpha: 0.5),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const GameApp(
+                              selectedTeams: [
+                                PlayerTeam.blue,
+                                PlayerTeam.red,
+                                PlayerTeam.green,
+                                PlayerTeam.yellow
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.groups, color: Colors.white, size: 22),
+                          SizedBox(width: 12),
+                          Text(
+                            '4 PLAYER GAME',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const GameApp(
-                              selectedTeams: [PlayerTeam.blue, PlayerTeam.red, PlayerTeam.green, PlayerTeam.yellow]),
-                        ),
-                      );
-                    }, // Button is disabled if no selection
-                    child: const Text('4 player game'),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -137,143 +471,90 @@ class SecondScreen extends StatefulWidget {
 }
 
 class SecondScreenState extends State<SecondScreen> {
-  List<PlayerTeam> selectedTeams = [];
-  int? selectedOption; // New state variable to track selected radio option
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xff002fa7),
-              Color(0xff002fa7),
-            ],
-          ),
-        ),
-        child: Center(
-          child: Builder(
-            builder: (context) {
-              switch (widget.selectedPlayerCount) {
-                case 2:
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0)),
-                              ),
+      body: AmbientBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: GlassmorphicContainer(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.08),
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const GameApp(
-                                      selectedTeams: [PlayerTeam.blue, PlayerTeam.green]),
-                                ),
-                              );
-                            }, // Empty onPressed action
-                            child: const Row(
-                              children: [
-                                TokenDisplay(color: Colors.blue),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Player 1',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(width: 30),
-                                TokenDisplay(color: Colors.green),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Player 2',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0)),
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const GameApp(
-                                      selectedTeams: [PlayerTeam.red, PlayerTeam.yellow]),
-                                ),
-                              );
-                            },
-                            child: const Row(
-                              children: [
-                                TokenDisplay(color: Colors.red),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Player 1',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(width: 30),
-                                TokenDisplay(color: Colors.yellow),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Player 2',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                case 4:
-                  return ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              GameApp(selectedTeams: selectedTeams),
                         ),
-                      );
-                    },
-                    child: const Text('4 Players Selected'),
-                  );
-                default:
-                  return const Text('Invalid Player Count');
-              }
-            },
+                        const Expanded(
+                          child: Text(
+                            'SELECT TEAMS',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 34), // Spacing alignment matching back button
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      'Choose a 2-Player Matchup',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white.withValues(alpha: 0.5),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    MatchupCard(
+                      team1: PlayerTeam.blue,
+                      team2: PlayerTeam.green,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const GameApp(
+                              selectedTeams: [PlayerTeam.blue, PlayerTeam.green],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    MatchupCard(
+                      team1: PlayerTeam.red,
+                      team2: PlayerTeam.yellow,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const GameApp(
+                              selectedTeams: [PlayerTeam.red, PlayerTeam.yellow],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -314,11 +595,11 @@ class _GameAppState extends State<GameApp> {
           body: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
-                  Color(0xff1E3E62),
-                   Color(0xff1E3E62),
+                  Color(0xFF0F172A), // Dark slate matching AmbientBackground
+                  Color(0xFF1E293B),
                 ],
               ),
             ),
@@ -346,20 +627,21 @@ class _GameAppState extends State<GameApp> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Exit Game'),
-          content: const Text('Do you really want to exit the game?'),
+          backgroundColor: const Color(0xFF1E293B),
+          title: const Text('Exit Game', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          content: const Text('Do you really want to exit the game?', style: TextStyle(color: Colors.white70)),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Dismiss the dialog
               },
-              child: const Text('No'),
+              child: const Text('No', style: TextStyle(color: Color(0xFF60A5FA))),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).popUntil((route) => route.isFirst);
               },
-              child: const Text('Yes'),
+              child: const Text('Yes', style: TextStyle(color: Colors.redAccent)),
             ),
           ],
         );
@@ -376,12 +658,12 @@ class TokenDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: const Size(30, 30), // Adjust size as needed
+      size: const Size(28, 28), // Adjust size as needed
       painter: TokenPainter(
         fillPaint: Paint()..color = color,
         borderPaint: Paint()
-          ..color = Colors.black
-          ..strokeWidth = 1.0
+          ..color = Colors.black87
+          ..strokeWidth = 1.2
           ..style = PaintingStyle.stroke,
       ),
     );
@@ -400,7 +682,7 @@ class TokenPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final outerRadius = size.width / 2;
-    final smallerCircleRadius = outerRadius / 1.7;
+    final smallerCircleRadius = outerRadius / 1.6;
     final center = Offset(size.width / 2, size.height / 2);
 
     canvas.drawCircle(center, outerRadius, Paint()..color = Colors.white);
@@ -421,5 +703,3 @@ class PlayArea extends RectangleComponent with HasGameReference<Ludo> {
     size = Vector2(game.width, game.height);
   }
 }
-
-// CI Trigger

@@ -7,6 +7,6 @@ void main() {
     await tester.pumpWidget(const MyApp());
 
     // Verify that the select number of players text is displayed
-    expect(find.text('Select Number of Players'), findsOneWidget);
+    expect(find.text('LUDO ZONE'), findsOneWidget);
   });
 }
