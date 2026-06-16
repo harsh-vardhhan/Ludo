@@ -604,16 +604,68 @@ class _GameAppState extends State<GameApp> {
               ),
             ),
             child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Center(
-                  child: FittedBox(
-                    child: SizedBox(
-                        width: screenWidth,
-                        height: screenWidth + screenWidth * 0.70,
-                        child: GameWidget(game: game!)),
+              child: Column(
+                children: [
+                  // Premium Game Header with back/exit button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _showExitConfirmationDialog();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                width: 1,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                        ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
+                          ).createShader(bounds),
+                          child: const Text(
+                            'LUDO ZONE',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        // Balanced layout spacing
+                        const SizedBox(width: 34),
+                      ],
+                    ),
                   ),
-                ),
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: FittedBox(
+                          child: SizedBox(
+                              width: screenWidth,
+                              height: screenWidth + screenWidth * 0.70,
+                              child: GameWidget(game: game!)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -627,21 +679,61 @@ class _GameAppState extends State<GameApp> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          title: const Text('Exit Game', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          content: const Text('Do you really want to exit the game?', style: TextStyle(color: Colors.white70)),
+          backgroundColor: const Color(0xFF1E293B).withValues(alpha: 0.9),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: Colors.white.withValues(alpha: 0.1),
+              width: 1.5,
+            ),
+          ),
+          title: const Text(
+            'Exit Game',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
+          ),
+          content: const Text(
+            'Do you really want to exit the game?',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
+          ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Dismiss the dialog
               },
-              child: const Text('No', style: TextStyle(color: Color(0xFF60A5FA))),
+              child: Text(
+                'No',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444), // Red
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
               onPressed: () {
                 Navigator.of(context).popUntil((route) => route.isFirst);
               },
-              child: const Text('Yes', style: TextStyle(color: Colors.redAccent)),
+              child: const Text(
+                'Yes, Exit',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
