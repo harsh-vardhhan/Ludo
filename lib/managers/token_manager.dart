@@ -14,10 +14,6 @@ class TokenManager {
   }
 
   List<Token> allTokens = [];
-  List<Token> miniTokens = [];
-
-  // Cache for player-specific tokens
-  final Map<PlayerTeam, List<Token>> _playerTokensCache = {};
 
   final blueTokensBase = {
     'BT1': 'B1',
@@ -73,30 +69,10 @@ class TokenManager {
           size: Vector2(50, 50),
           paint: Paint());
     }
-    _cachePlayerTokens();
-  }
-
-  void _cachePlayerTokens() {
-    _playerTokensCache.clear();
-    for (var token in allTokens) {
-      _playerTokensCache.putIfAbsent(token.playerId, () => []).add(token);
-    }
   }
 
   List<Token> getAllTokens(PlayerTeam player) {
-    return _playerTokensCache[player] ?? [];
-  }
-
-  List<Token> getOpenTokens(PlayerTeam player) {
-    return getAllTokens(player)
-        .where((token) => token.positionId.length == 3)
-        .toList();
-  }
-
-  List<Token> getCloseTokens(PlayerTeam player) {
-    return getAllTokens(player)
-        .where((token) => token.positionId.length == 2)
-        .toList();
+    return allTokens.where((token) => token.playerId == player).toList();
   }
 
   List<Token> getBlueTokens() => getAllTokens(PlayerTeam.blue);
@@ -106,8 +82,6 @@ class TokenManager {
 
   Future<void> clearTokens() async {
     allTokens.clear();
-    miniTokens.clear();
-    _playerTokensCache.clear();
     return Future.value();
   }
 }
