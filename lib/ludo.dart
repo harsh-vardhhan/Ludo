@@ -340,7 +340,6 @@ class Ludo extends FlameGame
   Future<void> startGame() async {
     await TokenManager().clearTokens();
     await GameState().clearPlayers();
-    TileManager().clear();
     await AudioManager.dispose();
 
     AudioManager.initialize();
