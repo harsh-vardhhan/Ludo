@@ -1,13 +1,13 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/effects.dart';
-import 'package:ludo/state/player_team.dart';
-import '../../ludo.dart';
-import '../../state/game_state.dart';
-import '../../component/ui_components/dice_pointer.dart';
+import 'package:ludo/models/player_team.dart';
+import 'package:ludo/ludo.dart';
+import 'package:ludo/managers/game_state.dart';
+import 'package:ludo/components/controls/dice_pointer.dart';
 
 // user files
-import 'controller_block.dart';
+import 'package:ludo/components/controls/controller_block.dart';
 
 class LowerController extends RectangleComponent with HasGameReference<Ludo> {
   final RectangleComponent leftArrow;

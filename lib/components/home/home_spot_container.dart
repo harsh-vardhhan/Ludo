@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'home_spot.dart';
+import 'package:ludo/components/home/home_spot.dart';
 
 class HomeSpotContainer extends RectangleComponent {
   final String teamCode;

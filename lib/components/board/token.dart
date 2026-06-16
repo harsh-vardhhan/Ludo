@@ -1,46 +1,113 @@
+import 'dart:async';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/player_team.dart';
-import '../../state/game_state.dart';
-import '../../ludo.dart';
+import 'package:ludo/models/token.dart';
+import 'package:ludo/managers/game_state.dart';
+import 'package:ludo/managers/audio_manager.dart';
+import 'package:ludo/components/board/spot.dart';
+import 'package:ludo/ludo.dart';
 
-// Enum to define token states
-enum TokenState {
-  inBase,
-  onBoard,
-  inHome,
-}
-
-class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
-  final String tokenId; // Mandatory unique ID for the token
-  PlayerTeam playerId; // Store only the player ID
-  bool enableToken; // Store the enableToken state directly
-  String positionId; // Mandatory position ID for the token
-  TokenState state; // Current state of the token
-
+class TokenComponent extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
+  final Token token;
   Color topColor;
   Color sideColor;
 
   bool _shouldDrawCircle = false; // Flag to control circle rendering and animation
   double _circleScale = 1.0;
-  Timer? _circleAnimationTimer; //
+  Timer? _circleAnimationTimer;
 
-  Token({
-    required this.tokenId, // Mandatory unique ID for the token
-    required this.positionId, // Mandatory position ID for the token
+  Future<void> _applyEffect(Effect effect) {
+    final completer = Completer<void>();
+    effect.onComplete = completer.complete;
+    add(effect);
+    return completer.future;
+  }
+
+  Future<void> animateToSpot(String spotId) async {
+    await _applyEffect(
+      MoveToEffect(
+        Spot.findSpotById(spotId).tokenPosition,
+        EffectController(duration: 0.1, curve: Curves.easeInOut),
+      ),
+    );
+  }
+
+  Future<void> animatePath(List<String> tokenPath, int fromIndex, int toIndex) async {
+    final originalSize = size.clone();
+
+    for (int i = fromIndex; i <= toIndex && i < tokenPath.length; i++) {
+      token.positionId = tokenPath[i];
+
+      await AudioManager.playMoveSound();
+
+      // Apply size increase effect
+      await _applyEffect(
+        SizeEffect.to(
+          Vector2(originalSize.x * 1.30, originalSize.y * 1.30),
+          EffectController(duration: 0.05),
+        ),
+      );
+
+      // Move the token to the target position
+      await _applyEffect(
+        MoveToEffect(
+          Spot.findSpotById(tokenPath[i]).tokenPosition,
+          EffectController(duration: 0.05, curve: Curves.easeInOut),
+        ),
+      );
+
+      // Restore token to original size
+      await _applyEffect(
+        SizeEffect.to(
+          originalSize,
+          EffectController(duration: 0.05),
+        ),
+      );
+
+      // Add a small delay to reduce CPU strain and smooth the animation
+      await Future.delayed(const Duration(milliseconds: 120));
+    }
+  }
+
+  Future<void> animatePathBackward(List<String> tokenPath, int fromIndex, int toIndex) async {
+    bool audioPlayed = false;
+
+    for (int i = fromIndex; i >= toIndex && i >= 0; i--) {
+      token.positionId = tokenPath[i];
+
+      if (!audioPlayed) {
+        await AudioManager.playMoveSound();
+        audioPlayed = true;
+      }
+
+      await _applyEffect(
+        MoveToEffect(
+          Spot.findSpotById(tokenPath[i]).tokenPosition,
+          EffectController(duration: 0.1, curve: Curves.easeInOut),
+        ),
+      );
+    }
+  }
+
+  Future<void> animateToBase(String baseSpotId) async {
+    await _applyEffect(
+      MoveToEffect(
+        Spot.findSpotById(baseSpotId).position,
+        EffectController(duration: 0.03, curve: Curves.easeInOut),
+      ),
+    );
+    await Future.delayed(const Duration(milliseconds: 30));
+  }
+
+  TokenComponent({
+    required this.token,
     required Vector2 position, // Initial position of the token
     required Vector2 size, // Size of the token
-    required this.playerId, // Initialize playerId
-    this.enableToken = false, // Initialize enableToken
-    this.state = TokenState.inBase, // Default state
     required this.topColor,
     required this.sideColor,
   }) : super(position: position, size: size);
-
-  bool isInBase() => state == TokenState.inBase;
-  bool isOnBoard() => state == TokenState.onBoard;
-  bool isInHome() => state == TokenState.inHome;
 
   @override
   void render(Canvas canvas) {
@@ -82,7 +149,7 @@ class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> 
     final center = Offset(size.x / 2, size.y / 1.8);
 
     final paint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.4) // Blue color with transparency
+      ..color = Colors.black.withValues(alpha: 0.4)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.8;
 
@@ -130,14 +197,6 @@ class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> 
   @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
-    GameState().handleTokenTap(game.world, this);
-  }
-
-  bool spaceToMove() {
-    final tokenPath = GameState().getTokenPath(playerId);
-    final index = tokenPath.indexOf(positionId);
-    final newIndex = index + GameState().diceNumber;
-
-    return newIndex < tokenPath.length;
+    GameState().handleTokenTap(game.world, token);
   }
 }

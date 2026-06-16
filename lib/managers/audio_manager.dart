@@ -15,6 +15,10 @@ class AudioManager {
     return await _diceSoundPool!.start(volume: volume);
   }
 
+  static Future<void> playMoveSound() async {
+    await FlameAudio.play('move.mp3');
+  }
+
   static Future<void> dispose() async {
     await _diceSoundPool?.dispose();
     _diceSoundPool = null;

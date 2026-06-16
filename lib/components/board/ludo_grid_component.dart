@@ -1,10 +1,10 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/game_state.dart';
-import 'package:ludo/state/player_team.dart';
-import '../ui_components/spot.dart';
-import '../ui_components/arrow_icon_component.dart';
-import '../ui_components/star_component.dart';
+import 'package:ludo/managers/game_state.dart';
+import 'package:ludo/models/player_team.dart';
+import 'package:ludo/components/board/spot.dart';
+import 'package:ludo/components/board/arrow_icon_component.dart';
+import 'package:ludo/components/board/star_component.dart';
 
 class LudoGridComponent extends PositionComponent {
   final PlayerTeam team;

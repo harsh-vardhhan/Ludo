@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/home_spot_manager.dart';
+import 'package:ludo/managers/tile_manager.dart';
 
 class HomeSpot extends CircleComponent {
   final String uniqueId;
@@ -26,6 +26,6 @@ class HomeSpot extends CircleComponent {
             ),
           ],
         ) {
-    HomeSpotManager().addHomeSpot(this);
+    TileManager().registerHomeSpot(uniqueId, this);
   }
 }

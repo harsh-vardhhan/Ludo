@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'home_spot_container.dart';
+import 'package:ludo/components/home/home_spot_container.dart';
 
 class HomePlate extends RectangleComponent {
   // Constructor to initialize the square with size, position, and optional paint

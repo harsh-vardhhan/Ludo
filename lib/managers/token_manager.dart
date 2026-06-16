@@ -1,8 +1,8 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/player_team.dart';
-import '../component/ui_components/token.dart';
-import '../component/ui_components/spot.dart';
+import 'package:ludo/models/player_team.dart';
+import 'package:ludo/models/token.dart';
+import 'package:ludo/components/board/spot.dart';
 
 class TokenManager {
   static final TokenManager _instance = TokenManager._internal();
@@ -14,10 +14,6 @@ class TokenManager {
   }
 
   List<Token> allTokens = [];
-  List<Token> miniTokens = [];
-
-  // Cache for player-specific tokens
-  final Map<String, List<Token>> _playerTokensCache = {};
 
   final blueTokensBase = {
     'BT1': 'B1',
@@ -65,64 +61,27 @@ class TokenManager {
           enableToken: false,
           tokenId: entry.key,
           positionId: entry.value,
-          position: Vector2(100, 100), // Adjust position
-          size: Vector2(50, 50), // Adjust size
-          topColor: Colors.transparent,
-          sideColor: Colors.transparent);
+          state: TokenState.inBase);
       allTokens.add(token);
-      SpotManager().addSpot(Spot(
+      Spot(
           uniqueId: entry.value,
           position: Vector2(100, 100),
           size: Vector2(50, 50),
-          paint: Paint()));
-    }
-    _cachePlayerTokens();
-  }
-
-  void _cachePlayerTokens() {
-    _playerTokensCache.clear();
-    for (var token in allTokens) {
-      final player = token.tokenId[0];
-      _playerTokensCache.putIfAbsent(player, () => []).add(token);
+          paint: Paint());
     }
   }
 
-  List<Token> getAllTokens(String player) {
-    return _playerTokensCache[player] ?? [];
+  List<Token> getAllTokens(PlayerTeam player) {
+    return allTokens.where((token) => token.playerId == player).toList();
   }
 
-  List<Token> getOpenTokens(String player) {
-    return getAllTokens(player)
-        .where((token) => token.positionId.length == 3)
-        .toList();
-  }
-
-  List<Token> getCloseTokens(String player) {
-    return getAllTokens(player)
-        .where((token) => token.positionId.length == 2)
-        .toList();
-  }
-
-  List<Token> getBlueTokens() {
-    return getAllTokens('B');
-  }
-
-  List<Token> getGreenTokens() {
-    return getAllTokens('G');
-  }
-
-  List<Token> getYellowTokens() {
-    return getAllTokens('Y');
-  }
-
-  List<Token> getRedTokens() {
-    return getAllTokens('R');
-  }
+  List<Token> getBlueTokens() => getAllTokens(PlayerTeam.blue);
+  List<Token> getGreenTokens() => getAllTokens(PlayerTeam.green);
+  List<Token> getYellowTokens() => getAllTokens(PlayerTeam.yellow);
+  List<Token> getRedTokens() => getAllTokens(PlayerTeam.red);
 
   Future<void> clearTokens() async {
     allTokens.clear();
-    miniTokens.clear();
-    _playerTokensCache.clear();
     return Future.value();
   }
 }
