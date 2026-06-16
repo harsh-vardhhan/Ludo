@@ -26,6 +26,6 @@ class HomeSpot extends CircleComponent {
             ),
           ],
         ) {
-    TileManager().registerTile(uniqueId, this);
+    TileManager().registerHomeSpot(uniqueId, this);
   }
 }

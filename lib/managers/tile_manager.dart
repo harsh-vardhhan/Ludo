@@ -1,8 +1,10 @@
-import 'package:flame/components.dart';
+import 'package:ludo/components/board/spot.dart';
+import 'package:ludo/components/home/home_spot.dart';
 
 class TileManager {
   static final TileManager _instance = TileManager._internal();
-  final Map<String, PositionComponent> _tileMap = {};
+  final Map<String, Spot> _spotMap = {};
+  final Map<String, HomeSpot> _homeSpotMap = {};
 
   TileManager._internal();
 
@@ -10,23 +12,27 @@ class TileManager {
     return _instance;
   }
 
-  void registerTile(String id, PositionComponent component) {
-    _tileMap[id] = component;
+  void registerSpot(String id, Spot spot) {
+    _spotMap[id] = spot;
   }
 
-  void unregisterTile(String id) {
-    _tileMap.remove(id);
+  void registerHomeSpot(String id, HomeSpot homeSpot) {
+    _homeSpotMap[id] = homeSpot;
   }
 
-  PositionComponent? getTile(String id) {
-    return _tileMap[id];
+  Spot? getSpot(String id) {
+    return _spotMap[id];
   }
 
-  List<PositionComponent> getAllTiles() {
-    return _tileMap.values.toList();
+  HomeSpot? getHomeSpot(String id) {
+    return _homeSpotMap[id];
+  }
+
+  List<Spot> getSpots() {
+    return _spotMap.values.toList();
   }
 
   void clear() {
-    _tileMap.clear();
+    _spotMap.clear();
   }
 }

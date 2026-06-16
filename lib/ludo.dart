@@ -18,7 +18,6 @@ import 'package:ludo/components/board/spot.dart';
 import 'package:ludo/components/controls/ludo_dice.dart';
 import 'package:ludo/components/overlays/rank_modal_component.dart';
 import 'package:ludo/managers/tile_manager.dart';
-import 'package:ludo/components/home/home_spot.dart';
 import 'package:ludo/models/player_team.dart';
 import 'package:ludo/components/board/token.dart';
 import 'package:ludo/managers/ludo_layout_config.dart';
@@ -357,7 +356,7 @@ class Ludo extends FlameGame
           const tokenSizeFactorY = 1.05;
 
           for (var token in TokenManager().getBlueTokens()) {
-            final homeSpot = TileManager().getTile(token.positionId) as HomeSpot;
+            final homeSpot = TileManager().getHomeSpot(token.positionId)!;
             final spot = Spot.findSpotById(token.positionId);
             // update spot position
             spot.position = Vector2(
@@ -441,7 +440,7 @@ class Ludo extends FlameGame
           const tokenSizeFactorY = 1.05;
 
           for (var token in TokenManager().getGreenTokens()) {
-            final homeSpot = TileManager().getTile(token.positionId) as HomeSpot;
+            final homeSpot = TileManager().getHomeSpot(token.positionId)!;
             final spot = Spot.findSpotById(token.positionId);
             // update spot position
             spot.position = Vector2(
@@ -503,7 +502,7 @@ class Ludo extends FlameGame
           const tokenSizeFactorY = 1.05;
 
           for (var token in TokenManager().getYellowTokens()) {
-            final homeSpot = TileManager().getTile(token.positionId) as HomeSpot;
+            final homeSpot = TileManager().getHomeSpot(token.positionId)!;
             final spot = Spot.findSpotById(token.positionId);
             // update spot position
             spot.position = Vector2(
@@ -586,7 +585,7 @@ class Ludo extends FlameGame
           const tokenSizeFactorY = 1.05;
 
           for (var token in TokenManager().getRedTokens()) {
-            final homeSpot = TileManager().getTile(token.positionId) as HomeSpot;
+            final homeSpot = TileManager().getHomeSpot(token.positionId)!;
             final spot = Spot.findSpotById(token.positionId);
             // update spot position
             spot.position = Vector2(

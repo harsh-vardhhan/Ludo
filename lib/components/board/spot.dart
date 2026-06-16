@@ -15,13 +15,11 @@ class Spot extends RectangleComponent {
   );
 
   static Spot findSpotById(String spotId) {
-    final tile = TileManager().getTile(spotId);
-    if (tile is Spot) return tile;
-    return defaultSpot;
+    return TileManager().getSpot(spotId) ?? defaultSpot;
   }
 
   static List<Spot> getSpots() {
-    return TileManager().getAllTiles().whereType<Spot>().toList();
+    return TileManager().getSpots();
   }
 
   Spot({
@@ -36,7 +34,7 @@ class Spot extends RectangleComponent {
           paint: paint,
           children: children ?? [],
         ) {
-    TileManager().registerTile(uniqueId, this);
+    TileManager().registerSpot(uniqueId, this);
   }
 
   @override
