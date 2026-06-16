@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'home_plate.dart';
+import 'package:ludo/components/home/home_plate.dart';
 
 class Home extends RectangleComponent {
   Home({

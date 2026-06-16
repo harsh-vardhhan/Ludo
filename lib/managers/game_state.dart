@@ -4,18 +4,18 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/component/ui_components/token.dart';
-import 'package:ludo/state/token_manager.dart';
-import 'token.dart';
-import 'ludo_game_state.dart';
-import 'ludo_layout_config.dart';
-import 'package:ludo/component/ui_components/spot.dart';
-import 'package:ludo/component/controller/lower_controller.dart';
-import 'package:ludo/component/controller/upper_controller.dart';
+import 'package:ludo/components/board/token.dart';
+import 'package:ludo/managers/token_manager.dart';
+import 'package:ludo/models/token.dart';
+import 'package:ludo/models/ludo_game_state.dart';
+import 'package:ludo/managers/ludo_layout_config.dart';
+import 'package:ludo/components/board/spot.dart';
+import 'package:ludo/components/controls/lower_controller.dart';
+import 'package:ludo/components/controls/upper_controller.dart';
 
-import 'player.dart';
-import 'player_team.dart';
-import 'event_bus.dart';
+import 'package:ludo/models/player.dart';
+import 'package:ludo/models/player_team.dart';
+import 'package:ludo/managers/event_bus.dart';
 
 class GameState {
   // Private constructor

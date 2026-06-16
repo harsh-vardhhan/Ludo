@@ -6,22 +6,22 @@ import 'package:flame/game.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 
-import 'state/player.dart';
-import 'component/home/home.dart';
-import 'state/token_manager.dart';
-import 'state/event_bus.dart';
-import 'state/game_state.dart';
-import 'state/audio_manager.dart';
-import 'component/controller/upper_controller.dart';
-import 'component/controller/lower_controller.dart';
-import 'ludo_board.dart';
-import 'component/ui_components/spot.dart';
-import 'component/ui_components/ludo_dice.dart';
-import 'component/ui_components/rank_modal_component.dart';
-import 'state/home_spot_manager.dart';
-import 'state/player_team.dart';
-import 'component/ui_components/token.dart';
-import 'state/ludo_layout_config.dart';
+import 'package:ludo/models/player.dart';
+import 'package:ludo/components/home/home.dart';
+import 'package:ludo/managers/token_manager.dart';
+import 'package:ludo/managers/event_bus.dart';
+import 'package:ludo/managers/game_state.dart';
+import 'package:ludo/managers/audio_manager.dart';
+import 'package:ludo/components/controls/upper_controller.dart';
+import 'package:ludo/components/controls/lower_controller.dart';
+import 'package:ludo/components/board/ludo_board.dart';
+import 'package:ludo/components/board/spot.dart';
+import 'package:ludo/components/controls/ludo_dice.dart';
+import 'package:ludo/components/overlays/rank_modal_component.dart';
+import 'package:ludo/managers/home_spot_manager.dart';
+import 'package:ludo/models/player_team.dart';
+import 'package:ludo/components/board/token.dart';
+import 'package:ludo/managers/ludo_layout_config.dart';
 
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {

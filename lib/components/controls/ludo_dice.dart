@@ -5,11 +5,11 @@ import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/geometry.dart';
 // user files
-import 'dice_face_component.dart';
-import '../../state/game_state.dart';
-import '../../state/audio_manager.dart';
-import '../../state/player.dart';
-import '../../ludo.dart';
+import 'package:ludo/components/controls/dice_face_component.dart';
+import 'package:ludo/managers/game_state.dart';
+import 'package:ludo/managers/audio_manager.dart';
+import 'package:ludo/models/player.dart';
+import 'package:ludo/ludo.dart';
 
 class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
   static const double borderRadiusFactor =

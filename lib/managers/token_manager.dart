@@ -1,8 +1,8 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/player_team.dart';
-import 'package:ludo/state/token.dart';
-import '../component/ui_components/spot.dart';
+import 'package:ludo/models/player_team.dart';
+import 'package:ludo/models/token.dart';
+import 'package:ludo/components/board/spot.dart';
 
 class TokenManager {
   static final TokenManager _instance = TokenManager._internal();

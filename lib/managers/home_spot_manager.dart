@@ -1,4 +1,4 @@
-import 'package:ludo/component/home/home_spot.dart';
+import 'package:ludo/components/home/home_spot.dart';
 
 class HomeSpotManager {
   static final HomeSpotManager _instance = HomeSpotManager._internal();

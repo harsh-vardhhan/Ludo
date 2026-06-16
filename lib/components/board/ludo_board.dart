@@ -1,10 +1,10 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/game_state.dart';
-import 'component/grid_component/ludo_grid_component.dart';
-import 'state/player_team.dart';
-import 'component/home/home.dart';
-import 'component/ui_components/spot.dart';
+import 'package:ludo/managers/game_state.dart';
+import 'package:ludo/components/board/ludo_grid_component.dart';
+import 'package:ludo/models/player_team.dart';
+import 'package:ludo/components/home/home.dart';
+import 'package:ludo/components/board/spot.dart';
 
 class LudoBoard extends PositionComponent {
   LudoBoard() {

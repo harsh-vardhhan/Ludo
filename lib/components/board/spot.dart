@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import '../../state/game_state.dart';
+import 'package:ludo/managers/game_state.dart';
 
 class SpotManager {
   static final SpotManager _instance = SpotManager._internal();

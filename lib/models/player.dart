@@ -1,5 +1,5 @@
-import 'player_team.dart';
-import 'token.dart';
+import 'package:ludo/models/player_team.dart';
+import 'package:ludo/models/token.dart';
 
 class Player {
   PlayerTeam playerId;

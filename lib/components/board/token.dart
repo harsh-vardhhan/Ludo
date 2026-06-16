@@ -1,9 +1,9 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/token.dart';
-import '../../state/game_state.dart';
-import '../../ludo.dart';
+import 'package:ludo/models/token.dart';
+import 'package:ludo/managers/game_state.dart';
+import 'package:ludo/ludo.dart';
 
 class TokenComponent extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
   final Token token;

@@ -7,8 +7,8 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 // user files
 
-import 'ludo.dart';
-import 'state/player_team.dart';
+import 'package:ludo/ludo.dart';
+import 'package:ludo/models/player_team.dart';
 
 void main() {
   runApp(const MyApp());

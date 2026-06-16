@@ -1,5 +1,5 @@
-import 'player_team.dart';
-import 'game_state.dart';
+import 'package:ludo/models/player_team.dart';
+import 'package:ludo/managers/game_state.dart';
 
 enum TokenState {
   inBase,
