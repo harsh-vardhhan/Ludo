@@ -20,6 +20,8 @@ import 'component/ui_components/ludo_dice.dart';
 import 'component/ui_components/rank_modal_component.dart';
 import 'state/home_spot_manager.dart';
 import 'state/player_team.dart';
+import 'component/ui_components/token.dart';
+import 'state/ludo_layout_config.dart';
 
 class Ludo extends FlameGame
     with HasCollisionDetection, KeyboardEvents, TapDetector {
@@ -54,16 +56,18 @@ class Ludo extends FlameGame
     );
     camera.viewfinder.anchor = Anchor.topLeft;
 
+    final layout = LudoLayoutConfig(screenWidth: width, screenHeight: height);
+    GameState().layoutConfig = layout;
+
     world.add(UpperController(
-        position: Vector2(0, width * 0.05),
-        width: width,
-        height: width * 0.20));
-    world.add(LudoBoard(
-        width: width, height: width, position: Vector2(0, height * 0.175)));
+        position: layout.upperControllerPosition,
+        width: layout.upperControllerWidth,
+        height: layout.upperControllerHeight));
+    world.add(LudoBoard());
     world.add(LowerController(
-        position: Vector2(0, width + (width * 0.35)),
-        width: width,
-        height: width * 0.20));
+        position: layout.lowerControllerPosition,
+        width: layout.lowerControllerWidth,
+        height: layout.lowerControllerHeight));
 
     /*
     add(FpsTextComponent(
@@ -391,20 +395,22 @@ class Ludo extends FlameGame
                   (homeSpot.size.x * homeSpotSizeFactorY) -
                   GameState().ludoBoardAbsolutePosition.y,
             );
-            // update token position
-            token.sideColor = const Color(0xFF0D92F4);
-            token.topColor = const Color(0xFF77CDFF);
 
-            token.position = spot.position;
-            token.size = Vector2(
-              homeSpot.size.x * tokenSizeFactorX,
-              homeSpot.size.x * tokenSizeFactorY,
+            final tokenComp = TokenComponent(
+              token: token,
+              position: spot.position,
+              size: Vector2(
+                homeSpot.size.x * tokenSizeFactorX,
+                homeSpot.size.x * tokenSizeFactorY,
+              ),
+              topColor: const Color(0xFF77CDFF),
+              sideColor: const Color(0xFF0D92F4),
             );
-            GameState().ludoBoard?.add(token);
+            GameState().registerTokenComponent(tokenComp);
+            GameState().ludoBoard?.add(tokenComp);
           }
 
           const playerId = PlayerTeam.blue;
-          // final tokens = TokenManager().getBlueTokens();
 
           if (GameState().players.isEmpty) {
             blinkBlueBase(true);
@@ -475,19 +481,22 @@ class Ludo extends FlameGame
                   (homeSpot.size.x * homeSpotSizeFactorY) -
                   ludoBoardPosition.y,
             );
-            // update token position
-            token.sideColor = const Color(0xFF54C392);
-            token.topColor = const Color(0xFF73EC8B);
-            token.position = spot.position;
-            token.size = Vector2(
-              homeSpot.size.x * tokenSizeFactorX,
-              homeSpot.size.x * tokenSizeFactorY,
+
+            final tokenComp = TokenComponent(
+              token: token,
+              position: spot.position,
+              size: Vector2(
+                homeSpot.size.x * tokenSizeFactorX,
+                homeSpot.size.x * tokenSizeFactorY,
+              ),
+              topColor: const Color(0xFF73EC8B),
+              sideColor: const Color(0xFF54C392),
             );
-            GameState().ludoBoard?.add(token);
+            GameState().registerTokenComponent(tokenComp);
+            GameState().ludoBoard?.add(tokenComp);
           }
 
           const playerId = PlayerTeam.green;
-          // final tokens = TokenManager().getGreenTokens();
 
           if (GameState().players.isEmpty) {
             blinkGreenBase(true);
@@ -536,19 +545,22 @@ class Ludo extends FlameGame
                   (homeSpot.size.x * homeSpotSizeFactorY) -
                   ludoBoardPosition.y,
             );
-            // update token position
-            token.sideColor = const Color(0xffc9a227);
-            token.topColor = const Color(0xffFFDF5B);
-            token.position = spot.position;
-            token.size = Vector2(
-              homeSpot.size.x * tokenSizeFactorX,
-              homeSpot.size.x * tokenSizeFactorY,
+
+            final tokenComp = TokenComponent(
+              token: token,
+              position: spot.position,
+              size: Vector2(
+                homeSpot.size.x * tokenSizeFactorX,
+                homeSpot.size.x * tokenSizeFactorY,
+              ),
+              topColor: const Color(0xffFFDF5B),
+              sideColor: const Color(0xffc9a227),
             );
-            GameState().ludoBoard?.add(token);
+            GameState().registerTokenComponent(tokenComp);
+            GameState().ludoBoard?.add(tokenComp);
           }
 
           const playerId = PlayerTeam.yellow;
-          // final tokens = TokenManager().getYellowTokens();
 
           if (GameState().players.isEmpty) {
             blinkYellowBase(true);
@@ -618,19 +630,22 @@ class Ludo extends FlameGame
                   (homeSpot.size.x * homeSpotSizeFactorY) -
                   ludoBoardPosition.y,
             );
-            // update token position
-            token.sideColor = const Color(0xff780000);
-            token.topColor = const Color(0xffFF5B5B);
-            token.position = spot.position;
-            token.size = Vector2(
-              homeSpot.size.x * tokenSizeFactorX,
-              homeSpot.size.x * tokenSizeFactorY,
+
+            final tokenComp = TokenComponent(
+              token: token,
+              position: spot.position,
+              size: Vector2(
+                homeSpot.size.x * tokenSizeFactorX,
+                homeSpot.size.x * tokenSizeFactorY,
+              ),
+              topColor: const Color(0xffFF5B5B),
+              sideColor: const Color(0xff780000),
             );
-            GameState().ludoBoard?.add(token);
+            GameState().registerTokenComponent(tokenComp);
+            GameState().ludoBoard?.add(tokenComp);
           }
 
           const playerId = PlayerTeam.red;
-          // final tokens = TokenManager().getRedTokens();
 
           if (GameState().players.isEmpty) {
             blinkRedBase(true);

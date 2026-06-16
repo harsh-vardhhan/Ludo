@@ -1,46 +1,26 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/player_team.dart';
+import 'package:ludo/state/token.dart';
 import '../../state/game_state.dart';
 import '../../ludo.dart';
 
-// Enum to define token states
-enum TokenState {
-  inBase,
-  onBoard,
-  inHome,
-}
-
-class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
-  final String tokenId; // Mandatory unique ID for the token
-  PlayerTeam playerId; // Store only the player ID
-  bool enableToken; // Store the enableToken state directly
-  String positionId; // Mandatory position ID for the token
-  TokenState state; // Current state of the token
-
+class TokenComponent extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
+  final Token token;
   Color topColor;
   Color sideColor;
 
   bool _shouldDrawCircle = false; // Flag to control circle rendering and animation
   double _circleScale = 1.0;
-  Timer? _circleAnimationTimer; //
+  Timer? _circleAnimationTimer;
 
-  Token({
-    required this.tokenId, // Mandatory unique ID for the token
-    required this.positionId, // Mandatory position ID for the token
+  TokenComponent({
+    required this.token,
     required Vector2 position, // Initial position of the token
     required Vector2 size, // Size of the token
-    required this.playerId, // Initialize playerId
-    this.enableToken = false, // Initialize enableToken
-    this.state = TokenState.inBase, // Default state
     required this.topColor,
     required this.sideColor,
   }) : super(position: position, size: size);
-
-  bool isInBase() => state == TokenState.inBase;
-  bool isOnBoard() => state == TokenState.onBoard;
-  bool isInHome() => state == TokenState.inHome;
 
   @override
   void render(Canvas canvas) {
@@ -82,7 +62,7 @@ class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> 
     final center = Offset(size.x / 2, size.y / 1.8);
 
     final paint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.4) // Blue color with transparency
+      ..color = Colors.black.withValues(alpha: 0.4)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.8;
 
@@ -130,14 +110,6 @@ class Token extends PositionComponent with TapCallbacks, HasGameReference<Ludo> 
   @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
-    GameState().handleTokenTap(game.world, this);
-  }
-
-  bool spaceToMove() {
-    final tokenPath = GameState().getTokenPath(playerId);
-    final index = tokenPath.indexOf(positionId);
-    final newIndex = index + GameState().diceNumber;
-
-    return newIndex < tokenPath.length;
+    GameState().handleTokenTap(game.world, token);
   }
 }

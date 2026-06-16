@@ -6,6 +6,9 @@ import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:ludo/component/ui_components/token.dart';
 import 'package:ludo/state/token_manager.dart';
+import 'token.dart';
+import 'ludo_game_state.dart';
+import 'ludo_layout_config.dart';
 import 'package:ludo/component/ui_components/spot.dart';
 import 'package:ludo/component/controller/lower_controller.dart';
 import 'package:ludo/component/controller/upper_controller.dart';
@@ -20,6 +23,19 @@ class GameState {
 
   // Singleton instance
   static final GameState _instance = GameState._();
+
+  late final LudoLayoutConfig layoutConfig;
+  LudoGameState state = LudoGameState.needRoll;
+
+  final Map<String, TokenComponent> _tokenComponentMap = {};
+
+  void registerTokenComponent(TokenComponent component) {
+    _tokenComponentMap[component.token.tokenId] = component;
+  }
+
+  TokenComponent? getComponentForToken(Token token) {
+    return _tokenComponentMap[token.tokenId];
+  }
 
   List<int> diceChances =
       List.filled(3, 0, growable: false); // Track consecutive 6s
@@ -69,6 +85,7 @@ class GameState {
   }
 
   void switchToNextPlayer() {
+    state = LudoGameState.needRoll;
     var current = currentPlayer;
     current.isCurrentTurn = false;
     current.enableDice = false;
@@ -114,6 +131,8 @@ class GameState {
     currentPlayerIndex = 0;
     diceNumber = 5;
     resetTokenMovement();
+    _tokenComponentMap.clear();
+    state = LudoGameState.needRoll;
     return Future.value();
   }
 
@@ -384,7 +403,7 @@ class GameState {
     token.state = TokenState.onBoard;
 
     await _applyEffect(
-        token,
+        getComponentForToken(token)!,
         MoveToEffect(SpotManager().findSpotById(tokenPath.first).tokenPosition,
             EffectController(duration: 0.1, curve: Curves.easeInOut)));
 
@@ -470,12 +489,15 @@ class GameState {
 
       for (var i = 0; i < tokenList.length; i++) {
         final token = tokenList[i];
-        if (token.state == TokenState.inBase) {
-          token.position = spot.position;
-        } else if (token.state == TokenState.onBoard ||
-            token.state == TokenState.inHome) {
-          token.position = Vector2(
-              spot.tokenPosition.x + i * positionIncrement, spot.tokenPosition.y);
+        final tokenComp = getComponentForToken(token);
+        if (tokenComp != null) {
+          if (token.state == TokenState.inBase) {
+            tokenComp.position = spot.position;
+          } else if (token.state == TokenState.onBoard ||
+              token.state == TokenState.inHome) {
+            tokenComp.position = Vector2(
+                spot.tokenPosition.x + i * positionIncrement, spot.tokenPosition.y);
+          }
         }
       }
     });
@@ -498,7 +520,7 @@ class GameState {
     }
 
     for (var token in trailingTokens) {
-      token.enableCircleAnimation();
+      getComponentForToken(token)?.enableCircleAnimation();
     }
   }
 
@@ -521,7 +543,7 @@ class GameState {
       }
 
       await _applyEffect(
-        token,
+        getComponentForToken(token)!,
         MoveToEffect(
           SpotManager()
               .getSpots()
@@ -579,7 +601,7 @@ class GameState {
     for (int i = currentIndex + 1; i <= finalIndex && i < tokenPath.length; i++) {
       token.positionId = tokenPath[i];
       await _applyEffect(
-        token,
+        getComponentForToken(token)!,
         MoveToEffect(
           SpotManager()
               .getSpots()
@@ -605,7 +627,7 @@ class GameState {
 
   void clearTokenTrail() {
     for (var token in TokenManager().allTokens) {
-      token.disableCircleAnimation();
+      getComponentForToken(token)?.disableCircleAnimation();
     }
   }
 
@@ -626,7 +648,7 @@ class GameState {
     }
 
     await _applyEffect(
-      token,
+      getComponentForToken(token)!,
       MoveToEffect(
         SpotManager().findSpotById(token.positionId).position,
         EffectController(duration: 0.03, curve: Curves.easeInOut),
@@ -686,11 +708,13 @@ class GameState {
   }
 
   int rollDice() {
+    state = LudoGameState.rolling;
     diceNumber = Random().nextInt(6) + 1;
     return diceNumber;
   }
 
   void resolveDiceRoll(World world) {
+    state = LudoGameState.resolving;
     final handleRoll = diceNumber == 6 ? _handleSixRoll : _handleNonSixRoll;
     handleRoll(world);
   }
@@ -776,6 +800,7 @@ class GameState {
 
   void _enableManualTokenSelection(
       World world, List<Token> tokensInBase, List<Token> tokensOnBoard) {
+    state = LudoGameState.needMove;
     final player = currentPlayer;
     hidePointer();
     player.enableDice = false;
@@ -809,8 +834,10 @@ class GameState {
       return;
     }
 
+    state = LudoGameState.moving;
+
     for (var t in TokenManager().allTokens) {
-      t.disableCircleAnimation();
+      getComponentForToken(t)?.disableCircleAnimation();
       t.enableToken = false;
     }
 

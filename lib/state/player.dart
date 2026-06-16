@@ -1,5 +1,5 @@
 import 'player_team.dart';
-import '../component/ui_components/token.dart';
+import 'token.dart';
 
 class Player {
   PlayerTeam playerId;

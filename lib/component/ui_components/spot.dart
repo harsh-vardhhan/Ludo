@@ -1,6 +1,5 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:ludo/state/token_manager.dart';
 import '../../state/game_state.dart';
 
 class SpotManager {
@@ -72,8 +71,9 @@ class Spot extends RectangleComponent {
   @override
   void onLoad() {
     super.onLoad();
-    final tokenSizeAdjustmentX = TokenManager().allTokens.first.size.x * 0.10;
-    final tokenSizeAdjustmentY = TokenManager().allTokens.first.size.x * 0.15;
+    final tokenWidth = size.x * 0.80;
+    final tokenSizeAdjustmentX = tokenWidth * 0.10;
+    final tokenSizeAdjustmentY = tokenWidth * 0.15;
     final spotGlobalPosition = absolutePositionOf(Vector2.zero());
     final ludoBoardGlobalPosition = GameState().ludoBoardAbsolutePosition;
     tokenPosition = Vector2(
