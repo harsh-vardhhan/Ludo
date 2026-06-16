@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:ludo/models/player.dart';
 import 'package:ludo/components/home/home.dart';
 import 'package:ludo/managers/token_manager.dart';
-import 'package:ludo/managers/event_bus.dart';
 import 'package:ludo/managers/game_state.dart';
 import 'package:ludo/managers/audio_manager.dart';
 import 'package:ludo/components/controls/upper_controller.dart';
@@ -18,7 +17,8 @@ import 'package:ludo/components/board/ludo_board.dart';
 import 'package:ludo/components/board/spot.dart';
 import 'package:ludo/components/controls/ludo_dice.dart';
 import 'package:ludo/components/overlays/rank_modal_component.dart';
-import 'package:ludo/managers/home_spot_manager.dart';
+import 'package:ludo/managers/tile_manager.dart';
+import 'package:ludo/components/home/home_spot.dart';
 import 'package:ludo/models/player_team.dart';
 import 'package:ludo/components/board/token.dart';
 import 'package:ludo/managers/ludo_layout_config.dart';
@@ -50,6 +50,7 @@ class Ludo extends FlameGame
   @override
   void onLoad() async {
     super.onLoad();
+    GameState().game = this;
     camera = CameraComponent.withFixedResolution(
       width: width,
       height: height,
@@ -80,42 +81,6 @@ class Ludo extends FlameGame
     final ludoBoard = GameState().ludoBoard as PositionComponent;
     GameState().ludoBoardAbsolutePosition = ludoBoard.absolutePosition;
 
-    EventBus().on<OpenPlayerModalEvent>((event) {
-      showPlayerModal();
-    });
-
-    EventBus().on<SwitchPointerEvent>((event) {
-      switchOffPointer();
-    });
-
-    EventBus().on<BlinkGreenBaseEvent>((event) {
-      blinkGreenBase(true);
-      blinkBlueBase(false);
-      blinkRedBase(false);
-      blinkYellowBase(false);
-    });
-
-    EventBus().on<BlinkBlueBaseEvent>((event) {
-      blinkBlueBase(true);
-      blinkGreenBase(false);
-      blinkRedBase(false);
-      blinkYellowBase(false);
-    });
-
-    EventBus().on<BlinkRedBaseEvent>((event) {
-      blinkRedBase(true);
-      blinkGreenBase(false);
-      blinkBlueBase(false);
-      blinkYellowBase(false);
-    });
-
-    EventBus().on<BlinkYellowBaseEvent>((event) {
-      blinkYellowBase(true);
-      blinkGreenBase(false);
-      blinkBlueBase(false);
-      blinkRedBase(false);
-    });
-
     await startGame();
   }
 
@@ -125,6 +90,13 @@ class Ludo extends FlameGame
     lowerController.hidePointer(player.playerId);
     final upperController = world.children.whereType<UpperController>().first;
     upperController.hidePointer(player.playerId);
+  }
+
+  void blinkBaseForTeam(PlayerTeam team) {
+    blinkGreenBase(team == PlayerTeam.green);
+    blinkBlueBase(team == PlayerTeam.blue);
+    blinkRedBase(team == PlayerTeam.red);
+    blinkYellowBase(team == PlayerTeam.yellow);
   }
 
   void blinkRedBase(bool shouldBlink) {
@@ -369,6 +341,7 @@ class Ludo extends FlameGame
   Future<void> startGame() async {
     await TokenManager().clearTokens();
     await GameState().clearPlayers();
+    TileManager().clear();
     await AudioManager.dispose();
 
     AudioManager.initialize();
@@ -384,8 +357,8 @@ class Ludo extends FlameGame
           const tokenSizeFactorY = 1.05;
 
           for (var token in TokenManager().getBlueTokens()) {
-            final homeSpot = HomeSpotManager().getHomeSpotById(token.positionId)!;
-            final spot = SpotManager().findSpotById(token.positionId);
+            final homeSpot = TileManager().getTile(token.positionId) as HomeSpot;
+            final spot = Spot.findSpotById(token.positionId);
             // update spot position
             spot.position = Vector2(
               homeSpot.absolutePosition.x +
@@ -417,8 +390,6 @@ class Ludo extends FlameGame
             Player bluePlayer = Player(
               playerId: playerId,
               tokens: TokenManager().getBlueTokens(),
-              isCurrentTurn: true,
-              enableDice: true,
             );
             GameState().players.add(bluePlayer);
             for (var token in TokenManager().getBlueTokens()) {
@@ -470,8 +441,8 @@ class Ludo extends FlameGame
           const tokenSizeFactorY = 1.05;
 
           for (var token in TokenManager().getGreenTokens()) {
-            final homeSpot = HomeSpotManager().getHomeSpotById(token.positionId)!;
-            final spot = SpotManager().findSpotById(token.positionId);
+            final homeSpot = TileManager().getTile(token.positionId) as HomeSpot;
+            final spot = Spot.findSpotById(token.positionId);
             // update spot position
             spot.position = Vector2(
               homeSpot.absolutePosition.x +
@@ -503,8 +474,6 @@ class Ludo extends FlameGame
             Player greenPlayer = Player(
               playerId: playerId,
               tokens: TokenManager().getGreenTokens(),
-              isCurrentTurn: true,
-              enableDice: true,
             );
             GameState().players.add(greenPlayer);
             for (var token in TokenManager().getGreenTokens()) {
@@ -534,8 +503,8 @@ class Ludo extends FlameGame
           const tokenSizeFactorY = 1.05;
 
           for (var token in TokenManager().getYellowTokens()) {
-            final homeSpot = HomeSpotManager().getHomeSpotById(token.positionId)!;
-            final spot = SpotManager().findSpotById(token.positionId);
+            final homeSpot = TileManager().getTile(token.positionId) as HomeSpot;
+            final spot = Spot.findSpotById(token.positionId);
             // update spot position
             spot.position = Vector2(
               homeSpot.absolutePosition.x +
@@ -567,8 +536,6 @@ class Ludo extends FlameGame
             Player yellowPlayer = Player(
               playerId: playerId,
               tokens: TokenManager().getYellowTokens(),
-              isCurrentTurn: true,
-              enableDice: true,
             );
             GameState().players.add(yellowPlayer);
             for (var token in TokenManager().getYellowTokens()) {
@@ -619,8 +586,8 @@ class Ludo extends FlameGame
           const tokenSizeFactorY = 1.05;
 
           for (var token in TokenManager().getRedTokens()) {
-            final homeSpot = HomeSpotManager().getHomeSpotById(token.positionId)!;
-            final spot = SpotManager().findSpotById(token.positionId);
+            final homeSpot = TileManager().getTile(token.positionId) as HomeSpot;
+            final spot = Spot.findSpotById(token.positionId);
             // update spot position
             spot.position = Vector2(
               homeSpot.absolutePosition.x +
@@ -652,8 +619,6 @@ class Ludo extends FlameGame
             Player redPlayer = Player(
               playerId: playerId,
               tokens: TokenManager().getRedTokens(),
-              isCurrentTurn: true,
-              enableDice: true,
             );
             GameState().players.add(redPlayer);
             for (var token in TokenManager().getRedTokens()) {

@@ -15,7 +15,7 @@ import 'package:ludo/components/controls/upper_controller.dart';
 
 import 'package:ludo/models/player.dart';
 import 'package:ludo/models/player_team.dart';
-import 'package:ludo/managers/event_bus.dart';
+import 'package:ludo/ludo.dart';
 
 class GameState {
   // Private constructor
@@ -23,6 +23,8 @@ class GameState {
 
   // Singleton instance
   static final GameState _instance = GameState._();
+
+  late final Ludo game;
 
   late final LudoLayoutConfig layoutConfig;
   LudoGameState state = LudoGameState.needRoll;
@@ -44,9 +46,6 @@ class GameState {
   List<Player> players = [];
   int currentPlayerIndex = 0;
 
-  bool canMoveTokenFromBase = false;
-  bool canMoveTokenOnBoard = false;
-
   Vector2 ludoBoardAbsolutePosition = Vector2.zero();
   Component? ludoBoard;
 
@@ -60,36 +59,14 @@ class GameState {
     return _instance;
   }
 
-  void enableMoveFromBase() {
-    canMoveTokenFromBase = true;
-    canMoveTokenOnBoard = false;
-  }
-
-  void enableMoveOnBoard() {
-    canMoveTokenFromBase = false;
-    canMoveTokenOnBoard = true;
-  }
-
-  void enableMoveFromBoth() {
-    canMoveTokenFromBase = true;
-    canMoveTokenOnBoard = true;
-  }
-
-  void resetTokenMovement() {
-    canMoveTokenFromBase = false;
-    canMoveTokenOnBoard = false;
-  }
-
   void hidePointer() {
-    EventBus().emit(SwitchPointerEvent());
+    game.switchOffPointer();
   }
 
   void switchToNextPlayer() {
     state = LudoGameState.needRoll;
     var current = currentPlayer;
-    current.isCurrentTurn = false;
-    current.enableDice = false;
-    EventBus().emit(SwitchPointerEvent());
+    game.switchOffPointer();
     current.resetExtraTurns();
 
     // Loop to find the next player who hasn't won
@@ -98,29 +75,13 @@ class GameState {
     } while (players[currentPlayerIndex].hasWon);
 
     var nextPlayer = players[currentPlayerIndex];
-    nextPlayer.isCurrentTurn = true;
-    nextPlayer.enableDice = true;
 
     // Disable tokens of the current player
     for (var token in currentPlayer.tokens) {
       token.enableToken = false;
     }
 
-    // Emit events based on the next player's ID
-    switch (nextPlayer.playerId) {
-      case PlayerTeam.green:
-        EventBus().emit(BlinkGreenBaseEvent());
-        break;
-      case PlayerTeam.blue:
-        EventBus().emit(BlinkBlueBaseEvent());
-        break;
-      case PlayerTeam.red:
-        EventBus().emit(BlinkRedBaseEvent());
-        break;
-      case PlayerTeam.yellow:
-        EventBus().emit(BlinkYellowBaseEvent());
-        break;
-    }
+    game.blinkBaseForTeam(nextPlayer.playerId);
   }
 
   // Get the current player
@@ -130,7 +91,6 @@ class GameState {
     players.clear();
     currentPlayerIndex = 0;
     diceNumber = 5;
-    resetTokenMovement();
     _tokenComponentMap.clear();
     state = LudoGameState.needRoll;
     return Future.value();
@@ -404,7 +364,7 @@ class GameState {
 
     await _applyEffect(
         getComponentForToken(token)!,
-        MoveToEffect(SpotManager().findSpotById(tokenPath.first).tokenPosition,
+        MoveToEffect(Spot.findSpotById(tokenPath.first).tokenPosition,
             EffectController(duration: 0.1, curve: Curves.easeInOut)));
 
     tokenCollision(world, token);
@@ -446,13 +406,14 @@ class GameState {
         player.resetExtraTurns();
       }
       player.grantAnotherTurn();
+      state = LudoGameState.needRoll;
     } else {
       if (diceNumber != 6) {
         switchToNextPlayer();
+      } else {
+        state = LudoGameState.needRoll;
       }
     }
-
-    player.enableDice = true;
 
     if (diceNumber == 6 || wasTokenAttacked) {
       final lowerController = world.children.whereType<LowerController>().first;
@@ -484,7 +445,7 @@ class GameState {
     }
 
     tokensByPositionId.forEach((positionId, tokenList) {
-      final spot = SpotManager().findSpotById(positionId);
+      final spot = Spot.findSpotById(positionId);
       final positionIncrement = positionIncrements[tokenList.length] ?? 5;
 
       for (var i = 0; i < tokenList.length; i++) {
@@ -545,8 +506,7 @@ class GameState {
       await _applyEffect(
         getComponentForToken(token)!,
         MoveToEffect(
-          SpotManager()
-              .getSpots()
+          Spot.getSpots()
               .firstWhere((spot) => spot.uniqueId == token.positionId)
               .tokenPosition,
           EffectController(duration: 0.1, curve: Curves.easeInOut),
@@ -603,8 +563,7 @@ class GameState {
       await _applyEffect(
         getComponentForToken(token)!,
         MoveToEffect(
-          SpotManager()
-              .getSpots()
+          Spot.getSpots()
               .firstWhere((spot) => spot.uniqueId == token.positionId)
               .tokenPosition,
           EffectController(duration: 0.12, curve: Curves.easeInOut),
@@ -650,7 +609,7 @@ class GameState {
     await _applyEffect(
       getComponentForToken(token)!,
       MoveToEffect(
-        SpotManager().findSpotById(token.positionId).position,
+        Spot.findSpotById(token.positionId).position,
         EffectController(duration: 0.03, curve: Curves.easeInOut),
       ),
     );
@@ -676,20 +635,18 @@ class GameState {
       if (playersWhoWon.length == players.length - 1) {
         playersWhoNotWon.first.rank = players.length;
         player.rank = playersWhoWon.length;
-        for (var p in players) {
-          p.enableDice = false;
-        }
+        state = LudoGameState.gameOver;
         for (var t in TokenManager().allTokens) {
           t.enableToken = false;
         }
-        EventBus().emit(OpenPlayerModalEvent());
+        game.showPlayerModal();
       } else {
         player.rank = playersWhoWon.length;
       }
       return true;
     }
 
-    player.enableDice = true;
+    state = LudoGameState.needRoll;
     final lowerController = world.children.whereType<LowerController>().first;
     lowerController.showPointer(player.playerId);
     final upperController = world.children.whereType<UpperController>().first;
@@ -803,34 +760,24 @@ class GameState {
     state = LudoGameState.needMove;
     final player = currentPlayer;
     hidePointer();
-    player.enableDice = false;
 
     for (var token in player.tokens) {
       token.enableToken = true;
     }
-    if (tokensInBase.isNotEmpty && tokensOnBoard.isNotEmpty) {
-      enableMoveFromBoth();
-      addTokenTrail(tokensInBase, tokensOnBoard);
-    } else if (tokensInBase.isNotEmpty) {
-      enableMoveFromBase();
-      addTokenTrail(tokensInBase, tokensOnBoard);
-    } else if (tokensOnBoard.isNotEmpty) {
-      addTokenTrail(tokensInBase, tokensOnBoard);
-      enableMoveOnBoard();
-    }
+    addTokenTrail(tokensInBase, tokensOnBoard);
+  }
+
+  bool canMoveToken(Token token) {
+    if (state != LudoGameState.needMove) return false;
+    if (currentPlayer.playerId != token.playerId) return false;
+    if (token.isInHome()) return false;
+    if (token.isInBase() && diceNumber != 6) return false;
+    if (!token.spaceToMove()) return false;
+    return true;
   }
 
   void handleTokenTap(World world, Token token) {
-    if (!token.spaceToMove() ||
-        !token.enableToken ||
-        (token.isInBase() && diceNumber != 6) ||
-        token.isInHome()) {
-      return;
-    }
-
-    token.enableToken = false;
-
-    if (currentPlayer.playerId != token.playerId) {
+    if (!canMoveToken(token)) {
       return;
     }
 
@@ -841,23 +788,12 @@ class GameState {
       t.enableToken = false;
     }
 
-    if (diceNumber == 6) {
-      if (token.state == TokenState.inBase && canMoveTokenFromBase) {
-        moveOutOfBase(
-            world: world,
-            token: token,
-            tokenPath: getTokenPath(token.playerId));
-      } else if (token.state == TokenState.onBoard && canMoveTokenOnBoard) {
-        moveForward(
-            world: world,
-            token: token,
-            tokenPath: getTokenPath(token.playerId),
-            diceNumber: diceNumber);
-      }
-      return;
-    }
-
-    if (token.state == TokenState.onBoard && canMoveTokenOnBoard) {
+    if (token.state == TokenState.inBase) {
+      moveOutOfBase(
+          world: world,
+          token: token,
+          tokenPath: getTokenPath(token.playerId));
+    } else if (token.state == TokenState.onBoard) {
       moveForward(
           world: world,
           token: token,

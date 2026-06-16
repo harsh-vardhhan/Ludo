@@ -1,57 +1,28 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:ludo/managers/game_state.dart';
+import 'package:ludo/managers/tile_manager.dart';
 
-class SpotManager {
-  static final SpotManager _instance = SpotManager._internal();
-  final Map<String, Spot> _spotMap = {};
-  List<Spot>? _cachedSpots; // Cache for the spots list
+class Spot extends RectangleComponent {
+  final String uniqueId;
+  late final Vector2 tokenPosition;
 
-  SpotManager._internal();
-
-  factory SpotManager() {
-    return _instance;
-  }
-
-  void addSpot(Spot spot) {
-    _spotMap[spot.uniqueId] = spot;
-    _cachedSpots = null; // Invalidate cache when a new spot is added
-  }
-
-  // Add a method to remove a spot and invalidate the cache
-  void removeSpot(String spotId) {
-    if (_spotMap.remove(spotId) != null) {
-      _cachedSpots = null; // Invalidate cache when a spot is removed
-    }
-  }
-
-  Spot? getSpotById(String spotId) {
-    return _spotMap[spotId];
-  }
-
-  List<Spot> getSpots() {
-    _cachedSpots ??= List.unmodifiable(_spotMap.values.toList());
-    return _cachedSpots!;
-  }
-
-  static final Spot _defaultSpot = Spot(
+  static final Spot defaultSpot = Spot(
     uniqueId: 'default',
     position: Vector2.zero(),
     size: Vector2(10, 10),
     paint: Paint()..color = Colors.grey,
   );
 
-  Spot findSpotById(String spotId) {
-    Spot? spot = getSpotById(spotId);
-
-    // Return the found spot or the static default spot if not found
-    return spot ?? _defaultSpot;
+  static Spot findSpotById(String spotId) {
+    final tile = TileManager().getTile(spotId);
+    if (tile is Spot) return tile;
+    return defaultSpot;
   }
-}
 
-class Spot extends RectangleComponent {
-  final String uniqueId;
-  late final Vector2 tokenPosition;
+  static List<Spot> getSpots() {
+    return TileManager().getAllTiles().whereType<Spot>().toList();
+  }
 
   Spot({
     required this.uniqueId,
@@ -65,7 +36,7 @@ class Spot extends RectangleComponent {
           paint: paint,
           children: children ?? [],
         ) {
-    SpotManager().addSpot(this);
+    TileManager().registerTile(uniqueId, this);
   }
 
   @override

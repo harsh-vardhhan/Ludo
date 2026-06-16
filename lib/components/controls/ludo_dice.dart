@@ -9,6 +9,7 @@ import 'package:ludo/components/controls/dice_face_component.dart';
 import 'package:ludo/managers/game_state.dart';
 import 'package:ludo/managers/audio_manager.dart';
 import 'package:ludo/models/player.dart';
+import 'package:ludo/models/ludo_game_state.dart';
 import 'package:ludo/ludo.dart';
 
 class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Ludo> {
@@ -34,20 +35,18 @@ class LudoDice extends PositionComponent with TapCallbacks, HasGameReference<Lud
 
   @override
   void onTapDown(TapDownEvent event) async {
-    if (!player.enableDice ||
-        !player.isCurrentTurn ||
+    if (GameState().state != LudoGameState.needRoll ||
         player != GameState().currentPlayer) {
       return; // Exit if the player cannot roll the dice
     }
 
-    // Disable dice to prevent multiple taps
-    final world = game.world;
-    GameState().hidePointer();
-    player.enableDice = false;
-
     // Roll the dice and update the dice face
     final rolledNumber = GameState().rollDice();
     diceFace.updateDiceValue(rolledNumber);
+
+    // Disable pointer
+    final world = game.world;
+    GameState().hidePointer();
 
     playSound();
     // Apply dice rotation effect

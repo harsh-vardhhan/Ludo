@@ -67,11 +67,11 @@ class TokenManager {
           positionId: entry.value,
           state: TokenState.inBase);
       allTokens.add(token);
-      SpotManager().addSpot(Spot(
+      Spot(
           uniqueId: entry.value,
           position: Vector2(100, 100),
           size: Vector2(50, 50),
-          paint: Paint()));
+          paint: Paint());
     }
     _cachePlayerTokens();
   }

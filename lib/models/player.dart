@@ -4,23 +4,19 @@ import 'package:ludo/models/token.dart';
 class Player {
   PlayerTeam playerId;
   List<Token> tokens; // Tokens belonging to the player
-  bool isCurrentTurn; // Is it the player's turn right now?
   int rank; // Player's current score
   int totalTokensInHome; // Number of tokens in the home position
   bool hasWon; // Has the player won the game?
   int extraTurns; // Count of extra turns granted
-  bool enableDice;
 
   // Constructor to initialize the player's attributes
   Player({
     required this.playerId,
     required this.tokens,
-    this.isCurrentTurn = false, // Default: not the player's turn initially
     this.rank = 0, // Default: rank is 0 till player wins
     this.totalTokensInHome = 0, // Default: no tokens in home initially
     this.hasWon = false, // Default: player hasn't won yet
     this.extraTurns = 0,
-    this.enableDice = false, // Default to 0 extra turns
   });
 
   // Helper method to check if all tokens are in base
@@ -54,7 +50,6 @@ class Player {
   // Method to grant another turn (includes handling six rolls)
   void grantAnotherTurn() {
     extraTurns++; // Increment the count of extra turns
-    enableDice = true;
   }
 
   // Method to check if three consecutive sixes were rolled
